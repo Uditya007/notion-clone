@@ -202,3 +202,28 @@
   margin-bottom: 16px;
   text-align: center;
 }
+
+/* Mobile responsive styles */
+@media (max-width: 768px) {
+  .container {
+    flex-direction: column;
+    min-height: 100vh;
+  }
+
+  .leftPanel {
+    display: none; /* Hide the decorative banner on small screens */
+  }
+
+  .rightPanel {
+    padding: 32px 20px !important;
+    width: 100%;
+    min-height: 100vh;
+    justify-content: center;
+  }
+
+  .formWrapper {
+    width: 100%;
+    max-width: 100% !important;
+  }
+}
+

@@ -320,3 +320,40 @@
 .dropdownItem:hover {
   background: var(--bg-hover);
 }
+
+/* Mobile responsive styles */
+@media (max-width: 768px) {
+  .header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 12px !important;
+  }
+
+  .viewTabs {
+    width: 100%;
+    overflow-x: auto;
+    white-space: nowrap;
+    padding-bottom: 4px;
+  }
+
+  .tabBtn {
+    padding: 6px 10px !important;
+    font-size: 13px !important;
+  }
+
+  .controls {
+    width: 100%;
+    justify-content: space-between;
+  }
+
+  .controlBtn {
+    padding: 4px 8px !important;
+    font-size: 12px !important;
+  }
+
+  /* Board view adjustments */
+  .boardColumn {
+    flex: 0 0 240px !important; /* Slightly narrower columns on mobile */
+  }
+}
+
