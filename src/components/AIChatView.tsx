@@ -14,6 +14,7 @@ export default function AIChatView() {
 
   const { complete, completion, isLoading, setCompletion } = useCompletion({
     api: '/api/generate',
+    streamProtocol: 'text',
     onFinish: (prompt, result) => {
       if (activeConversationId) {
         addMessage(activeConversationId, {

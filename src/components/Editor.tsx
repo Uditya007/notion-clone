@@ -46,6 +46,7 @@ export default function Editor() {
   // AI Completion Hook
   const { complete, completion, input, handleInputChange, handleSubmit, isLoading, setCompletion, setInput } = useCompletion({
     api: '/api/generate',
+    streamProtocol: 'text',
   });
 
   const [showAiMenu, setShowAiMenu] = useState(false);
