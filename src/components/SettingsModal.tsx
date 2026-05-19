@@ -5,7 +5,7 @@ import { Settings, User, Globe, Moon, Monitor, X } from 'lucide-react';
 import { useState } from 'react';
 
 export default function SettingsModal() {
-  const { isSettingsOpen, setSettingsOpen } = useAppStore();
+  const { isSettingsOpen, setSettingsOpen, workspaceName, updateWorkspaceName } = useAppStore();
   const [activeTab, setActiveTab] = useState('account');
 
   if (!isSettingsOpen) return null;
@@ -48,6 +48,15 @@ export default function SettingsModal() {
           <div className={styles.settingsBody}>
             {activeTab === 'account' && (
               <div className={styles.settingsSection}>
+                <div className={styles.settingsRow}>
+                  <div className={styles.settingsLabel}>Workspace Name</div>
+                  <input 
+                    className={styles.settingsInput}
+                    value={workspaceName}
+                    onChange={(e) => updateWorkspaceName(e.target.value)}
+                    placeholder="Enter workspace name"
+                  />
+                </div>
                 <div className={styles.settingsRow}>
                   <div className={styles.settingsLabel}>Email</div>
                   <div className={styles.settingsValue}>uditya@example.com</div>

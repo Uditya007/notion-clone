@@ -9,7 +9,7 @@ import Underline from '@tiptap/extension-underline'
 import GlobalDragHandle from 'tiptap-extension-global-drag-handle'
 import styles from "./Editor.module.css";
 import { useEffect, useState } from "react";
-import { MoreHorizontal, Star, Clock, Sparkles, Check, X, LayoutGrid, FileText, Trash2 } from "lucide-react";
+import { MoreHorizontal, Star, Clock, Sparkles, Check, X, LayoutGrid, FileText, Trash2, Image as ImageIcon } from "lucide-react";
 import { useAppStore } from "@/store/useAppStore";
 import KanbanBoard from "./KanbanBoard";
 import CalendarView from "./CalendarView";
@@ -18,11 +18,26 @@ import TasksView from "./TasksView";
 import AutomationsView from "./AutomationsView";
 import TemplatesView from "./TemplatesView";
 import ShareModal from "./ShareModal";
+import TrashView from "./TrashView";
 import { useCompletion } from '@ai-sdk/react';
+
+const SLASH_COMMANDS = [
+  { title: 'Text', icon: '📝', action: (editor: any) => editor.chain().focus().clearNodes().run() },
+  { title: 'Heading 1', icon: '#', action: (editor: any) => editor.chain().focus().clearNodes().toggleHeading({ level: 1 }).run() },
+  { title: 'Heading 2', icon: '##', action: (editor: any) => editor.chain().focus().clearNodes().toggleHeading({ level: 2 }).run() },
+  { title: 'Heading 3', icon: '###', action: (editor: any) => editor.chain().focus().clearNodes().toggleHeading({ level: 3 }).run() },
+  { title: 'Bullet List', icon: '•', action: (editor: any) => editor.chain().focus().clearNodes().toggleBulletList().run() },
+  { title: 'Numbered List', icon: '1.', action: (editor: any) => editor.chain().focus().clearNodes().toggleOrderedList().run() },
+  { title: 'To-do', icon: '☑', action: (editor: any) => editor.chain().focus().clearNodes().toggleTaskList().run() },
+  { title: 'Quote', icon: '"', action: (editor: any) => editor.chain().focus().clearNodes().toggleBlockquote().run() },
+  { title: 'Code Block', icon: '<>', action: (editor: any) => editor.chain().focus().clearNodes().toggleCodeBlock().run() },
+  { title: 'Divider', icon: '—', action: (editor: any) => editor.chain().focus().clearNodes().setHorizontalRule().run() },
+  { title: 'Ask AI', icon: '✨', action: () => {} },
+];
 
 export default function Editor() {
   const [isMounted, setIsMounted] = useState(false);
-  const { pages, activePageId, updatePageContent, updatePageTitle, updatePageIcon, updatePageType, toggleFavorite, deletePage } = useAppStore();
+  const { pages, activePageId, updatePageContent, updatePageTitle, updatePageIcon, updatePageType, toggleFavorite, deletePage, updatePageCoverImage, workspaceName } = useAppStore();
   
   const activePage = activePageId ? pages[activePageId] : null;
 
@@ -35,6 +50,23 @@ export default function Editor() {
   const [showShareModal, setShowShareModal] = useState(false);
   const [saveStatus, setSaveStatus] = useState<'saved' | 'saving'>('saved');
   const [saveTimeoutId, setSaveTimeoutId] = useState<NodeJS.Timeout | null>(null);
+  const [slashIndex, setSlashIndex] = useState(0);
+
+  const COVER_IMAGES = [
+    "https://images.unsplash.com/photo-1707343843437-caacff5cfa74?q=80&w=2275&auto=format&fit=crop",
+    "https://images.unsplash.com/photo-1506744626753-dba37c25a1f1?q=80&w=2070&auto=format&fit=crop",
+    "https://images.unsplash.com/photo-1511884642898-4c92249e20b6?q=80&w=2070&auto=format&fit=crop",
+    "https://images.unsplash.com/photo-1473081556163-2a17de81fc97?q=80&w=2070&auto=format&fit=crop",
+    "https://images.unsplash.com/photo-1534447677768-be436bb09401?q=80&w=2094&auto=format&fit=crop",
+    "https://images.unsplash.com/photo-1501854140801-50d01698950b?q=80&w=2475&auto=format&fit=crop",
+  ];
+
+  const changeCoverImage = () => {
+    if (!activePageId) return;
+    const currentIndex = COVER_IMAGES.indexOf(activePage?.coverImage || "");
+    const nextIndex = (currentIndex + 1) % COVER_IMAGES.length;
+    updatePageCoverImage(activePageId, COVER_IMAGES[nextIndex]);
+  };
 
   const editor = useEditor({
     extensions: [
@@ -83,6 +115,42 @@ export default function Editor() {
   useEffect(() => {
     setIsMounted(true);
   }, []);
+
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (!editor) return;
+      const { state } = editor;
+      const { $anchor } = state.selection;
+      const isSlashMenuOpen = $anchor.parent.isTextblock && $anchor.parent.textContent === '/';
+      
+      if (isSlashMenuOpen) {
+        if (e.key === 'ArrowUp') {
+          e.preventDefault();
+          setSlashIndex(prev => (prev > 0 ? prev - 1 : SLASH_COMMANDS.length - 1));
+        } else if (e.key === 'ArrowDown') {
+          e.preventDefault();
+          setSlashIndex(prev => (prev < SLASH_COMMANDS.length - 1 ? prev + 1 : 0));
+        } else if (e.key === 'Enter') {
+          e.preventDefault();
+          const cmd = SLASH_COMMANDS[slashIndex];
+          
+          editor.commands.deleteRange({ from: state.selection.from - 1, to: state.selection.from });
+          
+          if (cmd.title === 'Ask AI') {
+            setShowAiMenu(true);
+          } else {
+            cmd.action(editor);
+          }
+        } else if (e.key === 'Escape') {
+           e.preventDefault();
+           editor.commands.deleteRange({ from: state.selection.from - 1, to: state.selection.from });
+        }
+      }
+    };
+    
+    document.addEventListener('keydown', handleKeyDown, true);
+    return () => document.removeEventListener('keydown', handleKeyDown, true);
+  }, [editor, slashIndex]);
 
   // Sync editor content when the active page changes
   useEffect(() => {
@@ -134,6 +202,7 @@ export default function Editor() {
   if (activePage.type === 'tasks') return <TasksView />;
   if (activePage.type === 'automations') return <AutomationsView />;
   if (activePage.type === 'templates') return <TemplatesView />;
+  if (activePage.type === 'trash') return <TrashView />;
 
   // Mock online presence data
   const onlineUsers = [
@@ -145,7 +214,7 @@ export default function Editor() {
     <div className={styles.editorContainer}>
       <header className={styles.header}>
         <div className={styles.breadcrumbs}>
-          <span className={styles.breadcrumbItem}>Uditya's Notion</span>
+          <span className={styles.breadcrumbItem}>{workspaceName}</span>
           <span className={styles.separator}>/</span>
           <span className={styles.breadcrumbItem}>{activePage.title || 'Untitled'}</span>
         </div>
@@ -188,9 +257,26 @@ export default function Editor() {
         </div>
       </header>
 
-      <div className={styles.coverImage}>
-        <img src={activePage.coverImage || "https://images.unsplash.com/photo-1707343843437-caacff5cfa74?q=80&w=2275&auto=format&fit=crop"} alt="Cover" />
-        <div className={styles.pageIconWrapper}>
+      {activePage.coverImage && (
+        <div className={styles.coverImage}>
+          <img src={activePage.coverImage} alt="Cover" />
+          <div className={styles.coverControls}>
+             <button className={styles.coverBtn} onClick={changeCoverImage}>Change cover</button>
+             <button className={styles.coverBtn} onClick={() => updatePageCoverImage(activePageId!, null)}>Remove</button>
+          </div>
+        </div>
+      )}
+
+      <div className={`${styles.contentWrapper} ${!activePage.coverImage ? styles.noCoverContent : ''}`}>
+        {!activePage.coverImage && (
+          <div className={styles.addCoverWrapper}>
+             <button className={styles.addCoverBtn} onClick={changeCoverImage}>
+               <ImageIcon size={14} /> Add cover
+             </button>
+          </div>
+        )}
+
+        <div className={`${styles.pageIconWrapper} ${activePage.coverImage ? styles.hasCover : ''}`}>
            <input 
              className={styles.iconInput} 
              value={activePage.icon} 
@@ -198,9 +284,7 @@ export default function Editor() {
              maxLength={2}
            />
         </div>
-      </div>
 
-      <div className={styles.contentWrapper}>
         <input 
           className={styles.titleInput}
           value={activePage.title}
@@ -229,13 +313,32 @@ export default function Editor() {
           ) : (
             <>
               {editor && (
-                <FloatingMenu editor={editor}>
-                  <button 
-                    className={styles.aiFloatingBtn}
-                    onClick={() => setShowAiMenu(!showAiMenu)}
-                  >
-                    <Sparkles size={16} /> Ask AI
-                  </button>
+                <FloatingMenu 
+                  editor={editor}
+                  shouldShow={({ state }) => {
+                    const { $anchor } = state.selection;
+                    return $anchor.parent.isTextblock && $anchor.parent.textContent === '/';
+                  }}
+                >
+                  <div className={styles.slashMenu}>
+                    {SLASH_COMMANDS.map((cmd, i) => (
+                      <button 
+                        key={cmd.title}
+                        className={`${styles.slashMenuItem} ${i === slashIndex ? styles.slashMenuItemActive : ''}`}
+                        onClick={() => {
+                          editor.commands.deleteRange({ from: editor.state.selection.from - 1, to: editor.state.selection.from });
+                          if (cmd.title === 'Ask AI') {
+                            setShowAiMenu(true);
+                          } else {
+                            cmd.action(editor);
+                          }
+                        }}
+                      >
+                        <span className={styles.slashMenuIcon}>{cmd.icon}</span>
+                        {cmd.title}
+                      </button>
+                    ))}
+                  </div>
                 </FloatingMenu>
               )}
 
@@ -243,18 +346,46 @@ export default function Editor() {
                 <BubbleMenu editor={editor}>
                   <div className={styles.bubbleMenu}>
                     <button 
-                      className={styles.bubbleBtn}
+                      className={`${styles.bubbleBtn} ${editor.isActive('bold') ? styles.bubbleBtnActive : ''}`}
                       onClick={() => editor.chain().focus().toggleBold().run()}
                       style={{ fontWeight: 'bold' }}
                     >
                       B
                     </button>
                     <button 
-                      className={styles.bubbleBtn}
+                      className={`${styles.bubbleBtn} ${editor.isActive('italic') ? styles.bubbleBtnActive : ''}`}
                       onClick={() => editor.chain().focus().toggleItalic().run()}
                       style={{ fontStyle: 'italic' }}
                     >
                       i
+                    </button>
+                    <button 
+                      className={`${styles.bubbleBtn} ${editor.isActive('strike') ? styles.bubbleBtnActive : ''}`}
+                      onClick={() => editor.chain().focus().toggleStrike().run()}
+                      style={{ textDecoration: 'line-through' }}
+                    >
+                      S
+                    </button>
+                    <button 
+                      className={`${styles.bubbleBtn} ${editor.isActive('code') ? styles.bubbleBtnActive : ''}`}
+                      onClick={() => editor.chain().focus().toggleCode().run()}
+                      style={{ fontFamily: 'monospace' }}
+                    >
+                      {'<>'}
+                    </button>
+                    <button 
+                      className={`${styles.bubbleBtn} ${editor.isActive('heading', { level: 1 }) ? styles.bubbleBtnActive : ''}`}
+                      onClick={() => editor.chain().focus().toggleHeading({ level: 1 }).run()}
+                      style={{ fontWeight: 'bold' }}
+                    >
+                      H1
+                    </button>
+                    <button 
+                      className={`${styles.bubbleBtn} ${editor.isActive('heading', { level: 2 }) ? styles.bubbleBtnActive : ''}`}
+                      onClick={() => editor.chain().focus().toggleHeading({ level: 2 }).run()}
+                      style={{ fontWeight: 'bold' }}
+                    >
+                      H2
                     </button>
                     <div className={styles.bubbleDivider} />
                     <button 

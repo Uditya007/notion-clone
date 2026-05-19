@@ -123,7 +123,7 @@
   height: 250px;
   width: 100%;
   position: relative;
-  overflow: visible;
+  overflow: hidden;
   flex-shrink: 0;
 }
 
@@ -131,18 +131,97 @@
   width: 100%;
   height: 100%;
   object-fit: cover;
+  transition: opacity 0.2s;
+}
+
+.coverControls {
+  position: absolute;
+  bottom: 16px;
+  right: 24px;
+  display: flex;
+  gap: 8px;
+  opacity: 0;
+  transition: opacity 0.2s;
+}
+
+.coverImage:hover .coverControls {
+  opacity: 1;
+}
+
+.coverBtn {
+  background: rgba(255, 255, 255, 0.8);
+  backdrop-filter: blur(4px);
+  border: none;
+  padding: 4px 12px;
+  border-radius: 4px;
+  font-size: 12px;
+  font-weight: 500;
+  color: #333;
+  cursor: pointer;
+}
+
+.coverBtn:hover {
+  background: rgba(255, 255, 255, 1);
+}
+
+.contentWrapper {
+  max-width: 900px;
+  width: 100%;
+  margin: 0 auto;
+  padding: 0 48px 100px;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+}
+
+.noCoverContent {
+  padding-top: 64px;
 }
 
 .pageIconWrapper {
-  position: absolute;
-  bottom: -40px;
-  left: max(96px, calc(50% - 400px));
+  width: max-content;
+  margin-top: -45px;
+  margin-bottom: 16px;
+}
+
+.pageIconWrapper.hasCover {
   background: var(--bg-main);
   border-radius: 12px;
   padding: 4px;
+}
+
+.noCoverContent .pageIconWrapper {
+  margin-top: 0;
+}
+
+.addCoverWrapper {
+  opacity: 0;
+  transition: opacity 0.2s;
+  height: 28px;
+  margin-bottom: 8px;
+}
+
+.contentWrapper:hover .addCoverWrapper {
+  opacity: 1;
+}
+
+.addCoverBtn {
   display: flex;
   align-items: center;
-  justify-content: center;
+  gap: 6px;
+  padding: 4px 8px;
+  background: transparent;
+  border: none;
+  border-radius: 4px;
+  color: var(--text-muted);
+  font-size: 13px;
+  cursor: pointer;
+  margin-left: -8px;
+}
+
+.addCoverBtn:hover {
+  background: var(--bg-hover);
+  color: var(--text-main);
 }
 
 .iconInput {
@@ -164,22 +243,11 @@
   background: transparent;
   outline: none;
   width: 100%;
-  margin-top: 24px;
 }
 
 .titleInput::placeholder {
   color: var(--text-muted);
   opacity: 0.5;
-}
-
-.contentWrapper {
-  max-width: 900px;
-  width: 100%;
-  margin: 0 auto;
-  padding: 64px 48px 100px;
-  flex: 1;
-  display: flex;
-  flex-direction: column;
 }
 
 .editorMain {
@@ -278,6 +346,11 @@
 
 .bubbleBtn:hover {
   background: var(--bg-hover);
+}
+
+.bubbleBtnActive {
+  background: var(--bg-hover);
+  color: var(--primary);
 }
 
 .bubbleDivider {
@@ -408,4 +481,47 @@
 
 .aiOptionBtn:hover {
   background: var(--bg-hover);
+}
+
+.slashMenu {
+  background: var(--bg-elevated);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+  padding: 6px;
+  display: flex;
+  flex-direction: column;
+  min-width: 200px;
+  max-height: 300px;
+  overflow-y: auto;
+}
+
+.slashMenuItem {
+  display: flex;
+  align-items: center;
+  padding: 8px 12px;
+  background: transparent;
+  border: none;
+  border-radius: 4px;
+  color: var(--text-main);
+  font-size: 13px;
+  cursor: pointer;
+  text-align: left;
+}
+
+.slashMenuItem:hover, .slashMenuItemActive {
+  background: var(--bg-hover);
+}
+
+.slashMenuIcon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 24px;
+  height: 24px;
+  margin-right: 12px;
+  background: var(--bg-main);
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  font-size: 14px;
 }

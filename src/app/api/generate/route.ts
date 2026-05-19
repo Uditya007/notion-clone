@@ -52,7 +52,7 @@ export async function POST(req: Request) {
   }
 
   const result = await streamText({
-    model: anthropic('claude-3-5-sonnet-20240620'), // Modern Claude Sonnet
+    model: anthropic('claude-sonnet-4-20250514'), // Modern Claude Sonnet
     system: systemPrompt,
     prompt: prompt || "Execute the requested command on the document context.",
   });

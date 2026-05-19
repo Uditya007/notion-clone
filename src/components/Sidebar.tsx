@@ -21,7 +21,7 @@ import { useAppStore } from "@/store/useAppStore";
 
 export default function Sidebar() {
   const [isCollapsed, setIsCollapsed] = useState(false);
-  const { pages, rootPageIds, activePageId, setActivePage, addPage, deletePage, setSearchOpen, setSettingsOpen } = useAppStore();
+  const { pages, rootPageIds, activePageId, setActivePage, addPage, deletePage, setSearchOpen, setSettingsOpen, workspaceName } = useAppStore();
 
   const handleAddPage = (e: React.MouseEvent, parentId: string | null = null) => {
     e.stopPropagation();
@@ -89,8 +89,8 @@ export default function Sidebar() {
     <aside className={styles.sidebar}>
       <div className={styles.header}>
         <div className={styles.workspaceInfo}>
-          <div className={styles.workspaceIcon}>U</div>
-          <span className={styles.workspaceName}>Uditya's Notion</span>
+          <div className={styles.workspaceIcon}>{workspaceName.charAt(0).toUpperCase()}</div>
+          <span className={styles.workspaceName}>{workspaceName}</span>
         </div>
         <button onClick={() => setIsCollapsed(true)} className={styles.collapseBtn}>
           <PanelLeftClose size={18} />
@@ -161,7 +161,7 @@ export default function Sidebar() {
       </div>
 
       <div className={styles.footer}>
-        <button className={styles.actionItem}>
+        <button className={`${styles.actionItem} ${activePageId === 'trash' ? styles.actionItemActive : ''}`} onClick={() => setActivePage('trash')}>
           <Trash2 size={16} />
           <span>Trash</span>
         </button>

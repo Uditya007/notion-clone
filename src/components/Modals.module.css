@@ -243,6 +243,17 @@
   outline: none;
 }
 
+.settingsInput {
+  background: var(--bg-hover);
+  border: 1px solid var(--border);
+  color: var(--text-main);
+  padding: 6px 12px;
+  border-radius: 4px;
+  outline: none;
+  font-size: 14px;
+  width: 200px;
+}
+
 /* Share Modal specific styles */
 .shareModal {
   background-color: var(--bg-main);

@@ -45,6 +45,20 @@ export default function CalendarView() {
   const firstDayOfMonth = daysInMonth[0].getDay();
   const paddingDays = Array.from({ length: firstDayOfMonth }).fill(null);
 
+  const startOfWeek = new Date(currentDate);
+  startOfWeek.setDate(currentDate.getDate() - currentDate.getDay());
+  const weekDays = Array.from({ length: 7 }, (_, i) => {
+    const d = new Date(startOfWeek);
+    d.setDate(startOfWeek.getDate() + i);
+    return d;
+  });
+
+  const hours = Array.from({ length: 24 }, (_, i) => {
+    if (i === 0) return '12 AM';
+    if (i === 12) return '12 PM';
+    return i < 12 ? `${i} AM` : `${i - 12} PM`;
+  });
+
   const prevMonth = () => setCurrentDate(new Date(currentYear, currentMonth - 1, 1));
   const nextMonth = () => setCurrentDate(new Date(currentYear, currentMonth + 1, 1));
   const goToday = () => setCurrentDate(new Date());
@@ -156,18 +170,91 @@ export default function CalendarView() {
       )}
 
       {view === 'Day' && (
-        <div className={styles.dayViewNotice}>
-          <Clock size={24} />
-          <p>Day view is focused on granular hourly scheduling.</p>
-          <p className={styles.subtext}>Switch back to Month view to try drag-and-drop rescheduling!</p>
+        <div className={styles.scrollWrapper}>
+          <div className={styles.dayViewGrid}>
+            <div className={styles.timeColumn}>
+              <div className={styles.timeSlotEmpty} />
+              {hours.map(hour => (
+                <div key={hour} className={styles.timeSlot}>{hour}</div>
+              ))}
+            </div>
+            <div 
+              className={styles.dayEventsColumn}
+              onDragOver={handleDragOver}
+              onDrop={(e) => handleDrop(e, formatDateStr(currentDate))}
+            >
+              <div className={styles.dayEventsContainer}>
+                 {events.filter(e => e.date === formatDateStr(currentDate)).map(event => (
+                   <div 
+                     key={event.id}
+                     draggable
+                     onDragStart={(e) => handleDragStart(e, event.id)}
+                     className={`${styles.eventCard} ${styles[event.type]}`}
+                   >
+                     <div className={styles.eventTitle}>{event.title}</div>
+                     <div className={styles.eventDetails}>
+                       {event.time && <span style={{ display: 'flex', alignItems: 'center', gap: '4px' }}><Clock size={12}/> {event.time}</span>}
+                     </div>
+                   </div>
+                 ))}
+              </div>
+              
+              <div className={styles.gridLines}>
+                {hours.map(hour => (
+                  <div key={hour} className={styles.gridLine} />
+                ))}
+              </div>
+            </div>
+          </div>
         </div>
       )}
       
       {view === 'Week' && (
-        <div className={styles.dayViewNotice}>
-          <CalendarIcon size={24} />
-          <p>Week view breaks down your next 7 days.</p>
-          <p className={styles.subtext}>Switch back to Month view to try drag-and-drop rescheduling!</p>
+        <div className={styles.scrollWrapper}>
+          <div className={styles.weekGrid}>
+            <div className={styles.timeColumn}>
+              <div className={styles.timeSlotEmpty} />
+              {hours.map(hour => (
+                <div key={hour} className={styles.timeSlot}>{hour}</div>
+              ))}
+            </div>
+            {weekDays.map(day => {
+              const dateStr = formatDateStr(day);
+              const dayEvents = events.filter(e => e.date === dateStr);
+              const isToday = dateStr === formatDateStr(new Date());
+              
+              return (
+                <div key={dateStr} className={`${styles.dayColumn} ${isToday ? styles.todayColumn : ''}`}>
+                  <div className={styles.dayColumnHeader}>
+                    <div className={styles.dayColumnName}>{['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'][day.getDay()]}</div>
+                    <div className={`${styles.dayColumnNumber} ${isToday ? styles.todayNumber : ''}`}>{day.getDate()}</div>
+                  </div>
+                  <div 
+                    className={styles.dayColumnBody}
+                    onDragOver={handleDragOver}
+                    onDrop={(e) => handleDrop(e, dateStr)}
+                  >
+                    {dayEvents.map(event => (
+                       <div 
+                         key={event.id}
+                         draggable
+                         onDragStart={(e) => handleDragStart(e, event.id)}
+                         className={`${styles.eventChip} ${styles[event.type]}`}
+                       >
+                         {event.time && <span className={styles.eventChipTime}>{event.time}</span>}
+                         {event.title}
+                       </div>
+                    ))}
+                    <div className={styles.gridLines}>
+                      {hours.map(hour => (
+                        <div key={hour} className={styles.gridLine} />
+                      ))}
+                    </div>
+                  </div>
+                </div>
+              )
+            })}
+          </div>
         </div>
       )}
     </div>

@@ -1,4 +1,5 @@
 import { create } from 'zustand';
+import { persist } from 'zustand/middleware';
 import { v4 as uuidv4 } from 'uuid';
 
 export type Page = {
@@ -9,7 +10,7 @@ export type Page = {
   coverImage: string | null;
   parentId: string | null;
   children: string[];
-  type: 'editor' | 'board' | 'calendar' | 'inbox' | 'tasks' | 'automations' | 'templates';
+  type: 'editor' | 'board' | 'calendar' | 'inbox' | 'tasks' | 'automations' | 'templates' | 'trash';
   isFavorite?: boolean;
 };
 
@@ -17,6 +18,8 @@ type AppState = {
   pages: Record<string, Page>;
   activePageId: string | null;
   rootPageIds: string[];
+  deletedPages: Record<string, Page & { deletedAt: string }>;
+  workspaceName: string;
   
   // UI States
   isSearchOpen: boolean;
@@ -26,13 +29,17 @@ type AppState = {
   setActivePage: (id: string) => void;
   setSearchOpen: (isOpen: boolean) => void;
   setSettingsOpen: (isOpen: boolean) => void;
+  updateWorkspaceName: (name: string) => void;
   addPage: (parentId: string | null) => string;
   updatePageTitle: (id: string, title: string) => void;
   updatePageContent: (id: string, content: string) => void;
   updatePageIcon: (id: string, icon: string) => void;
-  updatePageType: (id: string, type: 'editor' | 'board' | 'calendar' | 'inbox' | 'tasks' | 'automations' | 'templates') => void;
+  updatePageCoverImage: (id: string, coverImage: string | null) => void;
+  updatePageType: (id: string, type: 'editor' | 'board' | 'calendar' | 'inbox' | 'tasks' | 'automations' | 'templates' | 'trash') => void;
   toggleFavorite: (id: string) => void;
   deletePage: (id: string) => void;
+  restorePage: (id: string) => void;
+  permanentlyDeletePage: (id: string) => void;
   applyTemplate: (title: string, icon: string, content: string, type: 'editor' | 'board') => void;
 };
 
@@ -105,20 +112,36 @@ const initialState = {
       children: [],
       type: 'templates',
       isFavorite: false,
+    },
+    'trash': {
+      id: 'trash',
+      title: "Trash",
+      content: "",
+      icon: "🗑",
+      coverImage: null,
+      parentId: null,
+      children: [],
+      type: 'trash',
+      isFavorite: false,
     }
   },
   activePageId: initialPageId,
   rootPageIds: [initialPageId, 'inbox', 'calendar', 'tasks', 'automations', 'templates'],
+  deletedPages: {},
+  workspaceName: "Uditya's Notion",
   isSearchOpen: false,
   isSettingsOpen: false,
-} as Pick<AppState, 'pages' | 'activePageId' | 'rootPageIds' | 'isSearchOpen' | 'isSettingsOpen'>;
+} as Pick<AppState, 'pages' | 'activePageId' | 'rootPageIds' | 'deletedPages' | 'workspaceName' | 'isSearchOpen' | 'isSettingsOpen'>;
 
-export const useAppStore = create<AppState>()((set) => ({
-  ...initialState,
+export const useAppStore = create<AppState>()(
+  persist(
+    (set) => ({
+      ...initialState,
   
   setActivePage: (id) => set({ activePageId: id, isSearchOpen: false }),
   setSearchOpen: (isOpen) => set({ isSearchOpen: isOpen }),
   setSettingsOpen: (isOpen) => set({ isSettingsOpen: isOpen }),
+  updateWorkspaceName: (name) => set({ workspaceName: name }),
   
   addPage: (parentId) => {
     const newId = uuidv4();
@@ -178,6 +201,13 @@ export const useAppStore = create<AppState>()((set) => ({
     }
   })),
 
+  updatePageCoverImage: (id, coverImage) => set((state) => ({
+    pages: {
+      ...state.pages,
+      [id]: { ...state.pages[id], coverImage }
+    }
+  })),
+
   updatePageType: (id, type) => set((state) => ({
     pages: {
       ...state.pages,
@@ -197,9 +227,6 @@ export const useAppStore = create<AppState>()((set) => ({
     const pageToDelete = newPages[id];
     if (!pageToDelete) return state;
 
-    // Recursively delete children (simplified for this demo)
-    // Note: A robust system would traverse and delete all descendants
-    
     let newRootIds = state.rootPageIds;
     
     if (pageToDelete.parentId && newPages[pageToDelete.parentId]) {
@@ -213,7 +240,11 @@ export const useAppStore = create<AppState>()((set) => ({
     
     delete newPages[id];
     
-    // Auto-select another page if the active one was deleted
+    const newDeletedPages = { 
+      ...state.deletedPages, 
+      [id]: { ...pageToDelete, deletedAt: new Date().toISOString() } 
+    };
+    
     let newActiveId = state.activePageId;
     if (newActiveId === id) {
       newActiveId = newRootIds.length > 0 ? newRootIds[0] : null;
@@ -222,8 +253,32 @@ export const useAppStore = create<AppState>()((set) => ({
     return {
       pages: newPages,
       rootPageIds: newRootIds,
+      deletedPages: newDeletedPages,
       activePageId: newActiveId,
     };
+  }),
+
+  restorePage: (id) => set((state) => {
+    const pageToRestore = state.deletedPages[id];
+    if (!pageToRestore) return state;
+
+    const newDeletedPages = { ...state.deletedPages };
+    delete newDeletedPages[id];
+
+    // Remove deletedAt property
+    const { deletedAt, ...restPage } = pageToRestore;
+
+    return {
+      deletedPages: newDeletedPages,
+      pages: { ...state.pages, [id]: restPage },
+      rootPageIds: [...state.rootPageIds, id],
+    };
+  }),
+
+  permanentlyDeletePage: (id) => set((state) => {
+    const newDeletedPages = { ...state.deletedPages };
+    delete newDeletedPages[id];
+    return { deletedPages: newDeletedPages };
   }),
 
   applyTemplate: (title, icon, content, type) => {
@@ -248,4 +303,6 @@ export const useAppStore = create<AppState>()((set) => ({
       };
     });
   }
+}), {
+  name: 'notion-clone-storage',
 }));
