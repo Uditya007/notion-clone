@@ -1,0 +1,18 @@
+"use client";
+import dynamic from "next/dynamic";
+import SearchModal from '@/components/SearchModal'
+import SettingsModal from '@/components/SettingsModal'
+
+const Editor = dynamic(() => import("@/components/Editor"), {
+  ssr: false,
+});
+
+export default function WorkspacePage() {
+  return (
+    <>
+      <Editor />
+      <SearchModal />
+      <SettingsModal />
+    </>
+  );
+}

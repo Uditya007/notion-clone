@@ -20,6 +20,7 @@ import TemplatesView from "./TemplatesView";
 import ShareModal from "./ShareModal";
 import TrashView from "./TrashView";
 import { useCompletion } from '@ai-sdk/react';
+import DatabaseView from "./DatabaseView";
 
 const SLASH_COMMANDS = [
   { title: 'Text', icon: '📝', action: (editor: any) => editor.chain().focus().clearNodes().run() },
@@ -32,12 +33,13 @@ const SLASH_COMMANDS = [
   { title: 'Quote', icon: '"', action: (editor: any) => editor.chain().focus().clearNodes().toggleBlockquote().run() },
   { title: 'Code Block', icon: '<>', action: (editor: any) => editor.chain().focus().clearNodes().toggleCodeBlock().run() },
   { title: 'Divider', icon: '—', action: (editor: any) => editor.chain().focus().clearNodes().setHorizontalRule().run() },
+  { title: 'Database', icon: '🗄', action: () => {} },
   { title: 'Ask AI', icon: '✨', action: () => {} },
 ];
 
 export default function Editor() {
   const [isMounted, setIsMounted] = useState(false);
-  const { pages, activePageId, updatePageContent, updatePageTitle, updatePageIcon, updatePageType, toggleFavorite, deletePage, updatePageCoverImage, workspaceName } = useAppStore();
+  const { pages, activePageId, updatePageContent, updatePageTitle, updatePageIcon, updatePageType, toggleFavorite, deletePage, updatePageCoverImage, workspaceName, databases, createDatabase } = useAppStore();
   
   const activePage = activePageId ? pages[activePageId] : null;
 
@@ -138,6 +140,8 @@ export default function Editor() {
           
           if (cmd.title === 'Ask AI') {
             setShowAiMenu(true);
+          } else if (cmd.title === 'Database') {
+            createDatabase(activePageId!);
           } else {
             cmd.action(editor);
           }
@@ -329,6 +333,8 @@ export default function Editor() {
                           editor.commands.deleteRange({ from: editor.state.selection.from - 1, to: editor.state.selection.from });
                           if (cmd.title === 'Ask AI') {
                             setShowAiMenu(true);
+                          } else if (cmd.title === 'Database') {
+                            createDatabase(activePageId!);
                           } else {
                             cmd.action(editor);
                           }
@@ -447,6 +453,10 @@ export default function Editor() {
               )}
 
               <EditorContent editor={editor} />
+              
+              {activePageId && databases[activePageId] && (
+                <DatabaseView dbId={activePageId} />
+              )}
             </>
           )}
         </div>

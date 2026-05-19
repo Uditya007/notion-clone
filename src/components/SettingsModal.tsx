@@ -2,11 +2,25 @@
 import { useAppStore } from '@/store/useAppStore';
 import styles from './Modals.module.css';
 import { Settings, User, Globe, Moon, Monitor, X } from 'lucide-react';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
+import { useRouter } from 'next/navigation';
+import { getCurrentUser, logoutUser } from '@/lib/auth';
 
 export default function SettingsModal() {
   const { isSettingsOpen, setSettingsOpen, workspaceName, updateWorkspaceName } = useAppStore();
   const [activeTab, setActiveTab] = useState('account');
+  const router = useRouter();
+  const [user, setUser] = useState<any>(null);
+
+  useEffect(() => {
+    setUser(getCurrentUser());
+  }, []);
+
+  const handleLogout = () => {
+    logoutUser();
+    setSettingsOpen(false);
+    router.push('/login');
+  };
 
   if (!isSettingsOpen) return null;
 
@@ -59,11 +73,28 @@ export default function SettingsModal() {
                 </div>
                 <div className={styles.settingsRow}>
                   <div className={styles.settingsLabel}>Email</div>
-                  <div className={styles.settingsValue}>uditya@example.com</div>
+                  <div className={styles.settingsValue}>{user?.email || 'N/A'}</div>
                 </div>
                 <div className={styles.settingsRow}>
                   <div className={styles.settingsLabel}>Name</div>
-                  <div className={styles.settingsValue}>Uditya</div>
+                  <div className={styles.settingsValue}>{user?.name || 'N/A'}</div>
+                </div>
+                <div className={styles.settingsRow}>
+                  <button 
+                    onClick={handleLogout}
+                    style={{
+                      background: 'transparent', 
+                      color: '#ff4d4d', 
+                      border: '1px solid #ff4d4d', 
+                      padding: '8px 16px', 
+                      borderRadius: '6px',
+                      cursor: 'pointer',
+                      fontSize: '14px',
+                      fontWeight: 500
+                    }}
+                  >
+                    Log out
+                  </button>
                 </div>
               </div>
             )}

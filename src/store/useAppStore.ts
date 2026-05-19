@@ -14,12 +14,36 @@ export type Page = {
   isFavorite?: boolean;
 };
 
+export type ColumnType = 'text' | 'number' | 'select' | 'multiselect' | 'date' | 'checkbox' | 'url';
+
+export type Column = {
+  id: string;
+  name: string;
+  type: ColumnType;
+  options?: string[];
+};
+
+export type Row = {
+  id: string;
+  cells: Record<string, any>;
+  pageContent: string;
+};
+
+export type Database = {
+  id: string;
+  name: string;
+  columns: Column[];
+  rows: Row[];
+  view: 'table' | 'board' | 'gallery';
+};
+
 type AppState = {
   pages: Record<string, Page>;
   activePageId: string | null;
   rootPageIds: string[];
   deletedPages: Record<string, Page & { deletedAt: string }>;
   workspaceName: string;
+  databases: Record<string, Database>;
   
   // UI States
   isSearchOpen: boolean;
@@ -41,6 +65,17 @@ type AppState = {
   restorePage: (id: string) => void;
   permanentlyDeletePage: (id: string) => void;
   applyTemplate: (title: string, icon: string, content: string, type: 'editor' | 'board') => void;
+  
+  // Database Actions
+  createDatabase: (pageId: string) => void;
+  addColumn: (dbId: string, column: Column) => void;
+  updateColumn: (dbId: string, columnId: string, changes: Partial<Column>) => void;
+  deleteColumn: (dbId: string, columnId: string) => void;
+  addRow: (dbId: string) => void;
+  updateCell: (dbId: string, rowId: string, columnId: string, value: any) => void;
+  updateRowContent: (dbId: string, rowId: string, content: string) => void;
+  deleteRow: (dbId: string, rowId: string) => void;
+  setDatabaseView: (dbId: string, view: 'table' | 'board' | 'gallery') => void;
 };
 
 const initialPageId = uuidv4();
@@ -129,9 +164,10 @@ const initialState = {
   rootPageIds: [initialPageId, 'inbox', 'calendar', 'tasks', 'automations', 'templates'],
   deletedPages: {},
   workspaceName: "Uditya's Notion",
+  databases: {},
   isSearchOpen: false,
   isSettingsOpen: false,
-} as Pick<AppState, 'pages' | 'activePageId' | 'rootPageIds' | 'deletedPages' | 'workspaceName' | 'isSearchOpen' | 'isSettingsOpen'>;
+} as Pick<AppState, 'pages' | 'activePageId' | 'rootPageIds' | 'deletedPages' | 'workspaceName' | 'databases' | 'isSearchOpen' | 'isSettingsOpen'>;
 
 export const useAppStore = create<AppState>()(
   persist(
@@ -302,7 +338,172 @@ export const useAppStore = create<AppState>()(
         activePageId: newId,
       };
     });
-  }
+  },
+
+  createDatabase: (pageId) => set((state) => {
+    if (state.databases[pageId]) return state; // Already exists
+    
+    const newDb: Database = {
+      id: pageId,
+      name: 'Untitled Database',
+      columns: [
+        { id: 'col-title', name: 'Name', type: 'text' },
+        { id: 'col-tags', name: 'Tags', type: 'multiselect', options: ['Important', 'Review'] }
+      ],
+      rows: [
+        { id: uuidv4(), cells: { 'col-title': 'First Item', 'col-tags': ['Important'] }, pageContent: '' },
+        { id: uuidv4(), cells: { 'col-title': 'Second Item', 'col-tags': [] }, pageContent: '' },
+        { id: uuidv4(), cells: { 'col-title': 'Third Item', 'col-tags': ['Review'] }, pageContent: '' }
+      ],
+      view: 'table'
+    };
+    
+    return {
+      databases: { ...state.databases, [pageId]: newDb }
+    };
+  }),
+
+  addColumn: (dbId, column) => set((state) => {
+    const db = state.databases[dbId];
+    if (!db) return state;
+    
+    return {
+      databases: {
+        ...state.databases,
+        [dbId]: {
+          ...db,
+          columns: [...db.columns, column]
+        }
+      }
+    };
+  }),
+
+  updateColumn: (dbId, columnId, changes) => set((state) => {
+    const db = state.databases[dbId];
+    if (!db) return state;
+    
+    return {
+      databases: {
+        ...state.databases,
+        [dbId]: {
+          ...db,
+          columns: db.columns.map(col => col.id === columnId ? { ...col, ...changes } : col)
+        }
+      }
+    };
+  }),
+
+  deleteColumn: (dbId, columnId) => set((state) => {
+    const db = state.databases[dbId];
+    if (!db) return state;
+    
+    return {
+      databases: {
+        ...state.databases,
+        [dbId]: {
+          ...db,
+          columns: db.columns.filter(col => col.id !== columnId)
+        }
+      }
+    };
+  }),
+
+  addRow: (dbId) => set((state) => {
+    const db = state.databases[dbId];
+    if (!db) return state;
+    
+    const newRow: Row = {
+      id: uuidv4(),
+      cells: {},
+      pageContent: ''
+    };
+    
+    return {
+      databases: {
+        ...state.databases,
+        [dbId]: {
+          ...db,
+          rows: [...db.rows, newRow]
+        }
+      }
+    };
+  }),
+
+  updateCell: (dbId, rowId, columnId, value) => set((state) => {
+    const db = state.databases[dbId];
+    if (!db) return state;
+    
+    return {
+      databases: {
+        ...state.databases,
+        [dbId]: {
+          ...db,
+          rows: db.rows.map(row => {
+            if (row.id === rowId) {
+              return {
+                ...row,
+                cells: {
+                  ...row.cells,
+                  [columnId]: value
+                }
+              };
+            }
+            return row;
+          })
+        }
+      }
+    };
+  }),
+
+  updateRowContent: (dbId, rowId, content) => set((state) => {
+    const db = state.databases[dbId];
+    if (!db) return state;
+    
+    return {
+      databases: {
+        ...state.databases,
+        [dbId]: {
+          ...db,
+          rows: db.rows.map(row => {
+            if (row.id === rowId) {
+              return { ...row, pageContent: content };
+            }
+            return row;
+          })
+        }
+      }
+    };
+  }),
+
+  deleteRow: (dbId, rowId) => set((state) => {
+    const db = state.databases[dbId];
+    if (!db) return state;
+    
+    return {
+      databases: {
+        ...state.databases,
+        [dbId]: {
+          ...db,
+          rows: db.rows.filter(row => row.id !== rowId)
+        }
+      }
+    };
+  }),
+
+  setDatabaseView: (dbId, view) => set((state) => {
+    const db = state.databases[dbId];
+    if (!db) return state;
+    
+    return {
+      databases: {
+        ...state.databases,
+        [dbId]: {
+          ...db,
+          view
+        }
+      }
+    };
+  })
 }), {
   name: 'notion-clone-storage',
 }));

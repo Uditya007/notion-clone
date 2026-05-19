@@ -1,0 +1,322 @@
+.container {
+  display: flex;
+  flex-direction: column;
+  margin-top: 24px;
+  border-top: 1px solid var(--border);
+  padding-top: 16px;
+  font-family: inherit;
+}
+
+.header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 16px;
+}
+
+.viewTabs {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.tabBtn {
+  background: transparent;
+  border: none;
+  padding: 6px 12px;
+  border-radius: 4px;
+  color: var(--text-muted);
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+}
+
+.tabBtn:hover {
+  background: var(--bg-hover);
+}
+
+.tabActive {
+  color: var(--text-main);
+  background: var(--bg-active);
+}
+
+.controls {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.controlBtn {
+  background: transparent;
+  border: 1px solid var(--border);
+  padding: 4px 10px;
+  border-radius: 4px;
+  color: var(--text-main);
+  font-size: 13px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.controlBtn:hover {
+  background: var(--bg-hover);
+}
+
+.primaryBtn {
+  background: var(--primary);
+  color: white;
+  border: none;
+  padding: 6px 12px;
+  border-radius: 4px;
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.primaryBtn:hover {
+  background: var(--primary-hover);
+}
+
+/* Table View */
+.tableWrapper {
+  overflow-x: auto;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+}
+
+.table {
+  width: 100%;
+  border-collapse: collapse;
+  text-align: left;
+  font-size: 14px;
+}
+
+.th {
+  padding: 8px 12px;
+  border-bottom: 1px solid var(--border);
+  border-right: 1px solid var(--border);
+  color: var(--text-muted);
+  font-weight: 500;
+  background: var(--bg-hover);
+  white-space: nowrap;
+}
+
+.td {
+  padding: 0;
+  border-bottom: 1px solid var(--border);
+  border-right: 1px solid var(--border);
+  height: 36px;
+  position: relative;
+}
+
+.cellInput {
+  width: 100%;
+  height: 100%;
+  border: none;
+  background: transparent;
+  padding: 8px 12px;
+  color: var(--text-main);
+  outline: none;
+  font-size: 14px;
+}
+
+.cellInput:focus {
+  background: rgba(255, 255, 255, 0.05);
+}
+
+.titleCell {
+  font-weight: 500;
+  cursor: pointer;
+}
+
+.titleCell:hover .openBtn {
+  opacity: 1;
+}
+
+.openBtn {
+  position: absolute;
+  right: 8px;
+  top: 50%;
+  transform: translateY(-50%);
+  background: var(--bg-elevated);
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  padding: 2px 6px;
+  font-size: 11px;
+  cursor: pointer;
+  opacity: 0;
+  transition: opacity 0.2s;
+  color: var(--text-main);
+}
+
+.openBtn:hover {
+  background: var(--bg-hover);
+}
+
+.newRowBtn {
+  padding: 8px 12px;
+  color: var(--text-muted);
+  cursor: pointer;
+  font-size: 14px;
+}
+
+.newRowBtn:hover {
+  background: var(--bg-hover);
+}
+
+/* Board View */
+.boardWrapper {
+  display: flex;
+  gap: 16px;
+  overflow-x: auto;
+  padding-bottom: 16px;
+}
+
+.boardColumn {
+  flex: 0 0 280px;
+  background: var(--bg-hover);
+  border-radius: 6px;
+  display: flex;
+  flex-direction: column;
+}
+
+.boardColHeader {
+  padding: 12px;
+  font-weight: 500;
+  font-size: 14px;
+  display: flex;
+  justify-content: space-between;
+}
+
+.boardCards {
+  padding: 0 12px 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.boardCard {
+  background: var(--bg-main);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  padding: 12px;
+  cursor: pointer;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+}
+
+.boardCard:hover {
+  background: var(--bg-active);
+}
+
+.cardTitle {
+  font-size: 14px;
+  font-weight: 500;
+  margin-bottom: 8px;
+}
+
+.cardProps {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+}
+
+.pill {
+  font-size: 11px;
+  padding: 2px 6px;
+  border-radius: 12px;
+  background: rgba(255, 255, 255, 0.1);
+  color: var(--text-muted);
+}
+
+.addCardBtn {
+  margin: 0 12px 12px;
+  padding: 8px;
+  background: transparent;
+  border: none;
+  color: var(--text-muted);
+  cursor: pointer;
+  text-align: left;
+  font-size: 13px;
+}
+
+.addCardBtn:hover {
+  background: rgba(255, 255, 255, 0.05);
+}
+
+/* Gallery View */
+.galleryWrapper {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+  gap: 16px;
+}
+
+.galleryCard {
+  background: var(--bg-main);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  overflow: hidden;
+  cursor: pointer;
+  transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.galleryCard:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+}
+
+.galleryCover {
+  height: 120px;
+  background: var(--bg-hover);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--text-muted);
+  font-size: 24px;
+}
+
+.galleryContent {
+  padding: 12px;
+}
+
+.galleryTitle {
+  font-size: 14px;
+  font-weight: 500;
+  margin-bottom: 8px;
+}
+
+/* Filters & Sort */
+.dropdown {
+  position: relative;
+}
+
+.dropdownMenu {
+  position: absolute;
+  top: 100%;
+  right: 0;
+  margin-top: 4px;
+  background: var(--bg-elevated);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  padding: 8px;
+  z-index: 10;
+  width: 200px;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+}
+
+.dropdownItem {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 6px 8px;
+  font-size: 13px;
+  cursor: pointer;
+  border-radius: 4px;
+}
+
+.dropdownItem:hover {
+  background: var(--bg-hover);
+}
