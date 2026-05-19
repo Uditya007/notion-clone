@@ -46,7 +46,7 @@ export async function POST(req: Request) {
   try {
     const body = await req.json();
     
-    const response = await fetch('https://www.googleapis.com/calendar/v3/calendars/primary/events', {
+    const response = await fetch('https://www.googleapis.com/calendar/v3/calendars/primary/events?conferenceDataVersion=1', {
       method: 'POST',
       headers: {
         'Authorization': `Bearer ${token}`,

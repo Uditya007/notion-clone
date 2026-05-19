@@ -23,6 +23,74 @@ export default function CalendarView() {
   const [isLoading, setIsLoading] = useState(false);
   const [selectedEvent, setSelectedEvent] = useState<CalendarEvent | null>(null);
 
+  // New Event Form State
+  const [isAddingEvent, setIsAddingEvent] = useState(false);
+  const [newEventTitle, setNewEventTitle] = useState('');
+  const [newEventDate, setNewEventDate] = useState('');
+  const [newEventStartTime, setNewEventStartTime] = useState('10:00');
+  const [newEventEndTime, setNewEventEndTime] = useState('11:00');
+  const [newEventDescription, setNewEventDescription] = useState('');
+  const [createGoogleMeet, setCreateGoogleMeet] = useState(false);
+
+  const openNewEventModal = (dateStr?: string) => {
+    const defaultDate = dateStr || formatDateStr(new Date());
+    setNewEventDate(defaultDate);
+    setIsAddingEvent(true);
+  };
+
+  const handleCreateEventSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!newEventTitle.trim() || !newEventDate) return;
+
+    setIsLoading(true);
+    try {
+      const startDateTime = new Date(`${newEventDate}T${newEventStartTime}:00`).toISOString();
+      const endDateTime = new Date(`${newEventDate}T${newEventEndTime}:00`).toISOString();
+
+      const body: any = {
+        summary: newEventTitle,
+        description: newEventDescription,
+        start: { dateTime: startDateTime },
+        end: { dateTime: endDateTime },
+      };
+
+      if (createGoogleMeet) {
+        body.conferenceData = {
+          createRequest: {
+            requestId: `clearspace-${Date.now()}`,
+            conferenceSolutionKey: {
+              type: 'hangoutsMeet'
+            }
+          }
+        };
+      }
+
+      const res = await fetch('/api/calendar/events', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(body),
+      });
+
+      if (!res.ok) throw new Error('Failed to create event');
+      
+      // Reset form
+      setNewEventTitle('');
+      setNewEventDescription('');
+      setNewEventStartTime('10:00');
+      setNewEventEndTime('11:00');
+      setCreateGoogleMeet(false);
+      setIsAddingEvent(false);
+
+      // Re-fetch events
+      fetchEvents();
+    } catch (error) {
+      console.error(error);
+      alert('Failed to add event to Google Calendar');
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
   const fetchEvents = async () => {
     if (!session) return;
     setIsLoading(true);
@@ -191,7 +259,7 @@ export default function CalendarView() {
               </button>
             ))}
           </div>
-          <button className={styles.primaryBtn}>
+          <button className={styles.primaryBtn} onClick={() => openNewEventModal()}>
             <Plus size={16} /> New Event
           </button>
         </div>
@@ -250,6 +318,8 @@ export default function CalendarView() {
                 className={`${styles.dayCell} ${isToday ? styles.todayCell : ''}`}
                 onDragOver={handleDragOver}
                 onDrop={(e) => handleDrop(e, dateStr)}
+                onClick={() => openNewEventModal(dateStr)}
+                style={{ cursor: 'pointer' }}
               >
                 <div className={styles.dayNumber}>{date.getDate()}</div>
                 <div className={styles.dayEventsList}>
@@ -258,7 +328,10 @@ export default function CalendarView() {
                       key={event.id}
                       draggable
                       onDragStart={(e) => handleDragStart(e, event.id)}
-                      onClick={() => setSelectedEvent(event)}
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        setSelectedEvent(event);
+                      }}
                       className={`${styles.eventChip} ${styles[event.type] || styles.default}`}
                       style={{ backgroundColor: event.type === 'meeting' ? 'rgba(35, 131, 226, 0.15)' : 'var(--bg-hover)' }}
                     >
@@ -408,6 +481,107 @@ export default function CalendarView() {
               Close
             </button>
           </div>
+        </div>
+      )}
+      {/* Create Event Modal */}
+      {isAddingEvent && (
+        <div 
+          style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, backgroundColor: 'rgba(0,0,0,0.6)', zIndex: 100, display: 'flex', alignItems: 'center', justifyContent: 'center', backdropFilter: 'blur(4px)' }}
+          onClick={() => setIsAddingEvent(false)}
+        >
+          <form 
+            onSubmit={handleCreateEventSubmit}
+            style={{ width: '420px', backgroundColor: 'var(--bg-main)', borderRadius: '12px', padding: '24px', border: '1px solid var(--border)', boxShadow: '0 20px 40px rgba(0,0,0,0.3)', display: 'flex', flexDirection: 'column', gap: '16px' }}
+            onClick={e => e.stopPropagation()}
+          >
+            <h3 style={{ fontSize: '20px', fontWeight: 600, color: 'var(--text-main)' }}>Create New Event</h3>
+            
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
+              <label style={{ fontSize: '12px', fontWeight: 500, color: 'var(--text-muted)' }}>Event Title</label>
+              <input 
+                type="text" 
+                required
+                placeholder="e.g. Design Sync"
+                value={newEventTitle}
+                onChange={e => setNewEventTitle(e.target.value)}
+                style={{ padding: '10px 12px', borderRadius: '8px', border: '1px solid var(--border)', backgroundColor: 'var(--bg-hover)', color: 'var(--text-main)', fontSize: '14px', outline: 'none' }}
+              />
+            </div>
+
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
+              <label style={{ fontSize: '12px', fontWeight: 500, color: 'var(--text-muted)' }}>Date</label>
+              <input 
+                type="date" 
+                required
+                value={newEventDate}
+                onChange={e => setNewEventDate(e.target.value)}
+                style={{ padding: '10px 12px', borderRadius: '8px', border: '1px solid var(--border)', backgroundColor: 'var(--bg-hover)', color: 'var(--text-main)', fontSize: '14px', outline: 'none' }}
+              />
+            </div>
+
+            <div style={{ display: 'flex', gap: '12px' }}>
+              <div style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: '6px' }}>
+                <label style={{ fontSize: '12px', fontWeight: 500, color: 'var(--text-muted)' }}>Start Time</label>
+                <input 
+                  type="time" 
+                  required
+                  value={newEventStartTime}
+                  onChange={e => setNewEventStartTime(e.target.value)}
+                  style={{ padding: '10px 12px', borderRadius: '8px', border: '1px solid var(--border)', backgroundColor: 'var(--bg-hover)', color: 'var(--text-main)', fontSize: '14px', outline: 'none' }}
+                />
+              </div>
+              <div style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: '6px' }}>
+                <label style={{ fontSize: '12px', fontWeight: 500, color: 'var(--text-muted)' }}>End Time</label>
+                <input 
+                  type="time" 
+                  required
+                  value={newEventEndTime}
+                  onChange={e => setNewEventEndTime(e.target.value)}
+                  style={{ padding: '10px 12px', borderRadius: '8px', border: '1px solid var(--border)', backgroundColor: 'var(--bg-hover)', color: 'var(--text-main)', fontSize: '14px', outline: 'none' }}
+                />
+              </div>
+            </div>
+
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
+              <label style={{ fontSize: '12px', fontWeight: 500, color: 'var(--text-muted)' }}>Description (Optional)</label>
+              <textarea 
+                placeholder="Add meeting agenda or notes..."
+                value={newEventDescription}
+                onChange={e => setNewEventDescription(e.target.value)}
+                rows={3}
+                style={{ padding: '10px 12px', borderRadius: '8px', border: '1px solid var(--border)', backgroundColor: 'var(--bg-hover)', color: 'var(--text-main)', fontSize: '14px', outline: 'none', resize: 'vertical' }}
+              />
+            </div>
+
+            <div style={{ display: 'flex', alignItems: 'center', gap: '10px', padding: '6px 0' }}>
+              <input 
+                type="checkbox" 
+                id="googleMeetCheckbox"
+                checked={createGoogleMeet}
+                onChange={e => setCreateGoogleMeet(e.target.checked)}
+                style={{ width: '16px', height: '16px', cursor: 'pointer' }}
+              />
+              <label htmlFor="googleMeetCheckbox" style={{ fontSize: '14px', color: 'var(--text-main)', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '6px' }}>
+                <Video size={16} color="var(--primary)" /> Generate Google Meet Link
+              </label>
+            </div>
+
+            <div style={{ display: 'flex', gap: '12px', marginTop: '8px' }}>
+              <button 
+                type="button"
+                onClick={() => setIsAddingEvent(false)}
+                style={{ flex: 1, padding: '10px', background: 'var(--bg-hover)', color: 'var(--text-main)', borderRadius: '8px', border: '1px solid var(--border)', cursor: 'pointer', fontWeight: 500 }}
+              >
+                Cancel
+              </button>
+              <button 
+                type="submit"
+                style={{ flex: 1, padding: '10px', background: 'var(--text-main)', color: 'var(--bg-main)', borderRadius: '8px', border: 'none', cursor: 'pointer', fontWeight: 600 }}
+              >
+                Create Event
+              </button>
+            </div>
+          </form>
         </div>
       )}
     </div>
