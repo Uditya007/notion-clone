@@ -1,5 +1,5 @@
 import { streamText } from 'ai';
-import { anthropic } from '@ai-sdk/anthropic';
+import { google } from '@ai-sdk/google';
 
 // Set runtime to edge for better streaming performance
 export const runtime = 'edge';
@@ -8,11 +8,11 @@ export async function POST(req: Request) {
   const { prompt, context, command } = await req.json();
 
   // If no API key is provided, gracefully fallback to the Mock stream
-  if (!process.env.ANTHROPIC_API_KEY) {
+  if (!process.env.GOOGLE_GENERATIVE_AI_API_KEY) {
     const stream = new ReadableStream({
       async start(controller) {
         const encoder = new TextEncoder();
-        const mockResponse = `\n\n*(Mock AI Response. Add ANTHROPIC_API_KEY to .env.local for real Claude AI)*\n\nYou asked to [${command}]. Based on your context, here is the generated response simulating Claude 3.5 Sonnet.`;
+        const mockResponse = `\n\n*(Mock AI Response. Add GOOGLE_GENERATIVE_AI_API_KEY to .env.local for real Gemini AI)*\n\nYou asked to [${command}]. Based on your context, here is the generated response simulating Gemini 1.5 Flash.`;
         const words = mockResponse.split(' ');
         for (const word of words) {
           controller.enqueue(encoder.encode(word + ' '));
@@ -52,7 +52,7 @@ export async function POST(req: Request) {
   }
 
   const result = await streamText({
-    model: anthropic('claude-sonnet-4-20250514'), // Modern Claude Sonnet
+    model: google('gemini-1.5-flash'), // Extremely fast and free tier available
     system: systemPrompt,
     prompt: prompt || "Execute the requested command on the document context.",
   });
