@@ -1,0 +1,277 @@
+.viewContainer {
+  padding: 48px;
+  max-width: 1200px;
+  margin: 0 auto;
+  width: 100%;
+}
+
+.viewHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 24px;
+}
+
+.viewTitleWrapper {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.viewIcon {
+  color: var(--primary);
+}
+
+.viewTitleWrapper h2 {
+  font-size: 28px;
+  font-weight: 700;
+  color: var(--text-main);
+  margin: 0;
+}
+
+.headerControls {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.viewToggles {
+  display: flex;
+  background: var(--bg-hover);
+  padding: 4px;
+  border-radius: 6px;
+  border: 1px solid var(--border);
+}
+
+.viewToggleBtn {
+  padding: 4px 12px;
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--text-muted);
+  background: transparent;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+.viewToggleBtn.active {
+  background: var(--bg-active);
+  color: var(--text-main);
+  box-shadow: 0 1px 2px rgba(0,0,0,0.2);
+}
+
+.primaryBtn {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 16px;
+  background-color: var(--primary);
+  color: white;
+  border-radius: 6px;
+  font-size: 14px;
+  font-weight: 500;
+  border: none;
+  cursor: pointer;
+}
+
+.calendarToolbar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 24px;
+}
+
+.dateNav {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.navBtn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  border-radius: 4px;
+  background: transparent;
+  border: 1px solid var(--border);
+  color: var(--text-main);
+  cursor: pointer;
+}
+
+.navBtn:hover {
+  background: var(--bg-hover);
+}
+
+.todayBtn {
+  padding: 0 12px;
+  height: 32px;
+  border-radius: 4px;
+  background: transparent;
+  border: 1px solid var(--border);
+  color: var(--text-main);
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+}
+
+.todayBtn:hover {
+  background: var(--bg-hover);
+}
+
+.currentMonthLabel {
+  font-size: 18px;
+  font-weight: 600;
+  color: var(--text-main);
+  margin-left: 12px;
+}
+
+.integrationNotice {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 13px;
+  color: var(--text-muted);
+  padding: 8px 12px;
+  background: var(--bg-hover);
+  border-radius: 6px;
+}
+
+.noticeDot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background-color: #2ea5ff;
+}
+
+/* Month Grid */
+.monthGrid {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background: var(--bg-main);
+  overflow: hidden;
+}
+
+.weekdayHeader {
+  padding: 12px;
+  text-align: center;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--text-muted);
+  border-bottom: 1px solid var(--border);
+  border-right: 1px solid var(--border);
+}
+
+.weekdayHeader:last-child {
+  border-right: none;
+}
+
+.dayCellEmpty {
+  border-right: 1px solid var(--border);
+  border-bottom: 1px solid var(--border);
+  background: rgba(255, 255, 255, 0.02);
+  min-height: 120px;
+}
+
+.dayCell {
+  border-right: 1px solid var(--border);
+  border-bottom: 1px solid var(--border);
+  min-height: 120px;
+  padding: 8px;
+  display: flex;
+  flex-direction: column;
+  transition: background 0.2s;
+}
+
+.dayCell:hover {
+  background: var(--bg-hover);
+}
+
+.todayCell {
+  background: rgba(46, 165, 255, 0.05);
+}
+
+.dayNumber {
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--text-muted);
+  margin-bottom: 8px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+}
+
+.todayCell .dayNumber {
+  background: var(--primary);
+  color: white;
+}
+
+.dayEventsList {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  flex: 1;
+}
+
+.eventChip {
+  font-size: 11px;
+  padding: 4px 6px;
+  border-radius: 4px;
+  background: var(--bg-active);
+  color: var(--text-main);
+  cursor: grab;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  border-left: 3px solid var(--border);
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.eventChip:active {
+  cursor: grabbing;
+}
+
+.eventChipTime {
+  opacity: 0.7;
+  font-size: 10px;
+}
+
+.eventChip.meeting {
+  border-left-color: #ff4d4d;
+  background: rgba(255, 77, 77, 0.1);
+}
+
+.eventChip.task {
+  border-left-color: #4da6ff;
+  background: rgba(77, 166, 255, 0.1);
+}
+
+.eventChip.milestone {
+  border-left-color: #4dff4d;
+  background: rgba(77, 255, 77, 0.1);
+}
+
+.dayViewNotice {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 400px;
+  border: 1px dashed var(--border);
+  border-radius: 8px;
+  color: var(--text-muted);
+  gap: 12px;
+}
+
+.subtext {
+  font-size: 13px;
+  opacity: 0.7;
+}

@@ -1,0 +1,404 @@
+.editorContainer {
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+  width: 100%;
+}
+
+.header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 12px 24px;
+  height: 45px;
+  position: sticky;
+  top: 0;
+  background: var(--bg-main);
+  z-index: 20;
+}
+
+.breadcrumbs {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 14px;
+  color: var(--text-muted);
+}
+
+.breadcrumbItem {
+  cursor: pointer;
+  padding: 4px 6px;
+  border-radius: var(--radius);
+  color: var(--text-main);
+  font-weight: 500;
+}
+
+.breadcrumbItem:hover {
+  background-color: var(--bg-hover);
+}
+
+.separator {
+  color: var(--text-muted);
+  opacity: 0.5;
+}
+
+.headerActions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.presenceAvatars {
+  display: flex;
+  align-items: center;
+  margin-right: 12px;
+}
+
+.presenceAvatar {
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  color: white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 11px;
+  font-weight: 600;
+  border: 2px solid var(--bg-main);
+  margin-left: -8px;
+  position: relative;
+  z-index: 1;
+}
+
+.presenceAvatar:first-child {
+  margin-left: 0;
+}
+
+.shareHeaderBtn {
+  font-size: 13px;
+  font-weight: 500;
+  padding: 4px 12px;
+  background: transparent;
+  color: var(--text-main);
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  cursor: pointer;
+  margin-right: 8px;
+}
+
+.shareHeaderBtn:hover {
+  background: var(--bg-hover);
+}
+
+.iconBtn {
+  padding: 6px;
+  border-radius: var(--radius);
+  color: var(--text-muted);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.iconBtn:hover {
+  background-color: var(--bg-hover);
+  color: var(--text-main);
+}
+
+.iconBtnActive {
+  color: var(--primary);
+}
+
+.iconBtnActive:hover {
+  color: var(--primary);
+}
+
+.coverImage {
+  height: 250px;
+  width: 100%;
+  position: relative;
+  overflow: visible;
+  flex-shrink: 0;
+}
+
+.coverImage img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.pageIconWrapper {
+  position: absolute;
+  bottom: -40px;
+  left: max(96px, calc(50% - 400px));
+  background: var(--bg-main);
+  border-radius: 12px;
+  padding: 4px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.iconInput {
+  font-size: 78px;
+  width: 90px;
+  height: 90px;
+  border: none;
+  background: transparent;
+  outline: none;
+  text-align: center;
+  line-height: 1;
+}
+
+.titleInput {
+  font-size: 40px;
+  font-weight: 700;
+  color: var(--text-main);
+  border: none;
+  background: transparent;
+  outline: none;
+  width: 100%;
+  margin-top: 24px;
+}
+
+.titleInput::placeholder {
+  color: var(--text-muted);
+  opacity: 0.5;
+}
+
+.contentWrapper {
+  max-width: 900px;
+  width: 100%;
+  margin: 0 auto;
+  padding: 64px 48px 100px;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+}
+
+.editorMain {
+  margin-top: 16px;
+  /* margin-left: -54px; Blocknote specific, not needed for Tiptap */
+}
+
+/* Ensure Tiptap inherits font and styling */
+:global(.tiptap-editor) {
+  font-family: inherit !important;
+}
+
+.loading {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+  color: var(--text-muted);
+}
+
+.viewToggles {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 16px;
+  border-bottom: 1px solid var(--border);
+  padding-bottom: 16px;
+  margin-bottom: 8px;
+}
+
+.viewToggleBtn {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 8px;
+  border-radius: 4px;
+  color: var(--text-muted);
+  font-size: 14px;
+  font-weight: 500;
+  transition: background 0.2s, color 0.2s;
+}
+
+.viewToggleBtn:hover {
+  background: var(--bg-hover);
+  color: var(--text-main);
+}
+
+.activeView {
+  background: var(--bg-active);
+  color: var(--text-main);
+}
+
+/* AI Menu Styles */
+.aiFloatingBtn {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  background: var(--bg-hover);
+  border: 1px solid var(--border);
+  color: var(--primary);
+  font-size: 13px;
+  font-weight: 500;
+  padding: 4px 8px;
+  border-radius: 6px;
+  cursor: pointer;
+  box-shadow: var(--shadow-sm);
+  transition: background 0.2s;
+}
+
+.aiFloatingBtn:hover {
+  background: var(--bg-active);
+}
+
+.bubbleMenu {
+  display: flex;
+  align-items: center;
+  background: var(--bg-main);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  padding: 4px;
+  box-shadow: var(--shadow-md);
+  gap: 2px;
+}
+
+.bubbleBtn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 4px 8px;
+  border-radius: 4px;
+  color: var(--text-main);
+  background: transparent;
+  font-size: 14px;
+  cursor: pointer;
+}
+
+.bubbleBtn:hover {
+  background: var(--bg-hover);
+}
+
+.bubbleDivider {
+  width: 1px;
+  height: 16px;
+  background: var(--border);
+  margin: 0 4px;
+}
+
+.aiBubbleBtn {
+  color: var(--primary);
+  gap: 4px;
+}
+
+.aiPopup {
+  position: absolute;
+  top: 60px; /* Simplified positioning */
+  right: 0;
+  width: 100%;
+  max-width: 600px;
+  background: var(--bg-main);
+  border: 1px solid var(--primary);
+  border-radius: 8px;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15);
+  z-index: 100;
+  overflow: hidden;
+}
+
+.aiForm {
+  display: flex;
+  align-items: center;
+  padding: 12px 16px;
+  border-bottom: 1px solid var(--border);
+  gap: 12px;
+}
+
+.aiIcon {
+  color: var(--primary);
+}
+
+.aiInput {
+  flex: 1;
+  background: transparent;
+  border: none;
+  outline: none;
+  color: var(--text-main);
+  font-size: 15px;
+}
+
+.aiInput::placeholder {
+  color: var(--text-muted);
+}
+
+.aiResult {
+  padding: 16px;
+  background: var(--bg-hover);
+}
+
+.aiText {
+  color: var(--text-main);
+  font-size: 15px;
+  line-height: 1.6;
+  white-space: pre-wrap;
+  margin-bottom: 16px;
+}
+
+.cursor {
+  display: inline-block;
+  width: 2px;
+  height: 1em;
+  background-color: var(--primary);
+  animation: blink 1s step-start infinite;
+  vertical-align: text-bottom;
+  margin-left: 2px;
+}
+
+@keyframes blink {
+  50% { opacity: 0; }
+}
+
+.aiActions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.aiActionBtn {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 12px;
+  background: var(--primary);
+  color: white;
+  border-radius: 6px;
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+}
+
+.aiActionBtn:hover {
+  background: var(--primary-hover);
+}
+
+.aiActionBtnDanger {
+  background: transparent;
+  color: var(--text-muted);
+  border: 1px solid var(--border);
+}
+
+.aiOptionsMenu {
+  display: flex;
+  flex-direction: column;
+  padding: 8px 0;
+  max-height: 200px;
+  overflow-y: auto;
+}
+
+.aiOptionBtn {
+  text-align: left;
+  padding: 8px 16px;
+  background: transparent;
+  color: var(--text-main);
+  border: none;
+  font-size: 13px;
+  cursor: pointer;
+  width: 100%;
+}
+
+.aiOptionBtn:hover {
+  background: var(--bg-hover);
+}

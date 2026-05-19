@@ -1,0 +1,776 @@
+.viewContainer {
+  padding: 48px;
+  max-width: 1000px;
+  margin: 0 auto;
+  width: 100%;
+}
+
+.viewHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 32px;
+}
+
+.viewTitleWrapper {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.viewIcon {
+  color: var(--primary);
+}
+
+.viewTitleWrapper h2 {
+  font-size: 28px;
+  font-weight: 700;
+  color: var(--text-main);
+  margin: 0;
+}
+
+.primaryBtn {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 16px;
+  background-color: var(--primary);
+  color: white;
+  border-radius: 6px;
+  font-size: 14px;
+  font-weight: 500;
+  border: none;
+  cursor: pointer;
+}
+
+.primaryBtn:hover {
+  opacity: 0.9;
+}
+
+/* Calendar View */
+.integrationNotice {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 13px;
+  color: var(--text-muted);
+  margin-bottom: 24px;
+  padding: 8px 12px;
+  background: var(--bg-hover);
+  border-radius: 6px;
+  width: max-content;
+}
+
+.noticeDot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background-color: #2ea5ff;
+}
+
+.calendarGrid {
+  display: flex;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background: var(--bg-main);
+  height: 600px;
+  overflow: hidden;
+}
+
+.timeColumn {
+  width: 80px;
+  border-right: 1px solid var(--border);
+  display: flex;
+  flex-direction: column;
+}
+
+.timeSlot {
+  height: 60px;
+  padding: 8px;
+  font-size: 12px;
+  color: var(--text-muted);
+  text-align: right;
+  border-bottom: 1px solid var(--border);
+}
+
+.eventsColumn {
+  flex: 1;
+  position: relative;
+  overflow-y: auto;
+}
+
+.eventTimeline {
+  display: flex;
+  flex-direction: column;
+  padding: 16px;
+  gap: 16px;
+}
+
+.eventCard {
+  padding: 12px;
+  border-radius: 6px;
+  border-left: 4px solid var(--primary);
+  background: var(--bg-hover);
+}
+
+.eventCard.meeting { border-left-color: #ff4d4d; }
+.eventCard.review { border-left-color: #4da6ff; }
+.eventCard.planning { border-left-color: #4dff4d; }
+
+.eventTitle {
+  font-weight: 600;
+  font-size: 14px;
+  color: var(--text-main);
+  margin-bottom: 4px;
+}
+
+.eventDetails {
+  display: flex;
+  gap: 16px;
+  font-size: 12px;
+  color: var(--text-muted);
+}
+
+.eventDetails span {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+/* Inbox View */
+.headerFilters {
+  display: flex;
+  gap: 8px;
+}
+
+.filterBtn {
+  padding: 6px 12px;
+  font-size: 13px;
+  border-radius: 16px;
+  background: transparent;
+  color: var(--text-muted);
+  border: 1px solid var(--border);
+  cursor: pointer;
+}
+
+.filterBtn.active {
+  background: var(--bg-hover);
+  color: var(--text-main);
+}
+
+.emailList {
+  display: flex;
+  flex-direction: column;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+.emailItem {
+  display: flex;
+  padding: 16px;
+  border-bottom: 1px solid var(--border);
+  background: rgba(46, 165, 255, 0.05); /* Unread background */
+  cursor: pointer;
+  position: relative;
+}
+
+.emailItem:last-child {
+  border-bottom: none;
+}
+
+.emailItem:hover {
+  background: var(--bg-hover);
+}
+
+.emailItem.emailRead {
+  background: var(--bg-main);
+}
+
+.emailAvatar {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background: var(--primary);
+  color: white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 600;
+  margin-right: 16px;
+  flex-shrink: 0;
+}
+
+.emailContent {
+  flex: 1;
+  min-width: 0;
+}
+
+.emailTop {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 4px;
+}
+
+.emailSender {
+  font-weight: 600;
+  color: var(--text-main);
+  font-size: 14px;
+}
+
+.emailTime {
+  font-size: 12px;
+  color: var(--text-muted);
+}
+
+.emailSubject {
+  font-weight: 600;
+  font-size: 14px;
+  color: var(--text-main);
+  margin-bottom: 4px;
+}
+
+.emailRead .emailSubject {
+  font-weight: 500;
+}
+
+.emailPreview {
+  font-size: 14px;
+  color: var(--text-muted);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.emailActions {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  opacity: 0;
+  transition: opacity 0.2s;
+  padding-left: 16px;
+}
+
+.emailItem:hover .emailActions {
+  opacity: 1;
+}
+
+.actionIcon {
+  color: var(--text-muted);
+  padding: 4px;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+.actionIcon:hover {
+  background: var(--bg-active);
+  color: var(--text-main);
+}
+
+/* Tasks View */
+.taskListContainer {
+  display: flex;
+  flex-direction: column;
+  gap: 32px;
+}
+
+.addTaskLargeBtn {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 12px;
+  width: 100%;
+  border: 1px dashed var(--border);
+  border-radius: 8px;
+  background: transparent;
+  color: var(--text-muted);
+  font-size: 14px;
+  cursor: pointer;
+  transition: border-color 0.2s, color 0.2s;
+}
+
+.addTaskLargeBtn:hover {
+  border-color: var(--primary);
+  color: var(--primary);
+}
+
+.addTaskInputWrapper {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 16px;
+  border: 1px solid var(--primary);
+  border-radius: 8px;
+  background: var(--bg-hover);
+}
+
+.addTaskInput {
+  flex: 1;
+  background: transparent;
+  border: none;
+  outline: none;
+  color: var(--text-main);
+  font-size: 14px;
+}
+
+.addTaskInput::placeholder {
+  color: var(--text-muted);
+}
+
+.taskGroupTitle {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--text-muted);
+  margin-bottom: 12px;
+  padding-bottom: 8px;
+  border-bottom: 1px solid var(--border);
+}
+
+.taskListItem {
+  display: flex;
+  align-items: center;
+  padding: 12px 0;
+  border-bottom: 1px solid var(--border);
+  gap: 12px;
+}
+
+.taskListItem:last-child {
+  border-bottom: none;
+}
+
+.checkbox {
+  width: 18px;
+  height: 18px;
+  border-radius: 4px;
+  border: 2px solid var(--text-muted);
+  background: transparent;
+  cursor: pointer;
+  flex-shrink: 0;
+  position: relative;
+}
+
+.checkbox.checked {
+  background: var(--primary);
+  border-color: var(--primary);
+}
+
+.checkbox.checked::after {
+  content: '';
+  position: absolute;
+  left: 5px;
+  top: 2px;
+  width: 4px;
+  height: 8px;
+  border: solid white;
+  border-width: 0 2px 2px 0;
+  transform: rotate(45deg);
+}
+
+.taskItemContent {
+  flex: 1;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.taskItemTitle {
+  font-size: 14px;
+  color: var(--text-main);
+  font-weight: 500;
+}
+
+.taskItemDue {
+  font-size: 12px;
+  color: var(--text-muted);
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  padding: 4px 8px;
+  background: var(--bg-hover);
+  border-radius: 4px;
+}
+
+.overdue {
+  color: #ff4d4d;
+  background: rgba(255, 77, 77, 0.1);
+}
+
+.taskCompleted .taskItemTitle {
+  text-decoration: line-through;
+  color: var(--text-muted);
+}
+
+/* Automations View */
+.tabsHeader {
+  display: flex;
+  gap: 24px;
+  border-bottom: 1px solid var(--border);
+  margin-bottom: 24px;
+}
+
+.tabBtn {
+  background: transparent;
+  border: none;
+  color: var(--text-muted);
+  font-size: 14px;
+  font-weight: 500;
+  padding: 8px 0;
+  cursor: pointer;
+  position: relative;
+}
+
+.tabBtn.activeTab {
+  color: var(--text-main);
+}
+
+.tabBtn.activeTab::after {
+  content: '';
+  position: absolute;
+  bottom: -1px;
+  left: 0;
+  right: 0;
+  height: 2px;
+  background: var(--primary);
+}
+
+.automationList {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.automationCard {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 20px;
+  background: var(--bg-main);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+}
+
+.automationInfo {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.automationTitle {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  font-size: 16px;
+  font-weight: 600;
+  color: var(--text-main);
+}
+
+.statusBadge {
+  font-size: 11px;
+  padding: 2px 8px;
+  border-radius: 12px;
+  background: var(--bg-hover);
+  color: var(--text-muted);
+  font-weight: 500;
+}
+
+.statusActive {
+  background: rgba(46, 165, 255, 0.1);
+  color: var(--primary);
+}
+
+.automationFlow {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  font-size: 13px;
+  color: var(--text-muted);
+}
+
+.flowIcon {
+  color: var(--border);
+}
+
+.automationActions {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.toggleSwitch {
+  width: 40px;
+  height: 20px;
+  background: var(--bg-hover);
+  border-radius: 20px;
+  cursor: pointer;
+  position: relative;
+  transition: background 0.2s;
+  margin-left: 12px;
+}
+
+.toggleSwitch.toggleOn {
+  background: var(--primary);
+}
+
+.toggleKnob {
+  width: 16px;
+  height: 16px;
+  background: white;
+  border-radius: 50%;
+  position: absolute;
+  top: 2px;
+  left: 2px;
+  transition: transform 0.2s;
+}
+
+.toggleSwitch.toggleOn .toggleKnob {
+  transform: translateX(20px);
+}
+
+/* Builder UI */
+.builderCard {
+  background: var(--bg-main);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 24px;
+}
+
+.builderHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 32px;
+}
+
+.builderHeader h3 {
+  margin: 0;
+  font-size: 18px;
+}
+
+.cancelBtn {
+  background: transparent;
+  border: none;
+  color: var(--text-muted);
+  cursor: pointer;
+  font-size: 14px;
+}
+
+.builderFlow {
+  display: flex;
+  align-items: center;
+  gap: 24px;
+  margin-bottom: 32px;
+  padding: 32px 0;
+  justify-content: center;
+  background: var(--bg-hover);
+  border-radius: 8px;
+}
+
+.builderNode {
+  background: var(--bg-main);
+  border: 1px solid var(--border);
+  padding: 16px;
+  border-radius: 8px;
+  min-width: 250px;
+}
+
+.nodeLabel {
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--primary);
+  margin-bottom: 8px;
+  letter-spacing: 0.5px;
+}
+
+.nodeSelect {
+  width: 100%;
+  padding: 8px;
+  background: var(--bg-hover);
+  border: 1px solid var(--border);
+  color: var(--text-main);
+  border-radius: 4px;
+  outline: none;
+}
+
+.flowArrow {
+  color: var(--text-muted);
+}
+
+.builderFooter {
+  display: flex;
+  justify-content: flex-end;
+  border-top: 1px solid var(--border);
+  padding-top: 24px;
+}
+
+/* Logs UI */
+.logsList {
+  display: flex;
+  flex-direction: column;
+}
+
+.logsHeader {
+  display: grid;
+  grid-template-columns: 2fr 1fr 1fr;
+  padding: 12px 16px;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--text-muted);
+  border-bottom: 1px solid var(--border);
+}
+
+.logRow {
+  display: grid;
+  grid-template-columns: 2fr 1fr 1fr;
+  padding: 16px;
+  border-bottom: 1px solid var(--border);
+  align-items: center;
+  font-size: 13px;
+}
+
+.logName {
+  color: var(--text-main);
+  font-weight: 500;
+}
+
+.logTime {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  color: var(--text-muted);
+}
+
+.logStatus {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-weight: 500;
+}
+
+.success {
+  color: #4dff4d;
+}
+
+.failed {
+  color: #ff4d4d;
+}
+
+/* Templates View */
+.templatesNotice {
+  padding: 16px;
+  background: var(--bg-hover);
+  border-radius: 8px;
+  margin-bottom: 32px;
+  border-left: 4px solid var(--primary);
+  color: var(--text-muted);
+  font-size: 14px;
+}
+
+.templateCategory {
+  margin-bottom: 40px;
+}
+
+.categoryHeader {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 16px;
+  padding-bottom: 8px;
+  border-bottom: 1px solid var(--border);
+}
+
+.categoryIcon {
+  color: var(--text-muted);
+}
+
+.categoryTitle {
+  font-size: 18px;
+  font-weight: 600;
+  color: var(--text-main);
+  margin: 0;
+}
+
+.templateGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 16px;
+}
+
+.templateCard {
+  display: flex;
+  flex-direction: column;
+  padding: 20px;
+  background: var(--bg-main);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  transition: transform 0.2s, border-color 0.2s;
+}
+
+.templateCard:hover {
+  transform: translateY(-2px);
+  border-color: var(--text-muted);
+}
+
+.templateCardHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 16px;
+}
+
+.templateIconWrapper {
+  font-size: 24px;
+  width: 48px;
+  height: 48px;
+  background: var(--bg-hover);
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.templateTypeBadge {
+  font-size: 11px;
+  padding: 4px 8px;
+  background: rgba(46, 165, 255, 0.1);
+  color: var(--primary);
+  border-radius: 12px;
+  font-weight: 500;
+}
+
+.templateName {
+  font-size: 16px;
+  font-weight: 600;
+  color: var(--text-main);
+  margin: 0 0 8px 0;
+}
+
+.templateDesc {
+  font-size: 13px;
+  color: var(--text-muted);
+  margin: 0 0 20px 0;
+  line-height: 1.4;
+  flex: 1;
+}
+
+.useTemplateBtn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  width: 100%;
+  padding: 10px;
+  background: transparent;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  color: var(--text-main);
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.templateCard:hover .useTemplateBtn {
+  background: var(--primary);
+  border-color: var(--primary);
+  color: white;
+}

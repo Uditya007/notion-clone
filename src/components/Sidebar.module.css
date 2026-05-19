@@ -1,0 +1,252 @@
+.sidebar {
+  width: var(--sidebar-width);
+  height: 100vh;
+  background-color: var(--bg-sidebar);
+  border-right: 1px solid var(--border);
+  display: flex;
+  flex-direction: column;
+  transition: width 0.3s ease;
+  position: relative;
+  z-index: 10;
+  flex-shrink: 0;
+  color: var(--text-muted);
+  font-size: 14px;
+}
+
+.collapsedSidebar {
+  width: 0;
+  height: 100vh;
+  position: relative;
+}
+
+.expandBtn {
+  position: absolute;
+  top: 16px;
+  left: 16px;
+  padding: 4px;
+  border-radius: var(--radius);
+  color: var(--text-muted);
+  background: transparent;
+  z-index: 20;
+}
+
+.expandBtn:hover {
+  background-color: var(--bg-hover);
+  color: var(--text-main);
+}
+
+.header {
+  padding: 12px 16px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.workspaceInfo {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  cursor: pointer;
+  padding: 4px 8px;
+  margin-left: -8px;
+  border-radius: var(--radius);
+}
+
+.workspaceInfo:hover {
+  background-color: var(--bg-hover);
+}
+
+.workspaceIcon {
+  width: 20px;
+  height: 20px;
+  border-radius: 4px;
+  background-color: var(--primary);
+  color: white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.workspaceName {
+  font-weight: 500;
+  color: var(--text-main);
+}
+
+.collapseBtn {
+  opacity: 0;
+  padding: 4px;
+  border-radius: var(--radius);
+  transition: opacity 0.2s;
+}
+
+.sidebar:hover .collapseBtn {
+  opacity: 1;
+}
+
+.collapseBtn:hover {
+  background-color: var(--bg-hover);
+}
+
+.quickActions {
+  padding: 8px;
+  flex-shrink: 0;
+}
+
+.actionItem {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  width: 100%;
+  padding: 6px 8px;
+  border-radius: var(--radius);
+  color: var(--text-muted);
+  font-weight: 500;
+}
+
+.actionItem:hover {
+  background-color: var(--bg-hover);
+  color: var(--text-main);
+}
+
+.actionItemActive {
+  background-color: var(--bg-active);
+  color: var(--text-main);
+}
+
+.shortcut {
+  margin-left: auto;
+  font-size: 12px;
+  padding: 2px 4px;
+  border-radius: 4px;
+  background-color: var(--bg-active);
+  font-family: inherit;
+}
+
+.scrollArea {
+  flex: 1;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+}
+
+.pagesSection {
+  padding: 8px 0;
+}
+
+.sectionHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 4px 16px;
+  font-size: 12px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.addPageBtn {
+  opacity: 0;
+  padding: 2px;
+  border-radius: 4px;
+}
+
+.pagesSection:hover .addPageBtn {
+  opacity: 1;
+}
+
+.addPageBtn:hover {
+  background-color: var(--bg-hover);
+}
+
+.pageTree {
+  margin-top: 4px;
+}
+
+.pageTreeWrapper {
+  display: flex;
+  flex-direction: column;
+}
+
+.pageItem {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 16px;
+  color: var(--text-main);
+  font-weight: 500;
+  text-decoration: none;
+  cursor: pointer;
+  position: relative;
+  user-select: none;
+}
+
+.pageItem:hover {
+  background-color: var(--bg-hover);
+}
+
+.pageItem.active {
+  background-color: var(--bg-active);
+}
+
+.chevronWrapper {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 18px;
+  height: 18px;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+.chevronWrapper:hover {
+  background-color: var(--bg-active);
+}
+
+.chevron {
+  color: var(--text-muted);
+}
+
+.pageTitle {
+  flex: 1;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  font-size: 14px;
+}
+
+.pageActions {
+  display: none;
+  align-items: center;
+  gap: 4px;
+  margin-left: auto;
+}
+
+.pageItem:hover .pageActions {
+  display: flex;
+}
+
+.iconActionBtn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 2px;
+  border-radius: 4px;
+  color: var(--text-muted);
+}
+
+.iconActionBtn:hover {
+  background-color: var(--bg-active);
+  color: var(--text-main);
+}
+
+.nestedPages {
+  display: flex;
+  flex-direction: column;
+}
+
+.footer {
+  padding: 8px;
+  border-top: 1px solid var(--border);
+}

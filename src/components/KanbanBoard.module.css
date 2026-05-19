@@ -1,0 +1,141 @@
+.board {
+  display: flex;
+  gap: 16px;
+  overflow-x: auto;
+  padding-bottom: 16px;
+  min-height: 400px;
+  align-items: flex-start;
+}
+
+.column {
+  width: 260px;
+  flex-shrink: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.columnHeader {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 0;
+}
+
+.columnTitle {
+  font-weight: 600;
+  font-size: 14px;
+  color: var(--text-main);
+  padding: 2px 6px;
+  border-radius: 4px;
+}
+
+.columnTitle:hover {
+  background: var(--bg-hover);
+}
+
+.taskCount {
+  font-size: 12px;
+  color: var(--text-muted);
+  margin-right: auto;
+}
+
+.columnActionBtn {
+  color: var(--text-muted);
+  opacity: 0;
+  padding: 2px;
+  border-radius: 4px;
+}
+
+.columnHeader:hover .columnActionBtn {
+  opacity: 1;
+}
+
+.columnActionBtn:hover {
+  background: var(--bg-active);
+  color: var(--text-main);
+}
+
+.taskList {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  min-height: 100px; /* Allows dropping into empty list */
+}
+
+.taskCard {
+  background: var(--bg-main);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  padding: 10px;
+  box-shadow: var(--shadow-sm);
+  cursor: grab;
+  transition: box-shadow 0.2s, border-color 0.2s;
+}
+
+.taskCard:hover {
+  box-shadow: var(--shadow-md);
+}
+
+.taskCard:active {
+  cursor: grabbing;
+}
+
+.taskCard.dragging {
+  opacity: 0.5;
+}
+
+.taskTitle {
+  font-size: 14px;
+  color: var(--text-main);
+  margin-bottom: 8px;
+  line-height: 1.4;
+}
+
+.taskMeta {
+  display: flex;
+  align-items: center;
+}
+
+.tag {
+  font-size: 11px;
+  padding: 2px 6px;
+  border-radius: 4px;
+  background: rgba(46, 165, 255, 0.1);
+  color: var(--primary);
+  font-weight: 500;
+}
+
+.addTaskBtn {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 8px;
+  color: var(--text-muted);
+  font-size: 14px;
+  border-radius: 6px;
+  cursor: pointer;
+}
+
+.addTaskBtn:hover {
+  background: var(--bg-hover);
+  color: var(--text-main);
+}
+
+.addColumn {
+  width: 260px;
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 12px;
+  color: var(--text-muted);
+  font-size: 14px;
+  border-radius: 6px;
+  cursor: pointer;
+}
+
+.addColumn:hover {
+  background: var(--bg-hover);
+  color: var(--text-main);
+}
