@@ -123,7 +123,7 @@ export default function CalendarView() {
         
         <div className={styles.integrationNotice}>
           <div className={styles.noticeDot} />
-          <span>Synced with uditya@example.com</span>
+          <span>Synced with user@example.com</span>
         </div>
       </div>
 

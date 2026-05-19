@@ -45,7 +45,7 @@ export default function SearchModal() {
           <input 
             ref={inputRef}
             className={styles.searchInput}
-            placeholder="Search Uditya's Notion..."
+            placeholder="Search Workspace..."
             value={query}
             onChange={(e) => setQuery(e.target.value)}
           />

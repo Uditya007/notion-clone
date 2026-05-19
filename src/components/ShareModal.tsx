@@ -8,7 +8,7 @@ export default function ShareModal({ onClose }: { onClose: () => void }) {
   const [role, setRole] = useState('editor');
 
   const [members, setMembers] = useState([
-    { id: 1, email: 'uditya@example.com', name: 'Uditya (You)', role: 'owner', avatar: 'U' },
+    { id: 1, email: 'user@example.com', name: 'Me (You)', role: 'owner', avatar: 'M' },
     { id: 2, email: 'alex@example.com', name: 'Alex Chen', role: 'editor', avatar: 'A' },
     { id: 3, email: 'sarah@example.com', name: 'Sarah Smith', role: 'viewer', avatar: 'S' },
   ]);

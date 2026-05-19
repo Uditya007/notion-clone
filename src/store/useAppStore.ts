@@ -163,7 +163,7 @@ const initialState = {
   activePageId: initialPageId,
   rootPageIds: [initialPageId, 'inbox', 'calendar', 'tasks', 'automations', 'templates'],
   deletedPages: {},
-  workspaceName: "Uditya's Notion",
+  workspaceName: "My Workspace",
   databases: {},
   isSearchOpen: false,
   isSettingsOpen: false,
