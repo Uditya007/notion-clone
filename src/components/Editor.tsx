@@ -3,6 +3,10 @@ import { useEditor, EditorContent } from '@tiptap/react'
 import { BubbleMenu, FloatingMenu } from '@tiptap/react/menus'
 import StarterKit from '@tiptap/starter-kit'
 import Placeholder from '@tiptap/extension-placeholder'
+import TaskList from '@tiptap/extension-task-list'
+import TaskItem from '@tiptap/extension-task-item'
+import Underline from '@tiptap/extension-underline'
+import GlobalDragHandle from 'tiptap-extension-global-drag-handle'
 import styles from "./Editor.module.css";
 import { useEffect, useState } from "react";
 import { MoreHorizontal, Star, Clock, Sparkles, Check, X, LayoutGrid, FileText, Trash2 } from "lucide-react";
@@ -29,10 +33,19 @@ export default function Editor() {
 
   const [showAiMenu, setShowAiMenu] = useState(false);
   const [showShareModal, setShowShareModal] = useState(false);
+  const [saveStatus, setSaveStatus] = useState<'saved' | 'saving'>('saved');
+  const [saveTimeoutId, setSaveTimeoutId] = useState<NodeJS.Timeout | null>(null);
 
   const editor = useEditor({
     extensions: [
       StarterKit,
+      Underline,
+      TaskList,
+      TaskItem.configure({ nested: true }),
+      GlobalDragHandle.configure({
+        dragHandleWidth: 20,
+        scrollTreshold: 100,
+      }),
       Placeholder.configure({
         placeholder: "Type '/' for commands or start writing...",
       })
@@ -45,7 +58,12 @@ export default function Editor() {
     },
     onUpdate: ({ editor }) => {
       if (activePageId && activePage?.type === 'editor') {
+        setSaveStatus('saving');
         updatePageContent(activePageId, editor.getHTML());
+        
+        if (saveTimeoutId) clearTimeout(saveTimeoutId);
+        const timeout = setTimeout(() => setSaveStatus('saved'), 1000);
+        setSaveTimeoutId(timeout);
         
         // Detect /ai slash command
         const text = editor.getText();
@@ -143,6 +161,9 @@ export default function Editor() {
                 {user.name.charAt(0)}
               </div>
             ))}
+          </div>
+          <div className={styles.saveIndicator}>
+            {saveStatus === 'saving' ? 'Saving...' : 'Saved'}
           </div>
           <button className={styles.shareHeaderBtn} onClick={() => setShowShareModal(true)}>Share</button>
           <button className={styles.iconBtn} title="Page History"><Clock size={18} /></button>

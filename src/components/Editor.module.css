@@ -90,6 +90,13 @@
   background: var(--bg-hover);
 }
 
+.saveIndicator {
+  font-size: 12px;
+  color: var(--text-muted);
+  margin-right: 8px;
+  user-select: none;
+}
+
 .iconBtn {
   padding: 6px;
   border-radius: var(--radius);
