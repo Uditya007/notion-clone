@@ -32,7 +32,7 @@ export default function SearchModal() {
 
   if (!isSearchOpen) return null;
 
-  const filteredPages = Object.values(pages).filter(page => 
+  const filteredPages = Object.values(pages).filter((page: any) => 
     page.title.toLowerCase().includes(query.toLowerCase()) || 
     (page.content && page.content.toLowerCase().includes(query.toLowerCase()))
   );
@@ -59,7 +59,7 @@ export default function SearchModal() {
           ) : (
             <div className={styles.resultsList}>
               <div className={styles.resultsLabel}>Pages</div>
-              {filteredPages.map(page => (
+              {filteredPages.map((page: any) => (
                 <div 
                   key={page.id} 
                   className={styles.resultItem}

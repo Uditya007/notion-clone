@@ -9,7 +9,7 @@ import Placeholder from '@tiptap/extension-placeholder';
 export default function DatabaseRowModal({ dbId, rowId, onClose }: { dbId: string; rowId: string; onClose: () => void }) {
   const { databases, updateCell, updateRowContent } = useAppStore();
   const db = databases[dbId];
-  const row = db?.rows.find(r => r.id === rowId);
+  const row = db?.rows.find((r: any) => r.id === rowId);
   const titleCol = db?.columns[0];
   const properties = db?.columns.slice(1) || [];
 
@@ -47,7 +47,7 @@ export default function DatabaseRowModal({ dbId, rowId, onClose }: { dbId: strin
 
           {properties.length > 0 && (
             <div className={styles.properties}>
-              {properties.map(col => (
+              {properties.map((col: any) => (
                 <div key={col.id} className={styles.propertyRow}>
                   <div className={styles.propertyLabel}>{col.name}</div>
                   <div className={styles.propertyValue}>

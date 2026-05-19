@@ -13,13 +13,13 @@ export default function TrashView() {
     const thirtyDaysAgo = new Date();
     thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
     
-    const validPages = Object.values(deletedPages).filter(page => {
+    const validPages = Object.values(deletedPages).filter((page: any) => {
       const deletedAt = new Date(page.deletedAt);
       return deletedAt > thirtyDaysAgo;
     });
     
     // Sort by most recently deleted
-    validPages.sort((a, b) => new Date(b.deletedAt).getTime() - new Date(a.deletedAt).getTime());
+    validPages.sort((a: any, b: any) => new Date(b.deletedAt).getTime() - new Date(a.deletedAt).getTime());
     
     setPages(validPages);
   }, [deletedPages]);

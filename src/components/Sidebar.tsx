@@ -69,7 +69,7 @@ export default function Sidebar() {
 
         {expanded && page.children.length > 0 && (
           <div className={styles.nestedPages}>
-            {page.children.map(childId => (
+            {page.children.map((childId: any) => (
               <PageTreeItem key={childId} pageId={childId} level={level + 1} />
             ))}
           </div>
@@ -144,13 +144,13 @@ export default function Sidebar() {
 
       <div className={styles.scrollArea}>
         {/* Favorites Section */}
-        {Object.values(pages).some(p => p.isFavorite) && (
+        {Object.values(pages).some((p: any) => p.isFavorite) && (
           <div className={styles.pagesSection}>
             <div className={styles.sectionHeader}>
               <span>Favorites</span>
             </div>
             <div className={styles.pageTree}>
-              {Object.values(pages).filter(p => p.isFavorite).map(page => (
+              {Object.values(pages).filter((p: any) => p.isFavorite).map((page: any) => (
                 <PageTreeItem key={`fav-${page.id}`} pageId={page.id} />
               ))}
             </div>
@@ -166,7 +166,7 @@ export default function Sidebar() {
           </div>
           
           <div className={styles.pageTree}>
-            {rootPageIds.filter(id => !['inbox', 'calendar', 'tasks', 'automations', 'templates'].includes(id)).map(pageId => (
+            {rootPageIds.filter((id: any) => !['inbox', 'calendar', 'tasks', 'automations', 'templates'].includes(id)).map((pageId: any) => (
               <PageTreeItem key={pageId} pageId={pageId} />
             ))}
           </div>

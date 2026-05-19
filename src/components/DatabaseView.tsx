@@ -20,16 +20,16 @@ export default function DatabaseView({ dbId }: { dbId: string }) {
       <table className={styles.table}>
         <thead>
           <tr>
-            {db.columns.map(col => (
+            {db.columns.map((col: any) => (
               <th key={col.id} className={styles.th}>{col.name}</th>
             ))}
             <th className={styles.th} style={{ width: 40 }}><Plus size={14} /></th>
           </tr>
         </thead>
         <tbody>
-          {db.rows.map(row => (
+          {db.rows.map((row: any) => (
             <tr key={row.id}>
-              {db.columns.map((col, idx) => (
+              {db.columns.map((col: any, idx: number) => (
                 <td key={col.id} className={`${styles.td} ${idx === 0 ? styles.titleCell : ''}`}>
                   <input
                     className={styles.cellInput}
@@ -59,26 +59,26 @@ export default function DatabaseView({ dbId }: { dbId: string }) {
 
   const renderBoard = () => {
     // Basic board: group by a select column, or if none, put all in one column
-    const selectCol = db.columns.find(c => c.type === 'select' || c.type === 'multiselect');
+    const selectCol = db.columns.find((c: any) => c.type === 'select' || c.type === 'multiselect');
     const groups = selectCol?.options || ['No Status'];
     
     return (
       <div className={styles.boardWrapper}>
-        {groups.map(group => (
+        {groups.map((group: any) => (
           <div key={group} className={styles.boardColumn}>
             <div className={styles.boardColHeader}>
               <span className={styles.pill}>{group}</span>
-              <span>{db.rows.filter(r => (r.cells[selectCol?.id || ''] || []).includes(group) || (!selectCol && group === 'No Status')).length}</span>
+              <span>{db.rows.filter((r: any) => (r.cells[selectCol?.id || ''] || []).includes(group) || (!selectCol && group === 'No Status')).length}</span>
             </div>
             <div className={styles.boardCards}>
               {db.rows
-                .filter(r => {
+                .filter((r: any) => {
                   if (!selectCol) return group === 'No Status';
                   const val = r.cells[selectCol.id];
                   if (Array.isArray(val)) return val.includes(group);
                   return val === group;
                 })
-                .map(row => (
+                .map((row: any) => (
                   <div key={row.id} className={styles.boardCard} onClick={() => setSelectedRowId(row.id)}>
                     <div className={styles.cardTitle}>{row.cells[db.columns[0]?.id] || 'Untitled'}</div>
                   </div>
@@ -93,7 +93,7 @@ export default function DatabaseView({ dbId }: { dbId: string }) {
 
   const renderGallery = () => (
     <div className={styles.galleryWrapper}>
-      {db.rows.map(row => (
+      {db.rows.map((row: any) => (
         <div key={row.id} className={styles.galleryCard} onClick={() => setSelectedRowId(row.id)}>
           <div className={styles.galleryCover}>
             <LayoutGrid size={24} opacity={0.2} />

@@ -1,0 +1,29 @@
+src/components/DatabaseView.tsx(23,29): error TS7006: Parameter 'col' implicitly has an 'any' type.
+src/components/DatabaseView.tsx(30,24): error TS7006: Parameter 'row' implicitly has an 'any' type.
+src/components/DatabaseView.tsx(32,32): error TS7006: Parameter 'col' implicitly has an 'any' type.
+src/components/DatabaseView.tsx(32,37): error TS7006: Parameter 'idx' implicitly has an 'any' type.
+src/components/DatabaseView.tsx(62,39): error TS7006: Parameter 'c' implicitly has an 'any' type.
+src/components/DatabaseView.tsx(67,21): error TS7006: Parameter 'group' implicitly has an 'any' type.
+src/components/DatabaseView.tsx(71,37): error TS7006: Parameter 'r' implicitly has an 'any' type.
+src/components/DatabaseView.tsx(75,25): error TS7006: Parameter 'r' implicitly has an 'any' type.
+src/components/DatabaseView.tsx(81,22): error TS7006: Parameter 'row' implicitly has an 'any' type.
+src/components/DatabaseView.tsx(96,20): error TS7006: Parameter 'row' implicitly has an 'any' type.
+src/components/SearchModal.tsx(36,5): error TS18046: 'page' is of type 'unknown'.
+src/components/SearchModal.tsx(37,6): error TS18046: 'page' is of type 'unknown'.
+src/components/SearchModal.tsx(37,22): error TS18046: 'page' is of type 'unknown'.
+src/components/SearchModal.tsx(64,24): error TS18046: 'page' is of type 'unknown'.
+src/components/SearchModal.tsx(66,48): error TS18046: 'page' is of type 'unknown'.
+src/components/SearchModal.tsx(68,54): error TS18046: 'page' is of type 'unknown'.
+src/components/SearchModal.tsx(69,55): error TS18046: 'page' is of type 'unknown'.
+src/components/Sidebar.tsx(72,32): error TS7006: Parameter 'childId' implicitly has an 'any' type.
+src/components/Sidebar.tsx(147,41): error TS18046: 'p' is of type 'unknown'.
+src/components/Sidebar.tsx(153,49): error TS18046: 'p' is of type 'unknown'.
+src/components/Sidebar.tsx(154,43): error TS18046: 'page' is of type 'unknown'.
+src/components/Sidebar.tsx(154,62): error TS18046: 'page' is of type 'unknown'.
+src/components/Sidebar.tsx(169,33): error TS7006: Parameter 'id' implicitly has an 'any' type.
+src/components/Sidebar.tsx(169,117): error TS7006: Parameter 'pageId' implicitly has an 'any' type.
+src/components/TrashView.tsx(17,34): error TS18046: 'page' is of type 'unknown'.
+src/components/TrashView.tsx(22,40): error TS18046: 'b' is of type 'unknown'.
+src/components/TrashView.tsx(22,74): error TS18046: 'a' is of type 'unknown'.
+src/store/useAppStore.ts(200,14): error TS7022: 'useAppStore' implicitly has type 'any' because it does not have a type annotation and is referenced directly or indirectly in its own initializer.
+src/store/useAppStore.ts(594,3): error TS7023: 'setActiveConversation' implicitly has return type 'any' because it does not have a return type annotation and is referenced directly or indirectly in one of its return expressions.

@@ -591,10 +591,10 @@ export const useAppStore = create<AppState>()(
     };
   }),
 
-  setActiveConversation: (id) => set({ 
+  setActiveConversation: (id) => set((state) => ({ 
     activeConversationId: id, 
-    activePageId: id ? null : useAppStore.getState().activePageId 
-  }),
+    activePageId: id ? null : state.activePageId 
+  })),
 }), {
   name: 'notion-clone-storage',
 }));

@@ -89,7 +89,7 @@ export default function AIChatView() {
       </div>
 
       <div className={styles.messages}>
-        {conv.messages.map((msg) => (
+        {conv.messages.map((msg: any) => (
           <div key={msg.id} className={`${styles.messageRow} ${msg.role === 'user' ? styles.userRow : styles.assistantRow}`}>
             {msg.role === 'user' ? (
               <div className={styles.userBubble}>{msg.content}</div>
