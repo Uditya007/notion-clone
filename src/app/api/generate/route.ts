@@ -1,11 +1,14 @@
 import { streamText } from 'ai';
 import { createGoogleGenerativeAI } from '@ai-sdk/google';
 
-// Set runtime to edge for better streaming performance
-export const runtime = 'edge';
+export const dynamic = 'force-dynamic';
 
+// Use default Node.js runtime for 100% stable environment variable loading in local dev
 export async function POST(req: Request) {
   const { prompt, context, command } = await req.json();
+
+  console.log("[API/GENERATE] Received command:", command);
+  console.log("[API/GENERATE] GOOGLE_GENERATIVE_AI_API_KEY exists in process.env:", !!process.env.GOOGLE_GENERATIVE_AI_API_KEY);
 
   // If no API key is provided, gracefully fallback to the Mock stream
   if (!process.env.GOOGLE_GENERATIVE_AI_API_KEY) {
@@ -51,15 +54,31 @@ export async function POST(req: Request) {
     systemPrompt += "\n\nYour task is to rewrite the text in a friendly, casual, conversational tone.";
   }
 
-  const google = createGoogleGenerativeAI({
-    apiKey: process.env.GOOGLE_GENERATIVE_AI_API_KEY
-  });
+  try {
+    const google = createGoogleGenerativeAI({
+      apiKey: process.env.GOOGLE_GENERATIVE_AI_API_KEY
+    });
 
-  const result = await streamText({
-    model: google('gemini-2.5-flash'), // Extremely fast and free tier available
-    system: systemPrompt,
-    prompt: prompt || "Execute the requested command on the document context.",
-  });
+    console.log("[API/GENERATE] Calling streamText with gemini-2.5-flash...");
+    const result = await streamText({
+      model: google('gemini-2.5-flash'), // Extremely fast and free tier available
+      system: systemPrompt,
+      prompt: prompt || "Execute the requested command on the document context.",
+    });
 
-  return result.toTextStreamResponse();
+    console.log("[API/GENERATE] streamText call successful, returning response stream.");
+    return result.toTextStreamResponse({
+      headers: {
+        'Cache-Control': 'no-cache, no-transform',
+        'Connection': 'keep-alive',
+      }
+    });
+  } catch (error: any) {
+    console.error("[API/GENERATE] Error during AI generation:", error);
+    return new Response(
+      JSON.stringify({ error: error.message || "An error occurred during AI generation." }),
+      { status: 500, headers: { 'Content-Type': 'application/json' } }
+    );
+  }
 }
+
