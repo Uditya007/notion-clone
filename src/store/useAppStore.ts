@@ -44,6 +44,13 @@ export type ChatMessage = {
   timestamp: string;
 };
 
+export type Task = {
+  id: string;
+  title: string;
+  due: string;
+  completed: boolean;
+};
+
 export type Conversation = {
   id: string;
   title: string;
@@ -101,6 +108,12 @@ type AppState = {
   addMessage: (convId: string, message: ChatMessage) => void;
   deleteConversation: (convId: string) => void;
   setActiveConversation: (id: string | null) => void;
+
+  // Tasks actions
+  tasks: Task[];
+  addTask: (title: string, due?: string) => void;
+  toggleTask: (id: string) => void;
+  deleteTask: (id: string) => void;
 };
 
 const initialPageId = uuidv4();
@@ -195,7 +208,13 @@ const initialState = {
   isSearchOpen: false,
   isSettingsOpen: false,
   isAIPanelOpen: false,
-} as Pick<AppState, 'pages' | 'activePageId' | 'rootPageIds' | 'deletedPages' | 'workspaceName' | 'databases' | 'conversations' | 'activeConversationId' | 'isSearchOpen' | 'isSettingsOpen' | 'isAIPanelOpen'>;
+  tasks: [
+    { id: 'task-1', title: 'Finish AI integration', due: 'Today', completed: false },
+    { id: 'task-2', title: 'Update homepage copy', due: 'Tomorrow', completed: false },
+    { id: 'task-3', title: 'Review pull requests', due: 'Today', completed: true },
+    { id: 'task-4', title: 'Fix navigation bug', due: 'Overdue', completed: false },
+  ],
+} as Pick<AppState, 'pages' | 'activePageId' | 'rootPageIds' | 'deletedPages' | 'workspaceName' | 'databases' | 'conversations' | 'activeConversationId' | 'isSearchOpen' | 'isSettingsOpen' | 'isAIPanelOpen' | 'tasks'>;
 
 export const useAppStore = create<AppState>()(
   persist(
@@ -594,6 +613,24 @@ export const useAppStore = create<AppState>()(
   setActiveConversation: (id) => set((state) => ({ 
     activeConversationId: id, 
     activePageId: id ? null : state.activePageId 
+  })),
+
+  addTask: (title, due = 'No due date') => set((state) => {
+    const newTask: Task = {
+      id: uuidv4(),
+      title,
+      due,
+      completed: false,
+    };
+    return { tasks: [...state.tasks, newTask] };
+  }),
+
+  toggleTask: (id) => set((state) => ({
+    tasks: state.tasks.map(t => t.id === id ? { ...t, completed: !t.completed } : t)
+  })),
+
+  deleteTask: (id) => set((state) => ({
+    tasks: state.tasks.filter(t => t.id !== id)
   })),
 }), {
   name: 'notion-clone-storage',

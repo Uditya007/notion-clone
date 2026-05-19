@@ -6,7 +6,7 @@ import { useCompletion } from '@ai-sdk/react';
 import { v4 as uuidv4 } from 'uuid';
 
 export default function AIChatView() {
-  const { conversations, activeConversationId, setActiveConversation, addMessage } = useAppStore();
+  const { conversations, activeConversationId, setActiveConversation, addMessage, addTask } = useAppStore();
   const conv = activeConversationId ? conversations[activeConversationId] : null;
   
   const messagesEndRef = useRef<HTMLDivElement>(null);
@@ -15,12 +15,49 @@ export default function AIChatView() {
   const { complete, completion, isLoading, setCompletion } = useCompletion({
     api: '/api/generate',
     streamProtocol: 'text',
-    onFinish: (prompt, result) => {
+    onFinish: async (prompt, result) => {
+      // 1. Check for TASK command
+      const taskMatch = result.match(/\[CREATE_TASK:\s*(.*?)\s*\|\s*(.*?)\s*\]/);
+      if (taskMatch) {
+        const title = taskMatch[1];
+        const due = taskMatch[2];
+        addTask(title, due);
+      }
+
+      // 2. Check for EVENT command
+      const eventMatch = result.match(/\[CREATE_EVENT:\s*(.*?)\s*\|\s*(.*?)\s*\|\s*(.*?)\s*\]/);
+      if (eventMatch) {
+        const title = eventMatch[1];
+        const start = eventMatch[2];
+        const end = eventMatch[3];
+        
+        // POST to /api/calendar/events to create event!
+        try {
+          const res = await fetch('/api/calendar/events', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              summary: title,
+              start: { dateTime: start },
+              end: { dateTime: end },
+            }),
+          });
+          if (!res.ok) {
+            console.warn("Could not create calendar event - Google Calendar not connected.");
+          }
+        } catch (e) {
+          console.error("Error creating event:", e);
+        }
+      }
+
+      // 3. Clean tags before adding message to state
+      let cleanContent = result.replace(/\[CREATE_TASK:.*?\]/g, '').replace(/\[CREATE_EVENT:.*?\]/g, '').trim();
+
       if (activeConversationId) {
         addMessage(activeConversationId, {
           id: uuidv4(),
           role: 'assistant',
-          content: result,
+          content: cleanContent,
           timestamp: new Date().toISOString()
         });
       }
@@ -66,9 +103,11 @@ export default function AIChatView() {
   };
 
   const renderMarkdown = (text: string) => {
+    // Strip command tags
+    let cleanText = text.replace(/\[CREATE_TASK:.*?\]/g, '').replace(/\[CREATE_EVENT:.*?\]/g, '').trim();
+
     // A very basic markdown renderer for bold and codeblocks
-    // In a real app, use react-markdown
-    let html = text.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
+    let html = cleanText.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
     html = html.replace(/```([\s\S]*?)```/g, '<pre><code>$1</code></pre>');
     return <div dangerouslySetInnerHTML={{ __html: html }} />;
   };

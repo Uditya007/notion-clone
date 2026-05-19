@@ -54,6 +54,23 @@ export async function POST(req: Request) {
     systemPrompt += "\n\nYour task is to rewrite the text in a friendly, casual, conversational tone.";
   }
 
+  // Inject current date & time so Gemini can parse calendar requests relative to now
+  const now = new Date();
+  systemPrompt += `\n\nCurrent Time Context:\n- The current date/time is: ${now.toString()}\n- The current UTC ISO string is: ${now.toISOString()}\n- Format dates relative to this time.`;
+
+  systemPrompt += `\n\nTask & Event Creation Capabilities:
+If the user asks you to create a task, todo, reminder, or schedule a meeting, you MUST execute the action by appending a special, machine-readable command tag at the very end of your response text.
+Guidelines:
+1. For creating a Task (Todo):
+   Format: [CREATE_TASK: Title | Due date/text]
+   Example: "I've added the task for you! [CREATE_TASK: Finish math assignment | Today]"
+2. For scheduling a Meeting or Event:
+   Format: [CREATE_EVENT: Event Title | Start DateTime (ISO 8601 string) | End DateTime (ISO 8601 string)]
+   IMPORTANT: Always construct valid ISO 8601 datetime strings in local or UTC timezone (e.g. 2026-05-21T16:00:00+05:30) for the Start and End times. Make meetings 1 hour long by default if not specified.
+   Example: "Meeting scheduled! [CREATE_EVENT: Project Review | 2026-05-21T14:00:00+05:30 | 2026-05-21T15:00:00+05:30]"
+
+Always be extremely polite and helpful. If you execute a task or event command, explain briefly to the user that you did so.`;
+
   try {
     const google = createGoogleGenerativeAI({
       apiKey: process.env.GOOGLE_GENERATIVE_AI_API_KEY

@@ -2,25 +2,16 @@
 import styles from './Views.module.css';
 import { CheckSquare, Plus, Clock } from 'lucide-react';
 import { useState } from 'react';
-import { v4 as uuidv4 } from 'uuid';
+import { useAppStore } from '@/store/useAppStore';
 
 export default function TasksView() {
-  const [tasks, setTasks] = useState([
-    { id: uuidv4(), title: 'Finish AI integration', due: 'Today', completed: false },
-    { id: uuidv4(), title: 'Update homepage copy', due: 'Tomorrow', completed: false },
-    { id: uuidv4(), title: 'Review pull requests', due: 'Today', completed: true },
-    { id: uuidv4(), title: 'Fix navigation bug', due: 'Overdue', completed: false },
-  ]);
+  const { tasks, addTask, toggleTask } = useAppStore();
   const [isAdding, setIsAdding] = useState(false);
   const [newTaskTitle, setNewTaskTitle] = useState('');
 
-  const toggleTask = (id: string) => {
-    setTasks(tasks.map(t => t.id === id ? { ...t, completed: !t.completed } : t));
-  };
-
   const handleAddSubmit = (e: React.KeyboardEvent<HTMLInputElement>) => {
     if (e.key === 'Enter' && newTaskTitle.trim()) {
-      setTasks([...tasks, { id: uuidv4(), title: newTaskTitle.trim(), due: 'No due date', completed: false }]);
+      addTask(newTaskTitle.trim(), 'No due date');
       setNewTaskTitle('');
       setIsAdding(false);
     } else if (e.key === 'Escape') {
@@ -55,7 +46,7 @@ export default function TasksView() {
               onKeyDown={handleAddSubmit}
               onBlur={() => {
                 if (newTaskTitle.trim()) {
-                  setTasks([...tasks, { id: uuidv4(), title: newTaskTitle.trim(), due: 'No due date', completed: false }]);
+                  addTask(newTaskTitle.trim(), 'No due date');
                 }
                 setIsAdding(false);
                 setNewTaskTitle('');
