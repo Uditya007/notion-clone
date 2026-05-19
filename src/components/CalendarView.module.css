@@ -430,3 +430,97 @@
   font-size: 12px;
   color: var(--text-muted);
 }
+
+/* Mobile responsive styles */
+@media (max-width: 768px) {
+  .viewContainer {
+    padding: 16px !important;
+  }
+
+  .viewHeader {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 16px;
+  }
+
+  .viewTitleWrapper h2 {
+    font-size: 22px !important;
+  }
+
+  .headerControls {
+    width: 100%;
+    justify-content: space-between;
+  }
+
+  .calendarToolbar {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 16px;
+  }
+
+  .dateNav {
+    width: 100%;
+    justify-content: space-between;
+  }
+
+  .currentMonthLabel {
+    font-size: 15px !important;
+    margin-left: 4px !important;
+  }
+
+  .integrationNotice {
+    width: 100%;
+    justify-content: center;
+  }
+
+  /* Month Grid Adjustments */
+  .monthGrid {
+    grid-template-columns: repeat(7, 1fr) !important;
+  }
+
+  .weekdayHeader {
+    padding: 6px 2px !important;
+    font-size: 10px !important;
+  }
+
+  .dayCell {
+    min-height: 70px !important;
+    padding: 2px !important;
+  }
+
+  .dayCellEmpty {
+    min-height: 70px !important;
+  }
+
+  .dayNumber {
+    font-size: 10px !important;
+    margin-bottom: 2px !important;
+    width: 18px !important;
+    height: 18px !important;
+  }
+
+  .eventChip {
+    font-size: 8px !important;
+    padding: 1px 2px !important;
+    border-left-width: 2px !important;
+  }
+
+  .eventChipTime {
+    display: none !important; /* Hide time to save space on mobile month view */
+  }
+
+  /* Week Grid Scrollable */
+  .scrollWrapper {
+    height: 450px !important;
+  }
+
+  .weekGrid {
+    overflow-x: auto;
+    width: 100%;
+  }
+
+  .dayColumn {
+    min-width: 80px !important;
+  }
+}
+

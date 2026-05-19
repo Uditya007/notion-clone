@@ -31,6 +31,14 @@ export default function Sidebar() {
     addPage(parentId);
   };
 
+  const handlePageSelect = (pageId: string) => {
+    setActivePage(pageId);
+    // Auto-collapse sidebar on mobile when a page is selected
+    if (window.innerWidth <= 768) {
+      setIsCollapsed(true);
+    }
+  };
+
   const PageTreeItem = ({ pageId, level = 0 }: { pageId: string, level?: number }) => {
     const page = pages[pageId];
     const [expanded, setExpanded] = useState(true);
@@ -42,7 +50,7 @@ export default function Sidebar() {
       <div className={styles.pageTreeWrapper} style={{ paddingLeft: level === 0 ? 0 : 16 }}>
         <div 
           className={`${styles.pageItem} ${isActive ? styles.active : ''}`}
-          onClick={() => setActivePage(pageId)}
+          onClick={() => handlePageSelect(pageId)}
         >
           <div 
             className={styles.chevronWrapper} 
@@ -89,96 +97,102 @@ export default function Sidebar() {
   }
 
   return (
-    <aside className={styles.sidebar}>
-      <div className={styles.header}>
-        <div className={styles.workspaceInfo}>
-          <div className={styles.workspaceIcon}>{workspaceName.charAt(0).toUpperCase()}</div>
-          <span className={styles.workspaceName}>{workspaceName}</span>
+    <>
+      <div className={styles.mobileOverlay} onClick={() => setIsCollapsed(true)} />
+      <aside className={styles.sidebar}>
+        <div className={styles.header}>
+          <div className={styles.workspaceInfo}>
+            <div className={styles.workspaceIcon}>{workspaceName.charAt(0).toUpperCase()}</div>
+            <span className={styles.workspaceName}>{workspaceName}</span>
+          </div>
+          <button onClick={() => setIsCollapsed(true)} className={styles.collapseBtn}>
+            <PanelLeftClose size={18} />
+          </button>
         </div>
-        <button onClick={() => setIsCollapsed(true)} className={styles.collapseBtn}>
-          <PanelLeftClose size={18} />
-        </button>
-      </div>
 
-      <div className={styles.quickActions}>
-        <button className={styles.actionItem} onClick={() => setSearchOpen(true)}>
-          <Search size={16} />
-          <span>Search</span>
-          <kbd className={styles.shortcut}>⌘K</kbd>
-        </button>
-        <button className={`${styles.actionItem} ${isAIPanelOpen ? styles.actionItemActive : ''}`} onClick={() => setAIPanelOpen(!isAIPanelOpen)}>
-          <Sparkles size={16} />
-          <span>Clearspace AI</span>
-        </button>
-        <button className={styles.actionItem} onClick={() => setSettingsOpen(true)}>
-          <Settings size={16} />
-          <span>Settings</span>
-        </button>
-        <button className={`${styles.actionItem} ${activePageId === 'inbox' ? styles.actionItemActive : ''}`} onClick={() => setActivePage('inbox')}>
-          <div style={{ position: 'relative', display: 'flex', alignItems: 'center' }}>
-            <Inbox size={16} />
-            <div style={{ position: 'absolute', bottom: -2, right: -2, width: 8, height: 8, borderRadius: '50%', backgroundColor: session ? '#10b981' : '#a1a1aa', border: '2px solid var(--bg-sidebar)' }} />
-          </div>
-          <span>Inbox</span>
-        </button>
-        <button className={`${styles.actionItem} ${activePageId === 'tasks' ? styles.actionItemActive : ''}`} onClick={() => setActivePage('tasks')}>
-          <CheckSquare size={16} />
-          <span>My Tasks</span>
-        </button>
-        <button className={`${styles.actionItem} ${activePageId === 'calendar' ? styles.actionItemActive : ''}`} onClick={() => setActivePage('calendar')}>
-          <div style={{ position: 'relative', display: 'flex', alignItems: 'center' }}>
-            <Calendar size={16} />
-            <div style={{ position: 'absolute', bottom: -2, right: -2, width: 8, height: 8, borderRadius: '50%', backgroundColor: session ? '#10b981' : '#a1a1aa', border: '2px solid var(--bg-sidebar)' }} />
-          </div>
-          <span>Google Calendar</span>
-        </button>
-        <button className={`${styles.actionItem} ${activePageId === 'automations' ? styles.actionItemActive : ''}`} onClick={() => setActivePage('automations')}>
-          <Zap size={16} />
-          <span>Automations</span>
-        </button>
-        <button className={`${styles.actionItem} ${activePageId === 'templates' ? styles.actionItemActive : ''}`} onClick={() => setActivePage('templates')}>
-          <Copy size={16} />
-          <span>Templates</span>
-        </button>
-      </div>
+        <div className={styles.quickActions}>
+          <button className={styles.actionItem} onClick={() => setSearchOpen(true)}>
+            <Search size={16} />
+            <span>Search</span>
+            <kbd className={styles.shortcut}>⌘K</kbd>
+          </button>
+          <button className={`${styles.actionItem} ${isAIPanelOpen ? styles.actionItemActive : ''}`} onClick={() => {
+            setAIPanelOpen(!isAIPanelOpen);
+            if (window.innerWidth <= 768) setIsCollapsed(true);
+          }}>
+            <Sparkles size={16} />
+            <span>Clearspace AI</span>
+          </button>
+          <button className={styles.actionItem} onClick={() => setSearchOpen(true)}>
+            <Settings size={16} />
+            <span>Settings</span>
+          </button>
+          <button className={`${styles.actionItem} ${activePageId === 'inbox' ? styles.actionItemActive : ''}`} onClick={() => handlePageSelect('inbox')}>
+            <div style={{ position: 'relative', display: 'flex', alignItems: 'center' }}>
+              <Inbox size={16} />
+              <div style={{ position: 'absolute', bottom: -2, right: -2, width: 8, height: 8, borderRadius: '50%', backgroundColor: session ? '#10b981' : '#a1a1aa', border: '2px solid var(--bg-sidebar)' }} />
+            </div>
+            <span>Inbox</span>
+          </button>
+          <button className={`${styles.actionItem} ${activePageId === 'tasks' ? styles.actionItemActive : ''}`} onClick={() => handlePageSelect('tasks')}>
+            <CheckSquare size={16} />
+            <span>My Tasks</span>
+          </button>
+          <button className={`${styles.actionItem} ${activePageId === 'calendar' ? styles.actionItemActive : ''}`} onClick={() => handlePageSelect('calendar')}>
+            <div style={{ position: 'relative', display: 'flex', alignItems: 'center' }}>
+              <Calendar size={16} />
+              <div style={{ position: 'absolute', bottom: -2, right: -2, width: 8, height: 8, borderRadius: '50%', backgroundColor: session ? '#10b981' : '#a1a1aa', border: '2px solid var(--bg-sidebar)' }} />
+            </div>
+            <span>Google Calendar</span>
+          </button>
+          <button className={`${styles.actionItem} ${activePageId === 'automations' ? styles.actionItemActive : ''}`} onClick={() => handlePageSelect('automations')}>
+            <Zap size={16} />
+            <span>Automations</span>
+          </button>
+          <button className={`${styles.actionItem} ${activePageId === 'templates' ? styles.actionItemActive : ''}`} onClick={() => handlePageSelect('templates')}>
+            <Copy size={16} />
+            <span>Templates</span>
+          </button>
+        </div>
 
-      <div className={styles.scrollArea}>
-        {/* Favorites Section */}
-        {Object.values(pages).some((p: any) => p.isFavorite) && (
+        <div className={styles.scrollArea}>
+          {/* Favorites Section */}
+          {Object.values(pages).some((p: any) => p.isFavorite) && (
+            <div className={styles.pagesSection}>
+              <div className={styles.sectionHeader}>
+                <span>Favorites</span>
+              </div>
+              <div className={styles.pageTree}>
+                {Object.values(pages).filter((p: any) => p.isFavorite).map((page: any) => (
+                  <PageTreeItem key={`fav-${page.id}`} pageId={page.id} />
+                ))}
+              </div>
+            </div>
+          )}
+
           <div className={styles.pagesSection}>
             <div className={styles.sectionHeader}>
-              <span>Favorites</span>
+              <span>Private</span>
+              <button className={styles.addPageBtn} onClick={(e) => handleAddPage(e, null)}>
+                <Plus size={16} />
+              </button>
             </div>
+            
             <div className={styles.pageTree}>
-              {Object.values(pages).filter((p: any) => p.isFavorite).map((page: any) => (
-                <PageTreeItem key={`fav-${page.id}`} pageId={page.id} />
+              {rootPageIds.filter((id: any) => !['inbox', 'calendar', 'tasks', 'automations', 'templates'].includes(id)).map((pageId: any) => (
+                <PageTreeItem key={pageId} pageId={pageId} />
               ))}
             </div>
           </div>
-        )}
-
-        <div className={styles.pagesSection}>
-          <div className={styles.sectionHeader}>
-            <span>Private</span>
-            <button className={styles.addPageBtn} onClick={(e) => handleAddPage(e, null)}>
-              <Plus size={16} />
-            </button>
-          </div>
-          
-          <div className={styles.pageTree}>
-            {rootPageIds.filter((id: any) => !['inbox', 'calendar', 'tasks', 'automations', 'templates'].includes(id)).map((pageId: any) => (
-              <PageTreeItem key={pageId} pageId={pageId} />
-            ))}
-          </div>
         </div>
-      </div>
 
-      <div className={styles.footer}>
-        <button className={`${styles.actionItem} ${activePageId === 'trash' ? styles.actionItemActive : ''}`} onClick={() => setActivePage('trash')}>
-          <Trash2 size={16} />
-          <span>Trash</span>
-        </button>
-      </div>
-    </aside>
+        <div className={styles.footer}>
+          <button className={`${styles.actionItem} ${activePageId === 'trash' ? styles.actionItemActive : ''}`} onClick={() => handlePageSelect('trash')}>
+            <Trash2 size={16} />
+            <span>Trash</span>
+          </button>
+        </div>
+      </aside>
+    </>
   );
 }

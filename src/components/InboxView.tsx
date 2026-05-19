@@ -152,7 +152,7 @@ export default function InboxView() {
   }
 
   return (
-    <div className={styles.container}>
+    <div className={`${styles.container} ${selectedEmail ? styles.hasSelectedEmail : ''}`}>
       <div className={styles.leftPanel}>
         <div className={styles.toolbar}>
           <button className={styles.composeBtn} onClick={() => setIsComposing(true)}>
@@ -201,17 +201,23 @@ export default function InboxView() {
             <p>Select an email to read</p>
           </div>
         ) : (
-          <div className={styles.emailDetail}>
-            <div className={styles.detailHeader}>
-              <div className={styles.detailSubject}>{selectedEmail.subject}</div>
-              <div className={styles.detailMeta}>
-                <div>
-                  <div className={styles.detailSender}>{selectedEmail.from}</div>
-                  <div style={{ fontSize: '12px', color: 'var(--text-muted)', marginTop: '4px' }}>to me</div>
+            <div className={styles.emailDetail}>
+              <div className={styles.detailHeader}>
+                <button 
+                  className={styles.mobileBackBtn} 
+                  onClick={() => setSelectedEmail(null)}
+                >
+                  ← Back to Inbox
+                </button>
+                <div className={styles.detailSubject}>{selectedEmail.subject}</div>
+                <div className={styles.detailMeta}>
+                  <div>
+                    <div className={styles.detailSender}>{selectedEmail.from}</div>
+                    <div style={{ fontSize: '12px', color: 'var(--text-muted)', marginTop: '4px' }}>to me</div>
+                  </div>
+                  <div className={styles.detailTime}>{new Date(selectedEmail.date).toLocaleString()}</div>
                 </div>
-                <div className={styles.detailTime}>{new Date(selectedEmail.date).toLocaleString()}</div>
               </div>
-            </div>
             
             <div className={styles.detailBody} dangerouslySetInnerHTML={{ __html: emailBody }} />
             

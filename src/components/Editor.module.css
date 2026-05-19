@@ -525,3 +525,43 @@
   border-radius: 4px;
   font-size: 14px;
 }
+
+/* Mobile responsive styles */
+@media (max-width: 768px) {
+  .header {
+    padding: 12px 16px 12px 60px !important; /* Avoid overlaying the floating menu btn */
+  }
+
+  .contentWrapper {
+    padding: 0 16px 60px !important;
+  }
+
+  .titleInput {
+    font-size: 28px !important;
+  }
+
+  .coverImage {
+    height: 150px !important;
+  }
+
+  .viewToggles {
+    overflow-x: auto;
+    white-space: nowrap;
+    padding-bottom: 8px;
+    gap: 4px;
+  }
+
+  .viewToggleBtn {
+    font-size: 12px;
+    padding: 4px 6px;
+  }
+
+  .breadcrumbs {
+    font-size: 12px;
+  }
+
+  .presenceAvatars {
+    display: none; /* Hide presence on tiny screens to save space */
+  }
+}
+

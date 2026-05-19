@@ -138,3 +138,43 @@
   font-size: 11px;
   color: var(--text-muted);
 }
+
+/* Mobile responsive styles */
+@media (max-width: 768px) {
+  .container {
+    position: fixed;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    z-index: 1000;
+    box-shadow: -10px 10px 30px rgba(0, 0, 0, 0.15);
+    background-color: var(--bg-sidebar);
+    width: 280px !important;
+    transform: translateX(0);
+    transition: transform 0.3s ease;
+  }
+
+  .collapsed {
+    transform: translateX(100%);
+    width: 0 !important;
+    border-left: none;
+  }
+
+  .mobileOverlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: rgba(15, 23, 42, 0.3);
+    backdrop-filter: blur(2px);
+    z-index: 999;
+    animation: fadeIn 0.2s ease;
+  }
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+

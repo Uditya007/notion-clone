@@ -774,3 +774,106 @@
   border-color: var(--primary);
   color: white;
 }
+
+/* Mobile responsive styles */
+@media (max-width: 768px) {
+  .viewContainer {
+    padding: 16px !important;
+  }
+
+  .viewHeader {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 12px;
+    margin-bottom: 20px;
+  }
+
+  .viewTitleWrapper h2 {
+    font-size: 22px !important;
+  }
+
+  /* Tasks View mobile tweaks */
+  .taskListContainer {
+    gap: 20px !important;
+  }
+
+  .taskGroupTitle {
+    margin-bottom: 8px !important;
+    font-size: 13px !important;
+  }
+
+  .taskListItem {
+    padding: 10px 0 !important;
+  }
+
+  .taskItemTitle {
+    font-size: 13px !important;
+  }
+
+  /* Automations View mobile tweaks */
+  .automationCard {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 16px;
+    padding: 16px !important;
+  }
+
+  .automationActions {
+    width: 100%;
+    justify-content: space-between;
+  }
+
+  /* Builder UI mobile tweaks */
+  .builderCard {
+    padding: 16px !important;
+  }
+
+  .builderHeader {
+    margin-bottom: 20px !important;
+  }
+
+  .builderFlow {
+    flex-direction: column !important;
+    gap: 16px !important;
+    padding: 20px !important;
+  }
+
+  .builderNode {
+    min-width: 100% !important;
+  }
+
+  .flowArrow {
+    transform: rotate(90deg);
+  }
+
+  /* Logs UI mobile tweaks */
+  .logsHeader {
+    grid-template-columns: 1fr 1fr !important;
+  }
+  
+  .logsHeader div:last-child {
+    display: none; /* Hide status column header or wrap */
+  }
+
+  .logRow {
+    grid-template-columns: 1.5fr 1fr !important;
+    padding: 12px 16px !important;
+    font-size: 12px !important;
+  }
+
+  .logRow div:last-child {
+    display: flex;
+    justify-content: flex-end;
+  }
+
+  /* Templates mobile tweaks */
+  .templatesNotice {
+    font-size: 12px !important;
+    margin-bottom: 20px !important;
+  }
+
+  .templateGrid {
+    grid-template-columns: 1fr !important; /* Stack cleanly */
+  }
+}
+

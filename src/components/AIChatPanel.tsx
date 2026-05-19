@@ -4,7 +4,7 @@ import styles from './AIChatPanel.module.css';
 import { Sparkles, MessageSquare, Plus } from 'lucide-react';
 
 export default function AIChatPanel() {
-  const { isAIPanelOpen, conversations, activeConversationId, setActiveConversation, createConversation } = useAppStore();
+  const { isAIPanelOpen, setAIPanelOpen, conversations, activeConversationId, setActiveConversation, createConversation } = useAppStore();
 
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
@@ -53,45 +53,53 @@ export default function AIChatPanel() {
   };
 
   return (
-    <div className={`${styles.container} ${!isAIPanelOpen ? styles.collapsed : ''}`}>
-      <div className={styles.header}>
-        <div className={styles.headerLeft}>
-          <Sparkles size={16} className={styles.headerIcon} />
-          Clearspace AI
+    <>
+      {isAIPanelOpen && (
+        <div className={styles.mobileOverlay} onClick={() => setAIPanelOpen(false)} />
+      )}
+      <div className={`${styles.container} ${!isAIPanelOpen ? styles.collapsed : ''}`}>
+        <div className={styles.header}>
+          <div className={styles.headerLeft}>
+            <Sparkles size={16} className={styles.headerIcon} />
+            Clearspace AI
+          </div>
+          <button className={styles.newAgentBtn}>
+            <Plus size={12} /> New agent
+          </button>
         </div>
-        <button className={styles.newAgentBtn}>
-          <Plus size={12} /> New agent
-        </button>
-      </div>
 
-      <div className={styles.history}>
-        {Object.entries(groups).map(([label, items]) => {
-          if (items.length === 0) return null;
-          return (
-            <div key={label} className={styles.group}>
-              <div className={styles.groupLabel}>{label}</div>
-              {items.map(conv => (
-                <div 
-                  key={conv.id} 
-                  className={`${styles.convItem} ${activeConversationId === conv.id ? styles.activeConv : ''}`}
-                  onClick={() => setActiveConversation(conv.id)}
-                >
-                  <MessageSquare size={14} className={styles.convIcon} />
-                  <span className={styles.convTitle}>{conv.title || 'New Chat'}</span>
-                  <span className={styles.convTime}>{getTimeAgo(conv.updatedAt)}</span>
-                </div>
-              ))}
-            </div>
-          );
-        })}
-      </div>
+        <div className={styles.history}>
+          {Object.entries(groups).map(([label, items]) => {
+            if (items.length === 0) return null;
+            return (
+              <div key={label} className={styles.group}>
+                <div className={styles.groupLabel}>{label}</div>
+                {items.map(conv => (
+                  <div 
+                    key={conv.id} 
+                    className={`${styles.convItem} ${activeConversationId === conv.id ? styles.activeConv : ''}`}
+                    onClick={() => {
+                      setActiveConversation(conv.id);
+                      if (window.innerWidth <= 768) setAIPanelOpen(false);
+                    }}
+                  >
+                    <MessageSquare size={14} className={styles.convIcon} />
+                    <span className={styles.convTitle}>{conv.title || 'New Chat'}</span>
+                    <span className={styles.convTime}>{getTimeAgo(conv.updatedAt)}</span>
+                  </div>
+                ))}
+              </div>
+            );
+          })}
+        </div>
 
-      <div className={styles.footer}>
-        <button className={styles.newChatBtn} onClick={() => createConversation()}>
-          <span><Plus size={14} style={{ display: 'inline', verticalAlign: 'middle', marginRight: 4 }}/> New chat</span>
-          <span className={styles.newChatShortcut}>⌘⌥N</span>
-        </button>
+        <div className={styles.footer}>
+          <button className={styles.newChatBtn} onClick={() => createConversation()}>
+            <span><Plus size={14} style={{ display: 'inline', verticalAlign: 'middle', marginRight: 4 }}/> New chat</span>
+            <span className={styles.newChatShortcut}>⌘⌥N</span>
+          </button>
+        </div>
       </div>
-    </div>
+    </>
   );
 }
