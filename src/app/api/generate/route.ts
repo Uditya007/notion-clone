@@ -1,5 +1,5 @@
 import { streamText } from 'ai';
-import { google } from '@ai-sdk/google';
+import { createGoogleGenerativeAI } from '@ai-sdk/google';
 
 // Set runtime to edge for better streaming performance
 export const runtime = 'edge';
@@ -12,7 +12,7 @@ export async function POST(req: Request) {
     const stream = new ReadableStream({
       async start(controller) {
         const encoder = new TextEncoder();
-        const mockResponse = `\n\n*(Mock AI Response. Add GOOGLE_GENERATIVE_AI_API_KEY to .env.local for real Gemini AI)*\n\nYou asked to [${command}]. Based on your context, here is the generated response simulating Gemini 1.5 Flash.`;
+        const mockResponse = `\n\n*(Mock AI Response. Add GOOGLE_GENERATIVE_AI_API_KEY to .env.local for real Gemini AI)*\n\nYou asked to [${command}]. Based on your context, here is the generated response simulating Gemini 2.5 Flash.`;
         const words = mockResponse.split(' ');
         for (const word of words) {
           controller.enqueue(encoder.encode(word + ' '));
@@ -51,8 +51,12 @@ export async function POST(req: Request) {
     systemPrompt += "\n\nYour task is to rewrite the text in a friendly, casual, conversational tone.";
   }
 
+  const google = createGoogleGenerativeAI({
+    apiKey: process.env.GOOGLE_GENERATIVE_AI_API_KEY
+  });
+
   const result = await streamText({
-    model: google('gemini-1.5-flash'), // Extremely fast and free tier available
+    model: google('gemini-2.5-flash'), // Extremely fast and free tier available
     system: systemPrompt,
     prompt: prompt || "Execute the requested command on the document context.",
   });
