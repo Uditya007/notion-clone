@@ -1,28 +1,83 @@
 "use client";
 import styles from './CalendarView.module.css';
-import { Calendar as CalendarIcon, Clock, Users, Plus, ChevronLeft, ChevronRight } from 'lucide-react';
-import { useState } from 'react';
+import { Calendar as CalendarIcon, Clock, Users, Plus, ChevronLeft, ChevronRight, Video, ExternalLink } from 'lucide-react';
+import { useState, useEffect } from 'react';
+import { useSession, signIn } from 'next-auth/react';
 
 type CalendarEvent = {
   id: string;
   title: string;
   date: string; // YYYY-MM-DD
   time?: string;
-  type: 'meeting' | 'task' | 'milestone';
+  type: 'meeting' | 'task' | 'milestone' | 'default';
+  description?: string;
+  meetLink?: string;
+  htmlLink?: string;
 };
 
 export default function CalendarView() {
+  const { data: session, status } = useSession();
   const [view, setView] = useState<'Month' | 'Week' | 'Day'>('Month');
-  
-  // Start with today's date context
   const [currentDate, setCurrentDate] = useState(new Date());
-  
-  const [events, setEvents] = useState<CalendarEvent[]>([
-    { id: '1', title: 'Product Launch', date: '2026-05-21', type: 'milestone' },
-    { id: '2', title: 'Design Review', date: '2026-05-19', time: '1:00 PM', type: 'meeting' },
-    { id: '3', title: 'Weekly Sync', date: '2026-05-20', time: '10:00 AM', type: 'meeting' },
-    { id: '4', title: 'Fix CSS Bug', date: '2026-05-22', type: 'task' },
-  ]);
+  const [events, setEvents] = useState<CalendarEvent[]>([]);
+  const [isLoading, setIsLoading] = useState(false);
+  const [selectedEvent, setSelectedEvent] = useState<CalendarEvent | null>(null);
+
+  const fetchEvents = async () => {
+    if (!session) return;
+    setIsLoading(true);
+    
+    // Fetch events for the current month +/- 1 month
+    const timeMin = new Date(currentDate.getFullYear(), currentDate.getMonth() - 1, 1).toISOString();
+    const timeMax = new Date(currentDate.getFullYear(), currentDate.getMonth() + 2, 0).toISOString();
+    
+    try {
+      const res = await fetch(`/api/calendar/events?timeMin=${timeMin}&timeMax=${timeMax}`);
+      if (!res.ok) throw new Error('Failed to fetch');
+      const data = await res.json();
+      
+      const mappedEvents: CalendarEvent[] = (data.items || []).map((item: any) => {
+        const start = item.start.dateTime || item.start.date;
+        const dateObj = new Date(start);
+        const dateStr = `${dateObj.getFullYear()}-${String(dateObj.getMonth() + 1).padStart(2, '0')}-${String(dateObj.getDate()).padStart(2, '0')}`;
+        
+        let time;
+        if (item.start.dateTime) {
+          time = dateObj.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' });
+        }
+
+        let meetLink;
+        if (item.conferenceData?.entryPoints) {
+          const videoEntry = item.conferenceData.entryPoints.find((e: any) => e.entryPointType === 'video');
+          if (videoEntry) meetLink = videoEntry.uri;
+        } else if (item.hangoutLink) {
+          meetLink = item.hangoutLink;
+        }
+
+        return {
+          id: item.id,
+          title: item.summary || 'Untitled Event',
+          date: dateStr,
+          time,
+          type: meetLink ? 'meeting' : 'default',
+          description: item.description,
+          meetLink,
+          htmlLink: item.htmlLink
+        };
+      });
+      setEvents(mappedEvents);
+    } catch (e) {
+      console.error(e);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    if (session) {
+      fetchEvents();
+    }
+  }, [session, currentDate]);
 
   const [draggedEventId, setDraggedEventId] = useState<string | null>(null);
 
@@ -72,12 +127,43 @@ export default function CalendarView() {
     e.preventDefault(); // allow drop
   };
 
-  const handleDrop = (e: React.DragEvent, targetDateStr: string) => {
+  const handleDrop = async (e: React.DragEvent, targetDateStr: string) => {
     e.preventDefault();
     if (draggedEventId) {
+      // Optimistic UI update
       setEvents(events.map(ev => 
         ev.id === draggedEventId ? { ...ev, date: targetDateStr } : ev
       ));
+      
+      // Real API update
+      const evToUpdate = events.find(e => e.id === draggedEventId);
+      if (evToUpdate && session) {
+        try {
+          // If it had a specific time, we need to preserve the time but change the date
+          let newStart;
+          if (evToUpdate.time) {
+             const [time, modifier] = evToUpdate.time.split(' ');
+             let [hours, minutes] = time.split(':');
+             if (hours === '12') hours = '00';
+             if (modifier === 'PM') hours = String(parseInt(hours, 10) + 12);
+             newStart = { dateTime: `${targetDateStr}T${hours}:${minutes}:00Z` };
+          } else {
+             newStart = { date: targetDateStr };
+          }
+
+          await fetch('/api/calendar/events', {
+            method: 'PATCH',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              eventId: draggedEventId,
+              start: newStart,
+              // End time also needs adjusting in a real app, keeping it simple here
+            })
+          });
+        } catch (error) {
+          console.error("Failed to update event", error);
+        }
+      }
     }
     setDraggedEventId(null);
   };
@@ -122,12 +208,28 @@ export default function CalendarView() {
         </div>
         
         <div className={styles.integrationNotice}>
-          <div className={styles.noticeDot} />
-          <span>Synced with user@example.com</span>
+          <div className={styles.noticeDot} style={{ backgroundColor: session ? '#10b981' : '#a1a1aa' }} />
+          <span>{session ? `Synced with ${session.user?.email}` : 'Not connected'}</span>
         </div>
       </div>
 
-      {view === 'Month' && (
+      {!session ? (
+        <div className={styles.emptyStateContainer} style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: '16px' }}>
+          <CalendarIcon size={48} opacity={0.2} />
+          <h3 style={{ fontSize: '18px', fontWeight: 600 }}>Connect Google Calendar</h3>
+          <p style={{ color: 'var(--text-muted)', fontSize: '14px', maxWidth: '300px', textAlign: 'center' }}>
+            Sync your real events and manage your schedule directly inside Clearspace.
+          </p>
+          <button 
+            onClick={() => signIn("google")}
+            style={{ padding: '8px 16px', background: 'var(--text-main)', color: 'var(--bg-main)', borderRadius: '6px', fontWeight: 500, fontSize: '14px', display: 'flex', alignItems: 'center', gap: '8px', cursor: 'pointer' }}
+          >
+            Connect Google Account
+          </button>
+        </div>
+      ) : (
+        <>
+          {view === 'Month' && (
         <div className={styles.monthGrid}>
           {['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'].map(day => (
             <div key={day} className={styles.weekdayHeader}>{day}</div>
@@ -156,7 +258,9 @@ export default function CalendarView() {
                       key={event.id}
                       draggable
                       onDragStart={(e) => handleDragStart(e, event.id)}
-                      className={`${styles.eventChip} ${styles[event.type]}`}
+                      onClick={() => setSelectedEvent(event)}
+                      className={`${styles.eventChip} ${styles[event.type] || styles.default}`}
+                      style={{ backgroundColor: event.type === 'meeting' ? 'rgba(35, 131, 226, 0.15)' : 'var(--bg-hover)' }}
                     >
                       {event.time && <span className={styles.eventChipTime}>{event.time}</span>}
                       {event.title}
@@ -254,6 +358,55 @@ export default function CalendarView() {
                 </div>
               )
             })}
+          </div>
+        </div>
+      )}
+      </>
+      )}
+
+      {/* Event Details Modal */}
+      {selectedEvent && (
+        <div 
+          style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, backgroundColor: 'rgba(0,0,0,0.5)', zIndex: 100, display: 'flex', alignItems: 'center', justifyContent: 'center' }}
+          onClick={() => setSelectedEvent(null)}
+        >
+          <div 
+            style={{ width: '400px', backgroundColor: 'var(--bg-main)', borderRadius: '12px', padding: '24px', border: '1px solid var(--border)', boxShadow: '0 10px 25px rgba(0,0,0,0.2)' }}
+            onClick={e => e.stopPropagation()}
+          >
+            <h3 style={{ fontSize: '20px', fontWeight: 600, marginBottom: '16px' }}>{selectedEvent.title}</h3>
+            
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '12px', marginBottom: '24px', fontSize: '14px' }}>
+              <div style={{ display: 'flex', gap: '8px', color: 'var(--text-muted)' }}>
+                <Clock size={16} /> 
+                <span>{selectedEvent.date} {selectedEvent.time ? `at ${selectedEvent.time}` : ''}</span>
+              </div>
+              
+              {selectedEvent.meetLink && (
+                <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
+                  <Video size={16} color="var(--primary)" /> 
+                  <a href={selectedEvent.meetLink} target="_blank" rel="noreferrer" style={{ color: 'var(--primary)', fontWeight: 500 }}>
+                    Join Google Meet
+                  </a>
+                </div>
+              )}
+
+              {selectedEvent.htmlLink && (
+                <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
+                  <ExternalLink size={16} color="var(--text-muted)" /> 
+                  <a href={selectedEvent.htmlLink} target="_blank" rel="noreferrer" style={{ color: 'var(--text-main)', textDecoration: 'underline' }}>
+                    View in Calendar
+                  </a>
+                </div>
+              )}
+            </div>
+
+            <button 
+              onClick={() => setSelectedEvent(null)}
+              style={{ width: '100%', padding: '8px', background: 'var(--bg-hover)', color: 'var(--text-main)', borderRadius: '6px', border: 'none', cursor: 'pointer' }}
+            >
+              Close
+            </button>
           </div>
         </div>
       )}

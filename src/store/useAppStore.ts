@@ -37,6 +37,21 @@ export type Database = {
   view: 'table' | 'board' | 'gallery';
 };
 
+export type ChatMessage = {
+  id: string;
+  role: 'user' | 'assistant';
+  content: string;
+  timestamp: string;
+};
+
+export type Conversation = {
+  id: string;
+  title: string;
+  messages: ChatMessage[];
+  createdAt: string;
+  updatedAt: string;
+};
+
 type AppState = {
   pages: Record<string, Page>;
   activePageId: string | null;
@@ -44,15 +59,19 @@ type AppState = {
   deletedPages: Record<string, Page & { deletedAt: string }>;
   workspaceName: string;
   databases: Record<string, Database>;
+  conversations: Record<string, Conversation>;
+  activeConversationId: string | null;
   
   // UI States
   isSearchOpen: boolean;
   isSettingsOpen: boolean;
+  isAIPanelOpen: boolean;
   
   // Actions
   setActivePage: (id: string) => void;
   setSearchOpen: (isOpen: boolean) => void;
   setSettingsOpen: (isOpen: boolean) => void;
+  setAIPanelOpen: (isOpen: boolean) => void;
   updateWorkspaceName: (name: string) => void;
   addPage: (parentId: string | null) => string;
   updatePageTitle: (id: string, title: string) => void;
@@ -76,6 +95,12 @@ type AppState = {
   updateRowContent: (dbId: string, rowId: string, content: string) => void;
   deleteRow: (dbId: string, rowId: string) => void;
   setDatabaseView: (dbId: string, view: 'table' | 'board' | 'gallery') => void;
+
+  // AI Chat Actions
+  createConversation: () => string;
+  addMessage: (convId: string, message: ChatMessage) => void;
+  deleteConversation: (convId: string) => void;
+  setActiveConversation: (id: string | null) => void;
 };
 
 const initialPageId = uuidv4();
@@ -165,18 +190,22 @@ const initialState = {
   deletedPages: {},
   workspaceName: "My Workspace",
   databases: {},
+  conversations: {},
+  activeConversationId: null,
   isSearchOpen: false,
   isSettingsOpen: false,
-} as Pick<AppState, 'pages' | 'activePageId' | 'rootPageIds' | 'deletedPages' | 'workspaceName' | 'databases' | 'isSearchOpen' | 'isSettingsOpen'>;
+  isAIPanelOpen: false,
+} as Pick<AppState, 'pages' | 'activePageId' | 'rootPageIds' | 'deletedPages' | 'workspaceName' | 'databases' | 'conversations' | 'activeConversationId' | 'isSearchOpen' | 'isSettingsOpen' | 'isAIPanelOpen'>;
 
 export const useAppStore = create<AppState>()(
   persist(
     (set) => ({
       ...initialState,
   
-  setActivePage: (id) => set({ activePageId: id, isSearchOpen: false }),
+  setActivePage: (id) => set({ activePageId: id, activeConversationId: null, isSearchOpen: false }),
   setSearchOpen: (isOpen) => set({ isSearchOpen: isOpen }),
   setSettingsOpen: (isOpen) => set({ isSettingsOpen: isOpen }),
+  setAIPanelOpen: (isOpen) => set({ isAIPanelOpen: isOpen }),
   updateWorkspaceName: (name) => set({ workspaceName: name }),
   
   addPage: (parentId) => {
@@ -503,7 +532,69 @@ export const useAppStore = create<AppState>()(
         }
       }
     };
-  })
+  }),
+
+  // AI Chat Implementations
+  createConversation: () => {
+    const newId = uuidv4();
+    const newConv: Conversation = {
+      id: newId,
+      title: 'New Chat',
+      messages: [],
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString(),
+    };
+    set((state) => ({
+      conversations: { ...state.conversations, [newId]: newConv },
+      activeConversationId: newId,
+      activePageId: null // Clear active page when viewing a chat
+    }));
+    return newId;
+  },
+
+  addMessage: (convId, message) => set((state) => {
+    const conv = state.conversations[convId];
+    if (!conv) return state;
+    
+    const updatedMessages = [...conv.messages, message];
+    // Auto-update title on first user message
+    let newTitle = conv.title;
+    if (updatedMessages.length === 1 && message.role === 'user') {
+      newTitle = message.content.slice(0, 40) + (message.content.length > 40 ? '...' : '');
+    }
+
+    return {
+      conversations: {
+        ...state.conversations,
+        [convId]: {
+          ...conv,
+          title: newTitle,
+          messages: updatedMessages,
+          updatedAt: new Date().toISOString(),
+        }
+      }
+    };
+  }),
+
+  deleteConversation: (convId) => set((state) => {
+    const newConvs = { ...state.conversations };
+    delete newConvs[convId];
+    
+    let newActiveId = state.activeConversationId;
+    if (newActiveId === convId) {
+      newActiveId = null;
+    }
+    
+    return {
+      conversations: newConvs,
+      activeConversationId: newActiveId,
+    };
+  }),
+
+  setActiveConversation: (id) => set({ 
+    activeConversationId: id, 
+    activePageId: id ? null : useAppStore.getState().activePageId 
+  }),
 }), {
   name: 'notion-clone-storage',
 }));

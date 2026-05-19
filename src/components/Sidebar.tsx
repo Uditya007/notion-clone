@@ -13,15 +13,18 @@ import {
   Calendar,
   CheckSquare,
   Zap,
-  Copy
+  Copy,
+  Sparkles
 } from "lucide-react";
 import styles from "./Sidebar.module.css";
 import { useState } from "react";
 import { useAppStore } from "@/store/useAppStore";
+import { useSession } from "next-auth/react";
 
 export default function Sidebar() {
+  const { data: session } = useSession();
   const [isCollapsed, setIsCollapsed] = useState(false);
-  const { pages, rootPageIds, activePageId, setActivePage, addPage, deletePage, setSearchOpen, setSettingsOpen, workspaceName } = useAppStore();
+  const { pages, rootPageIds, activePageId, setActivePage, addPage, deletePage, setSearchOpen, setSettingsOpen, workspaceName, isAIPanelOpen, setAIPanelOpen } = useAppStore();
 
   const handleAddPage = (e: React.MouseEvent, parentId: string | null = null) => {
     e.stopPropagation();
@@ -103,12 +106,19 @@ export default function Sidebar() {
           <span>Search</span>
           <kbd className={styles.shortcut}>⌘K</kbd>
         </button>
+        <button className={`${styles.actionItem} ${isAIPanelOpen ? styles.actionItemActive : ''}`} onClick={() => setAIPanelOpen(!isAIPanelOpen)}>
+          <Sparkles size={16} />
+          <span>Clearspace AI</span>
+        </button>
         <button className={styles.actionItem} onClick={() => setSettingsOpen(true)}>
           <Settings size={16} />
           <span>Settings</span>
         </button>
         <button className={`${styles.actionItem} ${activePageId === 'inbox' ? styles.actionItemActive : ''}`} onClick={() => setActivePage('inbox')}>
-          <Inbox size={16} />
+          <div style={{ position: 'relative', display: 'flex', alignItems: 'center' }}>
+            <Inbox size={16} />
+            <div style={{ position: 'absolute', bottom: -2, right: -2, width: 8, height: 8, borderRadius: '50%', backgroundColor: session ? '#10b981' : '#a1a1aa', border: '2px solid var(--bg-sidebar)' }} />
+          </div>
           <span>Inbox</span>
         </button>
         <button className={`${styles.actionItem} ${activePageId === 'tasks' ? styles.actionItemActive : ''}`} onClick={() => setActivePage('tasks')}>
@@ -116,7 +126,10 @@ export default function Sidebar() {
           <span>My Tasks</span>
         </button>
         <button className={`${styles.actionItem} ${activePageId === 'calendar' ? styles.actionItemActive : ''}`} onClick={() => setActivePage('calendar')}>
-          <Calendar size={16} />
+          <div style={{ position: 'relative', display: 'flex', alignItems: 'center' }}>
+            <Calendar size={16} />
+            <div style={{ position: 'absolute', bottom: -2, right: -2, width: 8, height: 8, borderRadius: '50%', backgroundColor: session ? '#10b981' : '#a1a1aa', border: '2px solid var(--bg-sidebar)' }} />
+          </div>
           <span>Google Calendar</span>
         </button>
         <button className={`${styles.actionItem} ${activePageId === 'automations' ? styles.actionItemActive : ''}`} onClick={() => setActivePage('automations')}>

@@ -1,5 +1,6 @@
 "use client";
 import Sidebar from "@/components/Sidebar";
+import AIChatPanel from "@/components/AIChatPanel";
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { isAuthenticated } from "@/lib/auth";
@@ -25,6 +26,7 @@ export default function WorkspaceLayout({
   return (
     <div className="app-container">
       <Sidebar />
+      <AIChatPanel />
       <main className="main-content">
         {children}
       </main>
