@@ -21,12 +21,14 @@ import styles from "./Sidebar.module.css";
 import { useState, useEffect } from "react";
 import { useAppStore } from "@/store/useAppStore";
 import { supabase } from "@/lib/supabase/client";
+import AIBuilder from "./AIBuilder";
 
 export default function Sidebar() {
   const [isCollapsed, setIsCollapsed] = useState(false);
   const [pagesList, setPagesList] = useState<any[]>([]);
   const [workspaceName, setWorkspaceName] = useState("My Workspace");
   const [isGoogleConnected, setIsGoogleConnected] = useState(false);
+  const [isAIBuilderOpen, setIsAIBuilderOpen] = useState(false);
   
   const { activePageId, setActivePage, setSearchOpen, setSettingsOpen, isAIPanelOpen, setAIPanelOpen } = useAppStore();
 
@@ -229,6 +231,10 @@ export default function Sidebar() {
             <Sparkles size={16} />
             <span>Clearspace AI</span>
           </button>
+          <button className={styles.actionItem} onClick={() => setIsAIBuilderOpen(true)}>
+            <Sparkles size={16} style={{ color: '#a855f7' }} />
+            <span style={{ fontWeight: 600, color: 'var(--text-main)' }}>✦ AI Builder</span>
+          </button>
           <button className={styles.actionItem} onClick={() => setSettingsOpen(true)}>
             <Settings size={16} />
             <span>Settings</span>
@@ -298,6 +304,7 @@ export default function Sidebar() {
           </button>
         </div>
       </aside>
+      <AIBuilder isOpen={isAIBuilderOpen} onClose={() => setIsAIBuilderOpen(false)} />
     </>
   );
 }
