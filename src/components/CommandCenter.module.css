@@ -1,0 +1,342 @@
+.dashboard {
+  padding: 32px;
+  background: var(--bg-main);
+  color: var(--text-main);
+  height: 100%;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 28px;
+  animation: fadeIn 0.3s ease-out;
+}
+
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.titleSection h1 {
+  font-size: 26px;
+  font-weight: 800;
+  margin: 0;
+  background: linear-gradient(135deg, var(--text-main) 0%, #a855f7 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.sparkle {
+  color: #a855f7;
+  animation: pulse 2s infinite;
+}
+
+.tagline {
+  font-size: 13px;
+  color: var(--text-muted);
+  margin-top: 4px;
+}
+
+.tickerTape {
+  background: var(--bg-hover);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 8px 16px;
+  display: flex;
+  gap: 24px;
+  overflow: hidden;
+  align-items: center;
+}
+
+.tickerItem {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 12px;
+  font-family: monospace;
+}
+
+.tickerDot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: #10b981;
+}
+
+.tickerDotAlert {
+  background: #f59e0b;
+  animation: blink 1s infinite alternate;
+}
+
+/* AI Command Bar */
+.aiCommandBar {
+  background: var(--bg-hover);
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  transition: all 0.2s ease;
+}
+
+.aiCommandBar:focus-within {
+  border-color: #a855f7;
+  box-shadow: 0 0 0 3px rgba(168, 85, 247, 0.15);
+}
+
+.aiInputWrapper {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  background: var(--bg-main);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 8px 14px;
+}
+
+.aiInput {
+  flex: 1;
+  background: transparent;
+  border: none;
+  color: var(--text-main);
+  font-size: 14px;
+  outline: none;
+}
+
+.aiSubmitBtn {
+  background: transparent;
+  border: none;
+  color: #a855f7;
+  cursor: pointer;
+  padding: 4px;
+  border-radius: 6px;
+  display: flex;
+  align-items: center;
+  transition: all 0.2s ease;
+}
+
+.aiSubmitBtn:hover {
+  background: rgba(168, 85, 247, 0.1);
+  transform: scale(1.05);
+}
+
+.quickPills {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.pill {
+  background: var(--bg-main);
+  border: 1px solid var(--border);
+  color: var(--text-muted);
+  padding: 4px 10px;
+  border-radius: 16px;
+  font-size: 11px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.pill:hover {
+  border-color: rgba(168, 85, 247, 0.3);
+  color: #a855f7;
+}
+
+/* Grid System */
+.grid {
+  display: grid;
+  grid-template-columns: repeat(12, 1fr);
+  gap: 20px;
+}
+
+.widget {
+  background: var(--bg-hover);
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  position: relative;
+  overflow: hidden;
+}
+
+.col4 { grid-column: span 4; }
+.col6 { grid-column: span 6; }
+.col8 { grid-column: span 8; }
+.col12 { grid-column: span 12; }
+
+@media (max-width: 1024px) {
+  .col4, .col6, .col8 { grid-column: span 12; }
+}
+
+.widgetHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.widgetTitle {
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--text-main);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+/* Pomodoro Focus Timer Widget */
+.pomodoroBody {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 16px;
+  padding: 10px 0;
+}
+
+.timeDisplay {
+  font-size: 38px;
+  font-weight: 800;
+  font-family: monospace;
+  color: var(--text-main);
+  letter-spacing: 2px;
+  background: rgba(168, 85, 247, 0.05);
+  border: 1px dashed rgba(168, 85, 247, 0.2);
+  padding: 8px 24px;
+  border-radius: 12px;
+}
+
+.pomodoroControls {
+  display: flex;
+  gap: 12px;
+}
+
+.timerBtn {
+  background: var(--bg-main);
+  border: 1px solid var(--border);
+  color: var(--text-main);
+  border-radius: 8px;
+  padding: 6px 12px;
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  transition: all 0.2s ease;
+}
+
+.timerBtn:hover {
+  background: var(--border);
+}
+
+.timerBtnActive {
+  background: #ef4444;
+  color: white;
+  border-color: #ef4444;
+}
+
+/* Task Matrix Widget */
+.taskMatrix {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.taskItem {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 10px 14px;
+  background: var(--bg-main);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  font-size: 13px;
+  transition: all 0.2s ease;
+}
+
+.taskItem:hover {
+  transform: translateX(2px);
+  border-color: rgba(168, 85, 247, 0.2);
+}
+
+.taskTitle {
+  font-weight: 500;
+  color: var(--text-main);
+}
+
+.taskBadge {
+  font-size: 10px;
+  font-weight: 600;
+  padding: 2px 8px;
+  border-radius: 12px;
+  text-transform: uppercase;
+}
+
+.highBadge { background: rgba(239, 68, 68, 0.1); color: #ef4444; }
+.mediumBadge { background: rgba(245, 158, 11, 0.1); color: #f59e0b; }
+.lowBadge { background: rgba(16, 185, 129, 0.1); color: #10b981; }
+
+/* Recent Items Grid */
+.recentGrid {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.recentCard {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 14px;
+  background: var(--bg-main);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.recentCard:hover {
+  background: var(--bg-hover);
+  border-color: rgba(168, 85, 247, 0.25);
+  transform: translateY(-1px);
+}
+
+.recentInfo {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.recentTitle {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text-main);
+}
+
+.recentTime {
+  font-size: 11px;
+  color: var(--text-muted);
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes blink {
+  from { opacity: 0.3; }
+  to { opacity: 1; }
+}
+
+@keyframes pulse {
+  0%, 100% { transform: scale(1); opacity: 0.8; }
+  50% { transform: scale(1.1); opacity: 1; }
+}
