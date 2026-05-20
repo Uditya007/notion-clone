@@ -1,18 +1,114 @@
-import { useState, useMemo } from 'react';
-import { useAppStore } from '@/store/useAppStore';
+"use client";
+
+import { useState, useEffect } from 'react';
 import styles from './DatabaseView.module.css';
-import { Plus, Filter, ArrowUpDown, LayoutGrid, LayoutTemplate, LayoutList, MoreHorizontal } from 'lucide-react';
+import { Plus, Filter, ArrowUpDown, LayoutGrid, LayoutTemplate, LayoutList } from 'lucide-react';
 import DatabaseRowModal from './DatabaseRowModal';
+import { supabase } from '@/lib/supabase/client';
 
 export default function DatabaseView({ dbId }: { dbId: string }) {
-  const { databases, setDatabaseView, addRow, updateCell, addColumn } = useAppStore();
-  const db = databases[dbId];
+  const [db, setDb] = useState<any>(null);
   const [selectedRowId, setSelectedRowId] = useState<string | null>(null);
 
-  if (!db) return null;
+  const fetchDatabase = async () => {
+    try {
+      const res = await fetch(`/api/databases?pageId=${dbId}`);
+      if (res.ok) {
+        const data = await res.json();
+        setDb(data);
+      }
+    } catch (err) {
+      console.error("Error fetching inline database:", err);
+    }
+  };
 
-  const handleAddRow = () => {
-    addRow(dbId);
+  useEffect(() => {
+    fetchDatabase();
+
+    const channelCols = supabase
+      .channel(`realtime:db:cols:${dbId}`)
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'db_columns' }, () => {
+        fetchDatabase();
+      })
+      .subscribe();
+
+    const channelRows = supabase
+      .channel(`realtime:db:rows:${dbId}`)
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'db_rows' }, () => {
+        fetchDatabase();
+      })
+      .subscribe();
+
+    const channelDb = supabase
+      .channel(`realtime:db:${dbId}`)
+      .on('postgres_changes', { event: 'UPDATE', schema: 'public', table: 'databases', filter: `page_id=eq.${dbId}` }, () => {
+        fetchDatabase();
+      })
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channelCols);
+      supabase.removeChannel(channelRows);
+      supabase.removeChannel(channelDb);
+    };
+  }, [dbId]);
+
+  if (!db) return <div style={{ color: 'var(--text-muted)', padding: '16px' }}>Loading Database...</div>;
+
+  const handleAddRow = async () => {
+    try {
+      const res = await fetch('/api/databases', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ action: 'addRow', dbId: db.id, cells: {} }),
+      });
+      if (res.ok) {
+        fetchDatabase();
+      }
+    } catch (err) {
+      console.error("Error creating row:", err);
+    }
+  };
+
+  const handleUpdateCell = async (rowId: string, columnId: string, value: string) => {
+    setDb((prev: any) => {
+      if (!prev) return prev;
+      return {
+        ...prev,
+        rows: prev.rows.map((r: any) => {
+          if (r.id === rowId) {
+            return {
+              ...r,
+              cells: { ...r.cells, [columnId]: value }
+            };
+          }
+          return r;
+        })
+      };
+    });
+
+    try {
+      await fetch('/api/databases', {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ action: 'updateCell', dbId: db.id, rowId, columnId, value }),
+      });
+    } catch (err) {
+      console.error("Error updating cell:", err);
+    }
+  };
+
+  const handleSetView = async (viewType: string) => {
+    setDb((prev: any) => prev ? { ...prev, view_type: viewType } : null);
+    try {
+      await fetch('/api/databases', {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ action: 'setView', dbId: db.id, viewType }),
+      });
+    } catch (err) {
+      console.error("Error updating view:", err);
+    }
   };
 
   const renderTable = () => (
@@ -34,7 +130,7 @@ export default function DatabaseView({ dbId }: { dbId: string }) {
                   <input
                     className={styles.cellInput}
                     value={row.cells[col.id] || ''}
-                    onChange={(e) => updateCell(dbId, row.id, col.id, e.target.value)}
+                    onChange={(e) => handleUpdateCell(row.id, col.id, e.target.value)}
                     placeholder={idx === 0 ? 'Untitled' : ''}
                   />
                   {idx === 0 && (
@@ -58,7 +154,6 @@ export default function DatabaseView({ dbId }: { dbId: string }) {
   );
 
   const renderBoard = () => {
-    // Basic board: group by a select column, or if none, put all in one column
     const selectCol = db.columns.find((c: any) => c.type === 'select' || c.type === 'multiselect');
     const groups = selectCol?.options || ['No Status'];
     
@@ -106,25 +201,27 @@ export default function DatabaseView({ dbId }: { dbId: string }) {
     </div>
   );
 
+  const activeView = db.view_type || 'table';
+
   return (
     <div className={styles.container}>
       <div className={styles.header}>
         <div className={styles.viewTabs}>
           <button 
-            className={`${styles.tabBtn} ${db.view === 'table' ? styles.tabActive : ''}`}
-            onClick={() => setDatabaseView(dbId, 'table')}
+            className={`${styles.tabBtn} ${activeView === 'table' ? styles.tabActive : ''}`}
+            onClick={() => handleSetView('table')}
           >
             <LayoutList size={14} style={{ display: 'inline', verticalAlign: 'middle', marginRight: 4 }} /> Table
           </button>
           <button 
-            className={`${styles.tabBtn} ${db.view === 'board' ? styles.tabActive : ''}`}
-            onClick={() => setDatabaseView(dbId, 'board')}
+            className={`${styles.tabBtn} ${activeView === 'board' ? styles.tabActive : ''}`}
+            onClick={() => handleSetView('board')}
           >
             <LayoutTemplate size={14} style={{ display: 'inline', verticalAlign: 'middle', marginRight: 4 }} /> Board
           </button>
           <button 
-            className={`${styles.tabBtn} ${db.view === 'gallery' ? styles.tabActive : ''}`}
-            onClick={() => setDatabaseView(dbId, 'gallery')}
+            className={`${styles.tabBtn} ${activeView === 'gallery' ? styles.tabActive : ''}`}
+            onClick={() => handleSetView('gallery')}
           >
             <LayoutGrid size={14} style={{ display: 'inline', verticalAlign: 'middle', marginRight: 4 }} /> Gallery
           </button>
@@ -136,9 +233,9 @@ export default function DatabaseView({ dbId }: { dbId: string }) {
         </div>
       </div>
 
-      {db.view === 'table' && renderTable()}
-      {db.view === 'board' && renderBoard()}
-      {db.view === 'gallery' && renderGallery()}
+      {activeView === 'table' && renderTable()}
+      {activeView === 'board' && renderBoard()}
+      {activeView === 'gallery' && renderGallery()}
 
       {selectedRowId && (
         <DatabaseRowModal 

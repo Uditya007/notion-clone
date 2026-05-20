@@ -130,6 +130,20 @@ export async function updateCell(supabase: SupabaseClient, dbId: string, rowId: 
   return updatedRow;
 }
 
+export async function updateRow(supabase: SupabaseClient, dbId: string, rowId: string, updates: any) {
+  const { data, error } = await supabase
+    .from('db_rows')
+    .update(updates)
+    .eq('id', rowId)
+    .eq('database_id', dbId)
+    .select()
+    .single();
+
+  if (error) throw error;
+  return data;
+}
+
+
 export async function deleteRow(supabase: SupabaseClient, dbId: string, rowId: string) {
   const { error } = await supabase
     .from('db_rows')

@@ -1,4 +1,5 @@
 "use client";
+
 import styles from './Views.module.css';
 import { Copy, Folder, Briefcase, Rocket, Download } from 'lucide-react';
 import { useAppStore } from '@/store/useAppStore';
@@ -52,7 +53,7 @@ const TEMPLATES = [
 ];
 
 export default function TemplatesView() {
-  const { applyTemplate } = useAppStore();
+  const { setActivePage } = useAppStore();
 
   const categories = [
     { name: 'Personal', icon: <Folder size={16} /> },
@@ -60,8 +61,32 @@ export default function TemplatesView() {
     { name: 'Startup', icon: <Rocket size={16} /> }
   ];
 
-  const handleUseTemplate = (template: any) => {
-    applyTemplate(template.title, template.icon, template.content, template.type);
+  const handleUseTemplate = async (template: any) => {
+    try {
+      const res = await fetch("/api/pages", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          title: template.title,
+          icon: template.icon,
+          type: template.type,
+        }),
+      });
+
+      if (res.ok) {
+        const newPage = await res.json();
+        if (template.content) {
+          await fetch(`/api/pages/${newPage.id}`, {
+            method: "PATCH",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ content: template.content }),
+          });
+        }
+        setActivePage(newPage.id);
+      }
+    } catch (err) {
+      console.error("Error applying template:", err);
+    }
   };
 
   return (

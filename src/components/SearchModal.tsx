@@ -1,13 +1,35 @@
 "use client";
+
 import { useEffect, useState, useRef } from 'react';
 import { useAppStore } from '@/store/useAppStore';
 import styles from './Modals.module.css';
 import { Search, FileText, X } from 'lucide-react';
 
 export default function SearchModal() {
-  const { isSearchOpen, setSearchOpen, pages, setActivePage } = useAppStore();
+  const { isSearchOpen, setSearchOpen, setActivePage } = useAppStore();
+  const [pagesList, setPagesList] = useState<any[]>([]);
   const [query, setQuery] = useState('');
   const inputRef = useRef<HTMLInputElement>(null);
+
+  const fetchPages = async () => {
+    try {
+      const res = await fetch("/api/pages");
+      if (res.ok) {
+        const data = await res.json();
+        setPagesList(data);
+      }
+    } catch (err) {
+      console.error("Error fetching pages for search:", err);
+    }
+  };
+
+  useEffect(() => {
+    if (isSearchOpen) {
+      fetchPages();
+      setTimeout(() => inputRef.current?.focus(), 10);
+      setQuery('');
+    }
+  }, [isSearchOpen]);
 
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
@@ -23,16 +45,9 @@ export default function SearchModal() {
     return () => window.removeEventListener('keydown', handleKeyDown);
   }, [isSearchOpen, setSearchOpen]);
 
-  useEffect(() => {
-    if (isSearchOpen) {
-      setTimeout(() => inputRef.current?.focus(), 10);
-      setQuery('');
-    }
-  }, [isSearchOpen]);
-
   if (!isSearchOpen) return null;
 
-  const filteredPages = Object.values(pages).filter((page: any) => 
+  const filteredPages = pagesList.filter((page: any) => 
     page.title.toLowerCase().includes(query.toLowerCase()) || 
     (page.content && page.content.toLowerCase().includes(query.toLowerCase()))
   );
@@ -63,7 +78,10 @@ export default function SearchModal() {
                 <div 
                   key={page.id} 
                   className={styles.resultItem}
-                  onClick={() => setActivePage(page.id)}
+                  onClick={() => {
+                    setActivePage(page.id);
+                    setSearchOpen(false);
+                  }}
                 >
                   <span className={styles.pageIcon}>{page.icon || <FileText size={16} />}</span>
                   <span className={styles.pageTitle}>{page.title || 'Untitled'}</span>

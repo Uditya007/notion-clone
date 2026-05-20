@@ -1,39 +1,79 @@
+"use client";
+
 import { useEffect, useRef, useState } from 'react';
 import { useAppStore } from '@/store/useAppStore';
 import styles from './AIChatView.module.css';
 import { ArrowLeft, ArrowUp, Copy, ThumbsDown, ThumbsUp } from 'lucide-react';
 import { useCompletion } from '@ai-sdk/react';
-import { v4 as uuidv4 } from 'uuid';
+import { supabase } from '@/lib/supabase/client';
 
 export default function AIChatView() {
-  const { conversations, activeConversationId, setActiveConversation, addMessage, addTask } = useAppStore();
-  const conv = activeConversationId ? conversations[activeConversationId] : null;
-  
+  const { activeConversationId, setActiveConversation } = useAppStore();
+  const [messages, setMessages] = useState<any[]>([]);
+  const [convTitle, setConvTitle] = useState('New Chat');
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const [inputText, setInputText] = useState('');
+
+  const fetchMessages = async (convId: string) => {
+    try {
+      const res = await fetch(`/api/conversations/${convId}/messages`);
+      if (res.ok) {
+        const data = await res.json();
+        setMessages(data);
+      }
+    } catch (err) {
+      console.error('Error fetching messages:', err);
+    }
+  };
+
+  useEffect(() => {
+    if (activeConversationId) {
+      fetchMessages(activeConversationId);
+
+      const channel = supabase
+        .channel(`realtime:messages:${activeConversationId}`)
+        .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'messages', filter: `conversation_id=eq.${activeConversationId}` }, (payload: any) => {
+          setMessages((prev) => {
+            if (prev.some((m) => m.id === payload.new.id)) return prev;
+            return [...prev, payload.new];
+          });
+        })
+        .subscribe();
+
+      return () => {
+        supabase.removeChannel(channel);
+      };
+    } else {
+      setMessages([]);
+    }
+  }, [activeConversationId]);
 
   const { complete, completion, isLoading, setCompletion } = useCompletion({
     api: '/api/generate',
     streamProtocol: 'text',
     onFinish: async (prompt, result) => {
-      // 1. Check for TASK command
       const taskMatch = result.match(/\[CREATE_TASK:\s*(.*?)\s*\|\s*(.*?)\s*\]/);
       if (taskMatch) {
         const title = taskMatch[1];
-        const due = taskMatch[2];
-        addTask(title, due);
+        try {
+          await fetch('/api/tasks', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ title }),
+          });
+        } catch (e) {
+          console.error("Error creating AI task:", e);
+        }
       }
 
-      // 2. Check for EVENT command
       const eventMatch = result.match(/\[CREATE_EVENT:\s*(.*?)\s*\|\s*(.*?)\s*\|\s*(.*?)\s*\]/);
       if (eventMatch) {
         const title = eventMatch[1];
         const start = eventMatch[2];
         const end = eventMatch[3];
         
-        // POST to /api/calendar/events to create event!
         try {
-          const res = await fetch('/api/calendar/events', {
+          await fetch('/api/google/calendar', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({
@@ -42,24 +82,27 @@ export default function AIChatView() {
               end: { dateTime: end },
             }),
           });
-          if (!res.ok) {
-            console.warn("Could not create calendar event - Google Calendar not connected.");
-          }
         } catch (e) {
-          console.error("Error creating event:", e);
+          console.error("Error creating AI Google Calendar event:", e);
         }
       }
 
-      // 3. Clean tags before adding message to state
-      let cleanContent = result.replace(/\[CREATE_TASK:.*?\]/g, '').replace(/\[CREATE_EVENT:.*?\]/g, '').trim();
+      const cleanContent = result.replace(/\[CREATE_TASK:.*?\]/g, '').replace(/\[CREATE_EVENT:.*?\]/g, '').trim();
 
       if (activeConversationId) {
-        addMessage(activeConversationId, {
-          id: uuidv4(),
-          role: 'assistant',
-          content: cleanContent,
-          timestamp: new Date().toISOString()
-        });
+        try {
+          const res = await fetch(`/api/conversations/${activeConversationId}/messages`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ role: 'assistant', content: cleanContent }),
+          });
+          if (res.ok) {
+            const newMsg = await res.json();
+            setMessages((prev) => [...prev, newMsg]);
+          }
+        } catch (e) {
+          console.error("Error saving assistant message:", e);
+        }
       }
       setCompletion('');
     }
@@ -67,30 +110,35 @@ export default function AIChatView() {
 
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
-  }, [conv?.messages, completion]);
+  }, [messages, completion]);
 
-  if (!conv) return null;
+  if (!activeConversationId) return null;
 
   const handleSend = async (text: string, isPill = false) => {
     if (!text.trim() || isLoading) return;
     
-    // Add user message
-    addMessage(conv.id, {
-      id: uuidv4(),
-      role: 'user',
-      content: text,
-      timestamp: new Date().toISOString()
-    });
+    try {
+      const res = await fetch(`/api/conversations/${activeConversationId}/messages`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ role: 'user', content: text }),
+      });
+      if (res.ok) {
+        const newMsg = await res.json();
+        setMessages((prev) => [...prev, newMsg]);
+      }
+    } catch (e) {
+      console.error("Error saving user message:", e);
+    }
 
     if (!isPill) setInputText('');
 
-    // Prepare context from past messages
-    const historyContext = conv.messages.map((m: any) => `${m.role.toUpperCase()}: ${m.content}`).join('\n\n');
+    const historyContext = messages.map((m: any) => `${m.role.toUpperCase()}: ${m.content}`).join('\n\n');
 
     await complete(text, {
       body: {
         context: historyContext ? `Past conversation context:\n${historyContext}` : '',
-        command: 'prompt' // standard chat prompt
+        command: 'prompt'
       }
     });
   };
@@ -103,10 +151,7 @@ export default function AIChatView() {
   };
 
   const renderMarkdown = (text: string) => {
-    // Strip command tags
     let cleanText = text.replace(/\[CREATE_TASK:.*?\]/g, '').replace(/\[CREATE_EVENT:.*?\]/g, '').trim();
-
-    // A very basic markdown renderer for bold and codeblocks
     let html = cleanText.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
     html = html.replace(/```([\s\S]*?)```/g, '<pre><code>$1</code></pre>');
     return <div dangerouslySetInnerHTML={{ __html: html }} />;
@@ -120,16 +165,14 @@ export default function AIChatView() {
         </button>
         <input 
           className={styles.titleInput} 
-          value={conv.title} 
-          onChange={(e) => {
-             // In a real app we'd update the title in the store, keeping it simple here
-          }}
+          value={convTitle} 
+          onChange={(e) => setConvTitle(e.target.value)}
           readOnly
         />
       </div>
 
       <div className={styles.messages}>
-        {conv.messages.map((msg: any) => (
+        {messages.map((msg: any) => (
           <div key={msg.id} className={`${styles.messageRow} ${msg.role === 'user' ? styles.userRow : styles.assistantRow}`}>
             {msg.role === 'user' ? (
               <div className={styles.userBubble}>{msg.content}</div>

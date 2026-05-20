@@ -1,28 +1,78 @@
 "use client";
+
 import styles from './Views.module.css';
 import { Trash2, RotateCcw, AlertTriangle } from 'lucide-react';
-import { useAppStore } from '@/store/useAppStore';
 import { useEffect, useState } from 'react';
+import { supabase } from '@/lib/supabase/client';
 
 export default function TrashView() {
-  const { deletedPages, restorePage, permanentlyDeletePage } = useAppStore();
   const [pages, setPages] = useState<any[]>([]);
 
+  const fetchDeletedPages = async () => {
+    try {
+      const res = await fetch("/api/pages?deleted=true");
+      if (res.ok) {
+        const data = await res.json();
+        
+        const thirtyDaysAgo = new Date();
+        thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
+        
+        const validPages = data.filter((page: any) => {
+          const deletedAt = new Date(page.deleted_at || page.deletedAt || new Date());
+          return deletedAt > thirtyDaysAgo;
+        });
+        
+        validPages.sort((a: any, b: any) => new Date(b.deleted_at || b.deletedAt || new Date()).getTime() - new Date(a.deleted_at || a.deletedAt || new Date()).getTime());
+        setPages(validPages);
+      }
+    } catch (err) {
+      console.error("Error loading deleted pages:", err);
+    }
+  };
+
   useEffect(() => {
-    // Filter pages deleted less than 30 days ago
-    const thirtyDaysAgo = new Date();
-    thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
-    
-    const validPages = Object.values(deletedPages).filter((page: any) => {
-      const deletedAt = new Date(page.deletedAt);
-      return deletedAt > thirtyDaysAgo;
-    });
-    
-    // Sort by most recently deleted
-    validPages.sort((a: any, b: any) => new Date(b.deletedAt).getTime() - new Date(a.deletedAt).getTime());
-    
-    setPages(validPages);
-  }, [deletedPages]);
+    fetchDeletedPages();
+
+    const channel = supabase
+      .channel('realtime:trash')
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'pages' }, () => {
+        fetchDeletedPages();
+      })
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
+  }, []);
+
+  const handleRestorePage = async (pageId: string) => {
+    try {
+      const res = await fetch(`/api/pages/${pageId}`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ is_deleted: false, deleted_at: null }),
+      });
+      if (res.ok) {
+        fetchDeletedPages();
+      }
+    } catch (err) {
+      console.error("Error restoring page:", err);
+    }
+  };
+
+  const handlePermanentlyDeletePage = async (pageId: string) => {
+    if (!confirm('Are you sure you want to permanently delete this page? This cannot be undone.')) return;
+    try {
+      const res = await fetch(`/api/pages/${pageId}?permanent=true`, {
+        method: "DELETE",
+      });
+      if (res.ok) {
+        fetchDeletedPages();
+      }
+    } catch (err) {
+      console.error("Error permanently deleting page:", err);
+    }
+  };
 
   const getDaysAgo = (dateStr: string) => {
     const deletedDate = new Date(dateStr);
@@ -70,19 +120,19 @@ export default function TrashView() {
                 {page.title || 'Untitled'}
               </div>
               <div className={styles.logTime}>
-                {getDaysAgo(page.deletedAt)}
+                {getDaysAgo(page.deleted_at || page.deletedAt || new Date().toISOString())}
               </div>
               <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '8px' }}>
                 <button 
                   className={styles.filterBtn}
-                  onClick={() => restorePage(page.id)}
+                  onClick={() => handleRestorePage(page.id)}
                   style={{ display: 'flex', alignItems: 'center', gap: '4px' }}
                 >
                   <RotateCcw size={14} /> Restore
                 </button>
                 <button 
                   className={styles.filterBtn}
-                  onClick={() => permanentlyDeletePage(page.id)}
+                  onClick={() => handlePermanentlyDeletePage(page.id)}
                   style={{ display: 'flex', alignItems: 'center', gap: '4px', color: '#ff4d4d', borderColor: '#ff4d4d' }}
                 >
                   <Trash2 size={14} /> Delete Forever

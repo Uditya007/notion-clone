@@ -1,4 +1,5 @@
 "use client";
+
 import {
   ChevronRight,
   ChevronDown,
@@ -17,40 +18,143 @@ import {
   Sparkles
 } from "lucide-react";
 import styles from "./Sidebar.module.css";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useAppStore } from "@/store/useAppStore";
-import { useSession } from "next-auth/react";
+import { supabase } from "@/lib/supabase/client";
 
 export default function Sidebar() {
-  const { data: session } = useSession();
   const [isCollapsed, setIsCollapsed] = useState(false);
-  const { pages, rootPageIds, activePageId, setActivePage, addPage, deletePage, setSearchOpen, setSettingsOpen, workspaceName, isAIPanelOpen, setAIPanelOpen } = useAppStore();
+  const [pagesList, setPagesList] = useState<any[]>([]);
+  const [workspaceName, setWorkspaceName] = useState("My Workspace");
+  const [isGoogleConnected, setIsGoogleConnected] = useState(false);
+  
+  const { activePageId, setActivePage, setSearchOpen, setSettingsOpen, isAIPanelOpen, setAIPanelOpen } = useAppStore();
 
-  const handleAddPage = (e: React.MouseEvent, parentId: string | null = null) => {
+  useEffect(() => {
+    fetchPages();
+    fetchProfile();
+    fetchGoogleStatus();
+
+    const channel = supabase
+      .channel('realtime:pages')
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'pages' }, () => {
+        fetchPages();
+      })
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
+  }, []);
+
+  const fetchPages = async () => {
+    try {
+      const res = await fetch("/api/pages");
+      if (res.ok) {
+        const data = await res.json();
+        setPagesList(data);
+      }
+    } catch (err) {
+      console.error("Error fetching pages:", err);
+    }
+  };
+
+  const fetchProfile = async () => {
+    try {
+      const res = await fetch("/api/profile");
+      if (res.ok) {
+        const data = await res.json();
+        if (data?.workspace_name) {
+          setWorkspaceName(data.workspace_name);
+        }
+      }
+    } catch (err) {
+      console.error("Error fetching profile:", err);
+    }
+  };
+
+  const fetchGoogleStatus = async () => {
+    try {
+      const res = await fetch("/api/google/connect");
+      if (res.ok) {
+        const data = await res.json();
+        setIsGoogleConnected(data.connected);
+      }
+    } catch (err) {
+      console.error("Error fetching Google status:", err);
+    }
+  };
+
+  const handleAddPage = async (e: React.MouseEvent, parentId: string | null = null) => {
     e.stopPropagation();
-    addPage(parentId);
+    try {
+      const res = await fetch("/api/pages", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ title: "Untitled", parentId, icon: "📄", type: "editor" }),
+      });
+      if (res.ok) {
+        const newPage = await res.json();
+        setPagesList((prev) => [...prev, newPage]);
+        setActivePage(newPage.id);
+      }
+    } catch (err) {
+      console.error("Error adding page:", err);
+    }
+  };
+
+  const handleDeletePage = async (e: React.MouseEvent, pageId: string) => {
+    e.stopPropagation();
+    try {
+      const res = await fetch(`/api/pages/${pageId}`, {
+        method: "DELETE",
+      });
+      if (res.ok) {
+        fetchPages();
+        if (activePageId === pageId) {
+          setActivePage(null);
+        }
+      }
+    } catch (err) {
+      console.error("Error deleting page:", err);
+    }
   };
 
   const handlePageSelect = (pageId: string) => {
     setActivePage(pageId);
-    // Auto-collapse sidebar on mobile when a page is selected
     if (window.innerWidth <= 768) {
       setIsCollapsed(true);
     }
   };
 
-  const PageTreeItem = ({ pageId, level = 0 }: { pageId: string, level?: number }) => {
-    const page = pages[pageId];
+  const buildPageTree = () => {
+    const pageMap = new Map();
+    pagesList.forEach((p) => pageMap.set(p.id, { ...p, children: [] }));
+    const roots: any[] = [];
+
+    pagesList.forEach((p) => {
+      const mapped = pageMap.get(p.id);
+      if (p.parent_id && pageMap.has(p.parent_id)) {
+        pageMap.get(p.parent_id).children.push(mapped);
+      } else {
+        roots.push(mapped);
+      }
+    });
+
+    return roots;
+  };
+
+  const pageTreeRoots = buildPageTree();
+
+  const PageTreeItem = ({ page, level = 0 }: { page: any, level?: number }) => {
     const [expanded, setExpanded] = useState(true);
-    const isActive = activePageId === pageId;
-    
-    if (!page) return null;
+    const isActive = activePageId === page.id;
 
     return (
       <div className={styles.pageTreeWrapper} style={{ paddingLeft: level === 0 ? 0 : 16 }}>
         <div 
           className={`${styles.pageItem} ${isActive ? styles.active : ''}`}
-          onClick={() => handlePageSelect(pageId)}
+          onClick={() => handlePageSelect(page.id)}
         >
           <div 
             className={styles.chevronWrapper} 
@@ -66,10 +170,10 @@ export default function Sidebar() {
           <span className={styles.pageTitle}>{page.title || "Untitled"}</span>
           
           <div className={styles.pageActions}>
-            <button className={styles.iconActionBtn} onClick={(e) => handleAddPage(e, pageId)}>
+            <button className={styles.iconActionBtn} onClick={(e) => handleAddPage(e, page.id)}>
               <Plus size={14} />
             </button>
-            <button className={styles.iconActionBtn} onClick={(e) => { e.stopPropagation(); deletePage(pageId); }}>
+            <button className={styles.iconActionBtn} onClick={(e) => handleDeletePage(e, page.id)}>
               <Trash2 size={14} />
             </button>
           </div>
@@ -77,8 +181,8 @@ export default function Sidebar() {
 
         {expanded && page.children.length > 0 && (
           <div className={styles.nestedPages}>
-            {page.children.map((childId: any) => (
-              <PageTreeItem key={childId} pageId={childId} level={level + 1} />
+            {page.children.map((child: any) => (
+              <PageTreeItem key={child.id} page={child} level={level + 1} />
             ))}
           </div>
         )}
@@ -95,6 +199,8 @@ export default function Sidebar() {
       </div>
     );
   }
+
+  const favorites = pagesList.filter((p) => p.is_favorite);
 
   return (
     <>
@@ -123,14 +229,14 @@ export default function Sidebar() {
             <Sparkles size={16} />
             <span>Clearspace AI</span>
           </button>
-          <button className={styles.actionItem} onClick={() => setSearchOpen(true)}>
+          <button className={styles.actionItem} onClick={() => setSettingsOpen(true)}>
             <Settings size={16} />
             <span>Settings</span>
           </button>
           <button className={`${styles.actionItem} ${activePageId === 'inbox' ? styles.actionItemActive : ''}`} onClick={() => handlePageSelect('inbox')}>
             <div style={{ position: 'relative', display: 'flex', alignItems: 'center' }}>
               <Inbox size={16} />
-              <div style={{ position: 'absolute', bottom: -2, right: -2, width: 8, height: 8, borderRadius: '50%', backgroundColor: session ? '#10b981' : '#a1a1aa', border: '2px solid var(--bg-sidebar)' }} />
+              <div style={{ position: 'absolute', bottom: -2, right: -2, width: 8, height: 8, borderRadius: '50%', backgroundColor: isGoogleConnected ? '#10b981' : '#a1a1aa', border: '2px solid var(--bg-sidebar)' }} />
             </div>
             <span>Inbox</span>
           </button>
@@ -141,7 +247,7 @@ export default function Sidebar() {
           <button className={`${styles.actionItem} ${activePageId === 'calendar' ? styles.actionItemActive : ''}`} onClick={() => handlePageSelect('calendar')}>
             <div style={{ position: 'relative', display: 'flex', alignItems: 'center' }}>
               <Calendar size={16} />
-              <div style={{ position: 'absolute', bottom: -2, right: -2, width: 8, height: 8, borderRadius: '50%', backgroundColor: session ? '#10b981' : '#a1a1aa', border: '2px solid var(--bg-sidebar)' }} />
+              <div style={{ position: 'absolute', bottom: -2, right: -2, width: 8, height: 8, borderRadius: '50%', backgroundColor: isGoogleConnected ? '#10b981' : '#a1a1aa', border: '2px solid var(--bg-sidebar)' }} />
             </div>
             <span>Google Calendar</span>
           </button>
@@ -156,15 +262,14 @@ export default function Sidebar() {
         </div>
 
         <div className={styles.scrollArea}>
-          {/* Favorites Section */}
-          {Object.values(pages).some((p: any) => p.isFavorite) && (
+          {favorites.length > 0 && (
             <div className={styles.pagesSection}>
               <div className={styles.sectionHeader}>
                 <span>Favorites</span>
               </div>
               <div className={styles.pageTree}>
-                {Object.values(pages).filter((p: any) => p.isFavorite).map((page: any) => (
-                  <PageTreeItem key={`fav-${page.id}`} pageId={page.id} />
+                {favorites.map((page: any) => (
+                  <PageTreeItem key={`fav-${page.id}`} page={{ ...page, children: [] }} />
                 ))}
               </div>
             </div>
@@ -179,8 +284,8 @@ export default function Sidebar() {
             </div>
             
             <div className={styles.pageTree}>
-              {rootPageIds.filter((id: any) => !['inbox', 'calendar', 'tasks', 'automations', 'templates'].includes(id)).map((pageId: any) => (
-                <PageTreeItem key={pageId} pageId={pageId} />
+              {pageTreeRoots.map((page: any) => (
+                <PageTreeItem key={page.id} page={page} />
               ))}
             </div>
           </div>

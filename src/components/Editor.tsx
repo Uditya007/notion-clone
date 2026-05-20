@@ -1,4 +1,5 @@
 "use client";
+
 import { useEditor, EditorContent } from '@tiptap/react'
 import { BubbleMenu, FloatingMenu } from '@tiptap/react/menus'
 import StarterKit from '@tiptap/starter-kit'
@@ -8,7 +9,7 @@ import TaskItem from '@tiptap/extension-task-item'
 import Underline from '@tiptap/extension-underline'
 import GlobalDragHandle from 'tiptap-extension-global-drag-handle'
 import styles from "./Editor.module.css";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import { MoreHorizontal, Star, Clock, Sparkles, Check, X, LayoutGrid, FileText, Trash2, Image as ImageIcon } from "lucide-react";
 import { useAppStore } from "@/store/useAppStore";
 import KanbanBoard from "./KanbanBoard";
@@ -21,6 +22,7 @@ import ShareModal from "./ShareModal";
 import TrashView from "./TrashView";
 import { useCompletion } from '@ai-sdk/react';
 import DatabaseView from "./DatabaseView";
+import { supabase } from "@/lib/supabase/client";
 
 const SLASH_COMMANDS = [
   { title: 'Text', icon: '📝', action: (editor: any) => editor.chain().focus().clearNodes().run() },
@@ -39,12 +41,15 @@ const SLASH_COMMANDS = [
 
 export default function Editor() {
   const [isMounted, setIsMounted] = useState(false);
-  const { pages, activePageId, updatePageContent, updatePageTitle, updatePageIcon, updatePageType, toggleFavorite, deletePage, updatePageCoverImage, workspaceName, databases, createDatabase } = useAppStore();
+  const { activePageId, setActivePage } = useAppStore();
+  const [activePage, setActivePageData] = useState<any>(null);
+  const [workspaceName, setWorkspaceName] = useState("My Workspace");
+  const [hasDatabase, setHasDatabase] = useState(false);
   
-  const activePage = activePageId ? pages[activePageId] : null;
+  const activePageIdRef = useRef(activePageId);
+  activePageIdRef.current = activePageId;
 
-  // AI Completion Hook
-  const { complete, completion, input, handleInputChange, handleSubmit, isLoading, setCompletion, setInput } = useCompletion({
+  const { complete, completion, input, handleInputChange, isLoading, setCompletion } = useCompletion({
     api: '/api/generate',
     streamProtocol: 'text',
   });
@@ -52,7 +57,6 @@ export default function Editor() {
   const [showAiMenu, setShowAiMenu] = useState(false);
   const [showShareModal, setShowShareModal] = useState(false);
   const [saveStatus, setSaveStatus] = useState<'saved' | 'saving'>('saved');
-  const [saveTimeoutId, setSaveTimeoutId] = useState<NodeJS.Timeout | null>(null);
   const [slashIndex, setSlashIndex] = useState(0);
 
   const COVER_IMAGES = [
@@ -64,11 +68,77 @@ export default function Editor() {
     "https://images.unsplash.com/photo-1501854140801-50d01698950b?q=80&w=2475&auto=format&fit=crop",
   ];
 
-  const changeCoverImage = () => {
+  const fetchPageData = async (pageId: string) => {
+    try {
+      const res = await fetch(`/api/pages/${pageId}`);
+      if (res.ok) {
+        const data = await res.json();
+        setActivePageData(data);
+        setHasDatabase(data?.type === 'board');
+      }
+    } catch (err) {
+      console.error("Error loading page details:", err);
+    }
+  };
+
+  const fetchProfile = async () => {
+    try {
+      const res = await fetch("/api/profile");
+      if (res.ok) {
+        const data = await res.json();
+        if (data?.workspace_name) {
+          setWorkspaceName(data.workspace_name);
+        }
+      }
+    } catch (err) {
+      console.error("Error loading profile:", err);
+    }
+  };
+
+  useEffect(() => {
+    setIsMounted(true);
+    fetchProfile();
+  }, []);
+
+  useEffect(() => {
+    if (activePageId && !['inbox', 'calendar', 'tasks', 'automations', 'templates', 'trash'].includes(activePageId)) {
+      fetchPageData(activePageId);
+
+      const channel = supabase
+        .channel(`realtime:page:${activePageId}`)
+        .on('postgres_changes', { event: 'UPDATE', schema: 'public', table: 'pages', filter: `id=eq.${activePageId}` }, (payload: any) => {
+          setActivePageData(payload.new);
+        })
+        .subscribe();
+
+      return () => {
+        supabase.removeChannel(channel);
+      };
+    } else {
+      setActivePageData(null);
+    }
+  }, [activePageId]);
+
+  const updatePageAttribute = async (updates: any) => {
     if (!activePageId) return;
-    const currentIndex = COVER_IMAGES.indexOf(activePage?.coverImage || "");
+    
+    setActivePageData((prev: any) => prev ? { ...prev, ...updates } : null);
+    
+    try {
+      await fetch(`/api/pages/${activePageId}`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(updates),
+      });
+    } catch (err) {
+      console.error("Error updating page attribute:", err);
+    }
+  };
+
+  const changeCoverImage = () => {
+    const currentIndex = COVER_IMAGES.indexOf(activePage?.cover_image || "");
     const nextIndex = (currentIndex + 1) % COVER_IMAGES.length;
-    updatePageCoverImage(activePageId, COVER_IMAGES[nextIndex]);
+    updatePageAttribute({ cover_image: COVER_IMAGES[nextIndex] });
   };
 
   const editor = useEditor({
@@ -92,32 +162,40 @@ export default function Editor() {
       },
     },
     onUpdate: ({ editor }) => {
-      if (activePageId && activePage?.type === 'editor') {
+      const pageId = activePageIdRef.current;
+      if (pageId && activePage?.type === 'editor') {
         setSaveStatus('saving');
-        updatePageContent(activePageId, editor.getHTML());
+        triggerDebouncedSave(pageId, editor.getHTML());
         
-        if (saveTimeoutId) clearTimeout(saveTimeoutId);
-        const timeout = setTimeout(() => setSaveStatus('saved'), 1000);
-        setSaveTimeoutId(timeout);
-        
-        // Detect /ai slash command
         const text = editor.getText();
         if (text.endsWith('/ai')) {
-          // Remove the /ai text
           const { state, view } = editor;
           const { tr } = state;
           view.dispatch(tr.delete(state.selection.from - 3, state.selection.from));
-          
-          // Open AI Menu
           setShowAiMenu(true);
         }
       }
     }
-  })
+  });
 
-  useEffect(() => {
-    setIsMounted(true);
-  }, []);
+  const saveTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+  
+  const triggerDebouncedSave = (pageId: string, content: string) => {
+    if (saveTimeoutRef.current) clearTimeout(saveTimeoutRef.current);
+    
+    saveTimeoutRef.current = setTimeout(async () => {
+      try {
+        await fetch(`/api/pages/${pageId}`, {
+          method: "PATCH",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ content }),
+        });
+        setSaveStatus('saved');
+      } catch (err) {
+        console.error("Failed to save content:", err);
+      }
+    }, 1000);
+  };
 
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
@@ -142,7 +220,7 @@ export default function Editor() {
           if (cmd.title === 'Ask AI') {
             setShowAiMenu(true);
           } else if (cmd.title === 'Database') {
-            createDatabase(activePageId!);
+            setHasDatabase(true);
           } else {
             cmd.action(editor);
           }
@@ -157,12 +235,11 @@ export default function Editor() {
     return () => document.removeEventListener('keydown', handleKeyDown, true);
   }, [editor, slashIndex]);
 
-  // Sync editor content when the active page changes
   useEffect(() => {
     if (editor && activePage && activePage.type === 'editor' && editor.getHTML() !== activePage.content) {
       editor.commands.setContent(activePage.content);
     }
-  }, [activePageId, editor, activePage]);
+  }, [activePageId, editor]);
 
   const handleAiSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -186,7 +263,6 @@ export default function Editor() {
 
   const insertAiContent = () => {
     if (editor && completion) {
-      // Split by paragraphs and insert
       const formatted = completion.split('\n\n').map(p => `<p>${p}</p>`).join('');
       editor.commands.insertContent(formatted);
       setCompletion('');
@@ -200,16 +276,15 @@ export default function Editor() {
   };
 
   if (!isMounted) return null;
+  if (activePageId === 'calendar') return <CalendarView />;
+  if (activePageId === 'inbox') return <InboxView />;
+  if (activePageId === 'tasks') return <TasksView />;
+  if (activePageId === 'automations') return <AutomationsView />;
+  if (activePageId === 'templates') return <TemplatesView />;
+  if (activePageId === 'trash') return <TrashView />;
+
   if (!activePage) return null;
 
-  if (activePage.type === 'calendar') return <CalendarView />;
-  if (activePage.type === 'inbox') return <InboxView />;
-  if (activePage.type === 'tasks') return <TasksView />;
-  if (activePage.type === 'automations') return <AutomationsView />;
-  if (activePage.type === 'templates') return <TemplatesView />;
-  if (activePage.type === 'trash') return <TrashView />;
-
-  // Mock online presence data
   const onlineUsers = [
     { id: 1, name: 'Alex', color: '#ff4d4d' },
     { id: 2, name: 'Sarah', color: '#4da6ff' },
@@ -242,18 +317,19 @@ export default function Editor() {
           <button className={styles.shareHeaderBtn} onClick={() => setShowShareModal(true)}>Share</button>
           <button className={styles.iconBtn} title="Page History"><Clock size={18} /></button>
           <button 
-            className={`${styles.iconBtn} ${activePage.isFavorite ? styles.iconBtnActive : ''}`}
-            onClick={() => toggleFavorite(activePageId!)}
+            className={`${styles.iconBtn} ${activePage.is_favorite ? styles.iconBtnActive : ''}`}
+            onClick={() => updatePageAttribute({ is_favorite: !activePage.is_favorite })}
             title="Toggle Favorite"
           >
-            <Star size={18} fill={activePage.isFavorite ? "currentColor" : "none"} />
+            <Star size={18} fill={activePage.is_favorite ? "currentColor" : "none"} />
           </button>
           <button 
             className={styles.iconBtn} 
             title="Delete Page"
-            onClick={() => {
+            onClick={async () => {
               if (confirm('Are you sure you want to delete this page?')) {
-                deletePage(activePageId!);
+                await fetch(`/api/pages/${activePageId}`, { method: 'DELETE' });
+                setActivePage(null);
               }
             }}
           >
@@ -262,18 +338,18 @@ export default function Editor() {
         </div>
       </header>
 
-      {activePage.coverImage && (
+      {activePage.cover_image && (
         <div className={styles.coverImage}>
-          <img src={activePage.coverImage} alt="Cover" />
+          <img src={activePage.cover_image} alt="Cover" />
           <div className={styles.coverControls}>
              <button className={styles.coverBtn} onClick={changeCoverImage}>Change cover</button>
-             <button className={styles.coverBtn} onClick={() => updatePageCoverImage(activePageId!, null)}>Remove</button>
+             <button className={styles.coverBtn} onClick={() => updatePageAttribute({ cover_image: null })}>Remove</button>
           </div>
         </div>
       )}
 
-      <div className={`${styles.contentWrapper} ${!activePage.coverImage ? styles.noCoverContent : ''}`}>
-        {!activePage.coverImage && (
+      <div className={`${styles.contentWrapper} ${!activePage.cover_image ? styles.noCoverContent : ''}`}>
+        {!activePage.cover_image && (
           <div className={styles.addCoverWrapper}>
              <button className={styles.addCoverBtn} onClick={changeCoverImage}>
                <ImageIcon size={14} /> Add cover
@@ -281,32 +357,32 @@ export default function Editor() {
           </div>
         )}
 
-        <div className={`${styles.pageIconWrapper} ${activePage.coverImage ? styles.hasCover : ''}`}>
+        <div className={`${styles.pageIconWrapper} ${activePage.cover_image ? styles.hasCover : ''}`}>
            <input 
-             className={styles.iconInput} 
-             value={activePage.icon} 
-             onChange={(e) => updatePageIcon(activePageId!, e.target.value)}
+             className={styles.pageIconInput || styles.iconInput} 
+             value={activePage.icon || "📄"} 
+             onChange={(e) => updatePageAttribute({ icon: e.target.value })}
              maxLength={2}
            />
         </div>
 
         <input 
           className={styles.titleInput}
-          value={activePage.title}
-          onChange={(e) => updatePageTitle(activePageId!, e.target.value)}
+          value={activePage.title || ""}
+          onChange={(e) => updatePageAttribute({ title: e.target.value })}
           placeholder="Untitled"
         />
         
         <div className={styles.viewToggles}>
           <button 
             className={`${styles.viewToggleBtn} ${activePage.type === 'editor' ? styles.activeView : ''}`}
-            onClick={() => updatePageType(activePageId!, 'editor')}
+            onClick={() => updatePageAttribute({ type: 'editor' })}
           >
             <FileText size={14} /> Document
           </button>
           <button 
             className={`${styles.viewToggleBtn} ${activePage.type === 'board' ? styles.activeView : ''}`}
-            onClick={() => updatePageType(activePageId!, 'board')}
+            onClick={() => updatePageAttribute({ type: 'board' })}
           >
             <LayoutGrid size={14} /> Board
           </button>
@@ -335,7 +411,7 @@ export default function Editor() {
                           if (cmd.title === 'Ask AI') {
                             setShowAiMenu(true);
                           } else if (cmd.title === 'Database') {
-                            createDatabase(activePageId!);
+                            setHasDatabase(true);
                           } else {
                             cmd.action(editor);
                           }
@@ -455,8 +531,8 @@ export default function Editor() {
 
               <EditorContent editor={editor} />
               
-              {activePageId && databases[activePageId] && (
-                <DatabaseView dbId={activePageId} />
+              {hasDatabase && (
+                <DatabaseView dbId={activePageId!} />
               )}
             </>
           )}

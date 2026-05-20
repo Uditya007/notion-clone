@@ -1,27 +1,100 @@
 "use client";
+
 import { useAppStore } from '@/store/useAppStore';
 import styles from './Modals.module.css';
 import { User, LogOut, Check, Settings, Monitor, Lock, Bell, Palette, Globe, X } from "lucide-react";
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import { getCurrentUser, logoutUser } from '@/lib/auth';
-import { useSession, signIn, signOut } from "next-auth/react";
+import { supabase } from '@/lib/supabase/client';
 
 export default function SettingsModal() {
-  const { isSettingsOpen, setSettingsOpen, workspaceName, updateWorkspaceName } = useAppStore();
+  const { isSettingsOpen, setSettingsOpen } = useAppStore();
   const [activeTab, setActiveTab] = useState('account');
   const router = useRouter();
   const [user, setUser] = useState<any>(null);
-  const { data: session } = useSession();
+  const [workspaceName, setWorkspaceName] = useState("My Workspace");
+  const [isGoogleConnected, setIsGoogleConnected] = useState(false);
+  const [googleEmail, setGoogleEmail] = useState("");
+
+  const fetchProfile = async () => {
+    try {
+      const res = await fetch("/api/profile");
+      if (res.ok) {
+        const data = await res.json();
+        if (data?.workspace_name) {
+          setWorkspaceName(data.workspace_name);
+        }
+      }
+    } catch (err) {
+      console.error("Error loading profile:", err);
+    }
+  };
+
+  const fetchGoogleStatus = async () => {
+    try {
+      const res = await fetch("/api/google/connect");
+      if (res.ok) {
+        const data = await res.json();
+        setIsGoogleConnected(data.connected);
+        setGoogleEmail(data.email || "");
+      }
+    } catch (err) {
+      console.error("Error loading Google connection status:", err);
+    }
+  };
+
+  const updateWorkspaceName = async (name: string) => {
+    setWorkspaceName(name);
+    try {
+      await fetch("/api/profile", {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ workspaceName: name }),
+      });
+    } catch (err) {
+      console.error("Failed to update workspace name:", err);
+    }
+  };
 
   useEffect(() => {
-    setUser(getCurrentUser());
-  }, []);
+    if (isSettingsOpen) {
+      supabase.auth.getUser().then(({ data }) => {
+        setUser(data.user);
+      });
+      fetchProfile();
+      fetchGoogleStatus();
+    }
+  }, [isSettingsOpen]);
 
-  const handleLogout = () => {
-    logoutUser();
+  const handleLogout = async () => {
+    await supabase.auth.signOut();
     setSettingsOpen(false);
     router.push('/login');
+  };
+
+  const handleConnectGoogle = async () => {
+    await supabase.auth.signInWithOAuth({
+      provider: 'google',
+      options: {
+        redirectTo: `${window.location.origin}/auth/callback`,
+        queryParams: {
+          access_type: 'offline',
+          prompt: 'consent',
+        },
+      },
+    });
+  };
+
+  const handleDisconnectGoogle = async () => {
+    try {
+      const res = await fetch('/api/google/connect', { method: 'DELETE' });
+      if (res.ok) {
+        setIsGoogleConnected(false);
+        setGoogleEmail("");
+      }
+    } catch (err) {
+      console.error("Failed to disconnect Google account:", err);
+    }
   };
 
   if (!isSettingsOpen) return null;
@@ -78,8 +151,8 @@ export default function SettingsModal() {
                   <div className={styles.settingsValue}>{user?.email || 'N/A'}</div>
                 </div>
                 <div className={styles.settingsRow}>
-                  <div className={styles.settingsLabel}>Name</div>
-                  <div className={styles.settingsValue}>{user?.name || 'N/A'}</div>
+                  <div className={styles.settingsLabel}>User ID</div>
+                  <div className={styles.settingsValue}>{user?.id || 'N/A'}</div>
                 </div>
                 <div className={styles.settingsRow}>
                   <button 
@@ -114,9 +187,9 @@ export default function SettingsModal() {
                         Google Account
                       </div>
                       <div className={styles.settingDesc} style={{ marginTop: '4px', fontSize: '13px', color: '#666' }}>
-                        {session ? `Connected as ${session.user?.email}` : 'Connect your Google account to sync Calendar and Gmail.'}
+                        {isGoogleConnected ? `Connected as ${googleEmail}` : 'Connect your Google account to sync Calendar and Gmail.'}
                       </div>
-                      {session && (
+                      {isGoogleConnected && (
                         <div style={{ display: 'flex', gap: '8px', marginTop: '8px' }}>
                           <span style={{ fontSize: '12px', background: 'rgba(16, 185, 129, 0.1)', color: '#10b981', padding: '2px 8px', borderRadius: '12px' }}>Calendar ✓</span>
                           <span style={{ fontSize: '12px', background: 'rgba(16, 185, 129, 0.1)', color: '#10b981', padding: '2px 8px', borderRadius: '12px' }}>Gmail ✓</span>
@@ -124,16 +197,16 @@ export default function SettingsModal() {
                       )}
                     </div>
                     
-                    {session ? (
+                    {isGoogleConnected ? (
                       <button 
-                        onClick={() => signOut()}
+                        onClick={handleDisconnectGoogle}
                         style={{ padding: '6px 12px', background: 'transparent', border: '1px solid #ddd', borderRadius: '6px', cursor: 'pointer', fontSize: '13px' }}
                       >
                         Disconnect
                       </button>
                     ) : (
                       <button 
-                        onClick={() => signIn("google")}
+                        onClick={handleConnectGoogle}
                         style={{ padding: '6px 12px', background: '#000', border: 'none', borderRadius: '6px', color: 'white', cursor: 'pointer', fontSize: '13px', fontWeight: 500 }}
                       >
                         Connect Google
