@@ -16,11 +16,28 @@ type CalendarEvent = {
 };
 
 export default function CalendarView() {
-  const [isConnected, setIsConnected] = useState(false);
-  const [connectedEmail, setConnectedEmail] = useState<string | null>(null);
+  const [isConnected, setIsConnected] = useState(() => {
+    if (typeof window !== 'undefined') {
+      return localStorage.getItem('google_calendar_connected') === 'true';
+    }
+    return false;
+  });
+  const [connectedEmail, setConnectedEmail] = useState<string | null>(() => {
+    if (typeof window !== 'undefined') {
+      return localStorage.getItem('google_calendar_email');
+    }
+    return null;
+  });
   const [view, setView] = useState<'Month' | 'Week' | 'Day'>('Month');
   const [currentDate, setCurrentDate] = useState(new Date());
-  const [events, setEvents] = useState<CalendarEvent[]>([]);
+  
+  const [events, setEvents] = useState<CalendarEvent[]>(() => {
+    if (typeof window !== 'undefined') {
+      const cached = localStorage.getItem('cached_calendar_events');
+      return cached ? JSON.parse(cached) : [];
+    }
+    return [];
+  });
   const [isLoading, setIsLoading] = useState(false);
   const [selectedEvent, setSelectedEvent] = useState<CalendarEvent | null>(null);
   const [error, setError] = useState<string | null>(null);
@@ -33,6 +50,10 @@ export default function CalendarView() {
         if (data?.connected) {
           setIsConnected(true);
           setConnectedEmail(data.email);
+          localStorage.setItem('google_calendar_connected', 'true');
+          if (data.email) {
+            localStorage.setItem('google_calendar_email', data.email);
+          }
           return true;
         }
       }
@@ -41,6 +62,8 @@ export default function CalendarView() {
     }
     setIsConnected(false);
     setConnectedEmail(null);
+    localStorage.removeItem('google_calendar_connected');
+    localStorage.removeItem('google_calendar_email');
     return false;
   };
 
@@ -72,6 +95,9 @@ export default function CalendarView() {
         setIsConnected(false);
         setConnectedEmail(null);
         setEvents([]);
+        localStorage.removeItem('google_calendar_connected');
+        localStorage.removeItem('google_calendar_email');
+        localStorage.removeItem('cached_calendar_events');
       }
     } catch (err) {
       console.error(err);
@@ -149,7 +175,6 @@ export default function CalendarView() {
   };
 
   const fetchEvents = async () => {
-    if (!isConnected) return;
     setIsLoading(true);
     setError(null);
     
@@ -192,6 +217,7 @@ export default function CalendarView() {
         };
       });
       setEvents(mappedEvents);
+      localStorage.setItem('cached_calendar_events', JSON.stringify(mappedEvents));
     } catch (e) {
       console.error(e);
       setError('Unable to load calendar events. Try logging out and reconnecting your Google Account to refresh your credentials.');
@@ -208,7 +234,7 @@ export default function CalendarView() {
       }
     };
     init();
-  }, [isConnected, currentDate]);
+  }, [currentDate]);
 
   const [draggedEventId, setDraggedEventId] = useState<string | null>(null);
 
@@ -536,7 +562,7 @@ export default function CalendarView() {
                 <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
                   <Video size={16} color="var(--primary)" /> 
                   <a href={selectedEvent.meetLink} target="_blank" rel="noreferrer" style={{ color: 'var(--primary)', fontWeight: 500 }}>
-                    Join Google Meet
+                     Join Google Meet
                   </a>
                 </div>
               )}

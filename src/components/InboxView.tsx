@@ -1,8 +1,8 @@
 "use client";
 import styles from './InboxView.module.css';
-import { Mail, Pencil, Paperclip, CornerUpLeft, X, Minus } from 'lucide-react';
+import { Mail, Pencil, CornerUpLeft, X } from 'lucide-react';
 import { useState, useEffect } from 'react';
-import { useSession, signIn } from 'next-auth/react';
+import { supabase } from '@/lib/supabase/client';
 
 type Email = {
   id: string;
@@ -17,8 +17,25 @@ type Email = {
 };
 
 export default function InboxView() {
-  const { data: session } = useSession();
-  const [emails, setEmails] = useState<Email[]>([]);
+  const [isConnected, setIsConnected] = useState(() => {
+    if (typeof window !== 'undefined') {
+      return localStorage.getItem('google_calendar_connected') === 'true';
+    }
+    return false;
+  });
+  const [connectedEmail, setConnectedEmail] = useState<string | null>(() => {
+    if (typeof window !== 'undefined') {
+      return localStorage.getItem('google_calendar_email');
+    }
+    return null;
+  });
+  const [emails, setEmails] = useState<Email[]>(() => {
+    if (typeof window !== 'undefined') {
+      const cached = localStorage.getItem('cached_inbox_emails');
+      return cached ? JSON.parse(cached) : [];
+    }
+    return [];
+  });
   const [selectedEmail, setSelectedEmail] = useState<Email | null>(null);
   const [emailBody, setEmailBody] = useState<string>('');
   const [isLoading, setIsLoading] = useState(false);
@@ -33,14 +50,58 @@ export default function InboxView() {
   const [replyBody, setReplyBody] = useState('');
   const [isSending, setIsSending] = useState(false);
 
+  const checkConnectionStatus = async () => {
+    try {
+      const res = await fetch('/api/google/connect');
+      if (res.ok) {
+        const data = await res.json();
+        if (data?.connected) {
+          setIsConnected(true);
+          setConnectedEmail(data.email);
+          localStorage.setItem('google_calendar_connected', 'true');
+          if (data.email) {
+            localStorage.setItem('google_calendar_email', data.email);
+          }
+          return true;
+        }
+      }
+    } catch (err) {
+      console.error(err);
+    }
+    setIsConnected(false);
+    setConnectedEmail(null);
+    localStorage.removeItem('google_calendar_connected');
+    localStorage.removeItem('google_calendar_email');
+    return false;
+  };
+
+  const handleConnectGoogle = async () => {
+    try {
+      const { error } = await supabase.auth.signInWithOAuth({
+        provider: 'google',
+        options: {
+          redirectTo: `${window.location.origin}/auth/callback`,
+          queryParams: {
+            access_type: 'offline',
+            prompt: 'consent'
+          },
+          scopes: 'email profile https://www.googleapis.com/auth/calendar https://www.googleapis.com/auth/gmail.modify'
+        }
+      });
+      if (error) throw error;
+    } catch (err: any) {
+      console.error(err);
+    }
+  };
+
   const fetchEmails = async () => {
-    if (!session) return;
     setIsLoading(true);
     try {
-      const res = await fetch('/api/gmail/messages');
+      const res = await fetch('/api/google/gmail');
       if (res.ok) {
         const data = await res.json();
         setEmails(data);
+        localStorage.setItem('cached_inbox_emails', JSON.stringify(data));
       }
     } catch (e) {
       console.error(e);
@@ -50,10 +111,14 @@ export default function InboxView() {
   };
 
   useEffect(() => {
-    if (session) {
-      fetchEmails();
-    }
-  }, [session]);
+    const init = async () => {
+      const connected = await checkConnectionStatus();
+      if (connected) {
+        fetchEmails();
+      }
+    };
+    init();
+  }, []);
 
   const handleSelectEmail = async (email: Email) => {
     setSelectedEmail(email);
@@ -64,20 +129,19 @@ export default function InboxView() {
     if (!email.isRead) {
       setEmails(emails.map(e => e.id === email.id ? { ...e, isRead: true } : e));
       // Mark as read in API
-      fetch('/api/gmail/mark-read', {
+      fetch(`/api/google/gmail/${email.id}`, {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ id: email.id, isRead: true })
+        body: JSON.stringify({ isRead: true })
       });
     }
 
     // Fetch full body
     setEmailBody('Loading content...');
     try {
-      const res = await fetch(`/api/gmail/messages?id=${email.id}`);
+      const res = await fetch(`/api/google/gmail/${email.id}`);
       if (res.ok) {
         const data = await res.json();
-        // Simple extraction for demo: text/html or text/plain
         const parts = data.payload?.parts || [];
         const htmlPart = parts.find((p: any) => p.mimeType === 'text/html');
         const textPart = parts.find((p: any) => p.mimeType === 'text/plain');
@@ -114,7 +178,7 @@ export default function InboxView() {
         body: composeBody
       };
 
-      const res = await fetch('/api/gmail/send', {
+      const res = await fetch('/api/google/gmail', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(payload)
@@ -138,14 +202,14 @@ export default function InboxView() {
     }
   };
 
-  if (!session) {
+  if (!isConnected) {
     return (
       <div className={styles.container}>
         <div className={styles.emptyState}>
           <Mail size={48} opacity={0.2} />
           <h3 style={{ fontSize: '18px', fontWeight: 600 }}>Connect Gmail</h3>
           <p style={{ maxWidth: '300px', textAlign: 'center' }}>Sync your real inbox and manage emails inside Clearspace.</p>
-          <button className={styles.connectBtn} onClick={() => signIn('google')}>Connect Google Account</button>
+          <button className={styles.connectBtn} onClick={handleConnectGoogle}>Connect Google Account</button>
         </div>
       </div>
     );
