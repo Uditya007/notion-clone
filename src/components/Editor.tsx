@@ -16,7 +16,7 @@ import KanbanBoard from "./KanbanBoard";
 import CalendarView from "./CalendarView";
 import InboxView from "./InboxView";
 import TasksView from "./TasksView";
-import AutomationsView from "./AutomationsView";
+import AgentsView from "./AgentsView";
 import TemplatesView from "./TemplatesView";
 import ShareModal from "./ShareModal";
 import TrashView from "./TrashView";
@@ -318,7 +318,7 @@ export default function Editor() {
   if (activePageId === 'calendar') return <CalendarView />;
   if (activePageId === 'inbox') return <InboxView />;
   if (activePageId === 'tasks') return <TasksView />;
-  if (activePageId === 'automations') return <AutomationsView />;
+  if (activePageId === 'automations') return <AgentsView />;
   if (activePageId === 'templates') return <TemplatesView />;
   if (activePageId === 'trash') return <TrashView />;
 
