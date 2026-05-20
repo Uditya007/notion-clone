@@ -2,7 +2,7 @@
 import styles from './CalendarView.module.css';
 import { Calendar as CalendarIcon, Clock, Users, Plus, ChevronLeft, ChevronRight, Video, ExternalLink } from 'lucide-react';
 import { useState, useEffect } from 'react';
-import { useSession, signIn } from 'next-auth/react';
+import { useSession, signIn, signOut } from 'next-auth/react';
 
 type CalendarEvent = {
   id: string;
@@ -22,6 +22,7 @@ export default function CalendarView() {
   const [events, setEvents] = useState<CalendarEvent[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [selectedEvent, setSelectedEvent] = useState<CalendarEvent | null>(null);
+  const [error, setError] = useState<string | null>(null);
 
   // New Event Form State
   const [isAddingEvent, setIsAddingEvent] = useState(false);
@@ -94,6 +95,7 @@ export default function CalendarView() {
   const fetchEvents = async () => {
     if (!session) return;
     setIsLoading(true);
+    setError(null);
     
     // Fetch events for the current month +/- 1 month
     const timeMin = new Date(currentDate.getFullYear(), currentDate.getMonth() - 1, 1).toISOString();
@@ -136,6 +138,7 @@ export default function CalendarView() {
       setEvents(mappedEvents);
     } catch (e) {
       console.error(e);
+      setError('Unable to load calendar events. Try logging out and reconnecting your Google Account to refresh your credentials.');
     } finally {
       setIsLoading(false);
     }
@@ -293,6 +296,20 @@ export default function CalendarView() {
             style={{ padding: '8px 16px', background: 'var(--text-main)', color: 'var(--bg-main)', borderRadius: '6px', fontWeight: 500, fontSize: '14px', display: 'flex', alignItems: 'center', gap: '8px', cursor: 'pointer' }}
           >
             Connect Google Account
+          </button>
+        </div>
+      ) : error ? (
+        <div className={styles.emptyStateContainer} style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: '16px' }}>
+          <CalendarIcon size={48} opacity={0.2} />
+          <h3 style={{ fontSize: '18px', fontWeight: 600 }}>Connection Issue</h3>
+          <p style={{ color: 'var(--text-muted)', fontSize: '14px', maxWidth: '350px', textAlign: 'center' }}>
+            {error}
+          </p>
+          <button 
+            onClick={() => signOut()}
+            style={{ padding: '8px 16px', background: 'var(--text-main)', color: 'var(--bg-main)', borderRadius: '6px', fontWeight: 500, fontSize: '14px', cursor: 'pointer', border: 'none' }}
+          >
+            Sign Out & Reconnect
           </button>
         </div>
       ) : (
