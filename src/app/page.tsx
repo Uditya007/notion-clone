@@ -4,6 +4,22 @@ import Link from "next/link";
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { supabase } from "@/lib/supabase/client";
+import { 
+  FileText, 
+  Brain, 
+  Database, 
+  Sparkles, 
+  CheckSquare, 
+  Layers, 
+  Lock, 
+  User, 
+  Mail, 
+  Calendar,
+  ChevronRight,
+  TrendingUp,
+  Award,
+  BookOpen
+} from "lucide-react";
 import styles from "./home.module.css";
 
 export default function LandingPage() {
@@ -20,7 +36,7 @@ export default function LandingPage() {
     });
   }, [router]);
 
-  if (isLoading) return null; // or a simple spinner, but null avoids flash
+  if (isLoading) return null;
 
   return (
     <div className={styles.container}>
@@ -30,12 +46,19 @@ export default function LandingPage() {
           <div className={styles.logoIcon}></div>
           <span className={styles.logoText}>Clearspace</span>
         </div>
+        
+        <div className={styles.navLinks}>
+          <Link href="#features" className={styles.navLink}>Overview</Link>
+          <Link href="#use-cases" className={styles.navLink}>Plans</Link>
+          <Link href="#privacy" className={styles.navLink}>Privacy</Link>
+        </div>
+
         <div className={styles.navActions}>
           <Link href="/login" className={styles.loginLink}>
             Log in
           </Link>
           <Link href="/signup" className={styles.primaryBtn}>
-            Get started free
+            Get the app <ChevronRight size={16} style={{ marginLeft: "4px" }} />
           </Link>
         </div>
       </nav>
@@ -44,107 +67,208 @@ export default function LandingPage() {
       <section className={styles.hero}>
         <div className={styles.pillBadge}>Now in public beta ✦</div>
         <h1 className={styles.heroTitle}>
-          Your workspace,<br />
-          without the<br />
-          clutter.
+          Understand <span className={styles.heroHighlight}>Anything</span>
         </h1>
         <p className={styles.heroSubtext}>
-          Clearspace is a focused productivity app for<br />
-          people who want to think clearly and work fast.
+          Your research and thinking partner, grounded in the information you trust, built with the latest Gemini models.
         </p>
         <div className={styles.heroButtons}>
-          <Link href="/signup" className={styles.primaryBtn}>
-            Start for free →
-          </Link>
-          <Link href="#features" className={styles.secondaryBtn}>
-            See how it works
+          <Link href="/signup" className={styles.primaryBtn} style={{ padding: "12px 28px", fontSize: "15px" }}>
+            Try Clearspace
           </Link>
         </div>
         <p className={styles.heroFineprint}>
-          No credit card required · Free forever plan
+          Free forever plan · Integrated Google Calendar & Gmail
         </p>
+      </section>
 
-        <div className={styles.mockupWrapper}>
-          <div className={styles.mockupFrame}>
-            <div className={styles.mockupHeader}>
-              <div className={styles.mockupDot}></div>
-              <div className={styles.mockupDot}></div>
-              <div className={styles.mockupDot}></div>
-              <div className={styles.mockupUrl}></div>
+      {/* PRODUCT FEATURES SHOWCASE (SPLIT ROWS) */}
+      <section id="features" className={styles.productShowcase}>
+        <div className={styles.sectionLabel}>Your AI-Powered Research Partner</div>
+        <h2 className={styles.sectionTitle} style={{ marginBottom: "20px" }}>Simply powerful. Powerfully simple.</h2>
+        
+        {/* Row 1 */}
+        <div className={showcaseRowClassName(false)}>
+          <div className={styles.showcaseText}>
+            <div className={styles.showcaseIconWrapper}>
+              <Layers size={22} />
+            </div>
+            <h3 className={styles.showcaseTitle}>Upload your sources</h3>
+            <p className={styles.showcaseDesc}>
+              Upload PDFs, web articles, Google Docs, calendars, and emails. Clearspace instantly maps connections between disparate ideas, powered by state-of-the-art multimodal understanding.
+            </p>
+            <div style={{ display: "flex", gap: "12px" }}>
+              <Link href="/signup" className={styles.secondaryBtn} style={{ display: "inline-flex", alignItems: "center", gap: "6px" }}>
+                Connect Sources <ChevronRight size={14} />
+              </Link>
+            </div>
+          </div>
+          <div className={styles.showcaseVisual}>
+            <div className={styles.visualMockupFile}>
+              <div style={{ display: "flex", alignItems: "center", gap: "8px", marginBottom: "16px" }}>
+                <FileText size={18} color="#10b981" />
+                <span style={{ fontSize: "13px", fontWeight: 600 }}>quarterly_report.pdf</span>
+              </div>
+              <div className={styles.mockupLine}></div>
+              <div className={styles.mockupLine}></div>
+              <div className={styles.mockupLineShort}></div>
+              
+              <div className={styles.mockupFilePill}>
+                <Sparkles size={12} /> Key Insights Generated
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* Row 2 */}
+        <div className={showcaseRowClassName(true)}>
+          <div className={styles.showcaseVisual}>
+            <div className={styles.visualMockupAI}>
+              <div style={{ display: "flex", alignItems: "center", gap: "8px", marginBottom: "12px" }}>
+                <Brain size={18} color="#10b981" />
+                <span style={{ fontSize: "13px", fontWeight: 600, color: "#fff" }}>Study Companion AI</span>
+              </div>
+              <p style={{ fontSize: "12px", color: "rgba(255,255,255,0.6)", margin: "0 0 16px" }}>
+                "Here is a comprehensive breakdown of the core strategies discussed in your uploaded briefs."
+              </p>
+              <div className={styles.aiPillsGrid}>
+                <div className={styles.aiPill}>📝 Study Guide</div>
+                <div className={styles.aiPill}>💡 Briefing Doc</div>
+                <div className={styles.aiPill}>❓ FAQ sheet</div>
+                <div className={styles.aiPill}>⏳ Timeline</div>
+              </div>
+            </div>
+          </div>
+          <div className={styles.showcaseText}>
+            <div className={styles.showcaseIconWrapper}>
+              <Sparkles size={22} />
+            </div>
+            <h3 className={styles.showcaseTitle}>Instant insights</h3>
+            <p className={styles.showcaseDesc}>
+              With all your materials in place, Clearspace becomes your personalized AI expert. Get auto-generated study guides, briefing documents, interactive timelines, and instant answers tailored exclusively to your documents.
+            </p>
+            <div>
+              <Link href="/signup" className={styles.primaryBtn}>
+                Try Live Chat
+              </Link>
             </div>
           </div>
         </div>
       </section>
 
-      {/* FEATURES SECTION */}
-      <section id="features" className={styles.features}>
-        <div className={styles.sectionLabel}>FEATURES</div>
-        <h2 className={styles.sectionTitle}>Everything you need. Nothing you don't.</h2>
-        <div className={styles.featuresGrid}>
-          <div className={styles.featureCard}>
-            <div className={styles.featureIcon}>✦</div>
-            <h3 className={styles.featureTitle}>AI-powered writing</h3>
-            <p className={styles.featureDesc}>
-              Write, summarize, and improve your content with one keystroke.
+      {/* HOW PEOPLE ARE USING IT */}
+      <section id="use-cases" className={styles.howPeopleUse}>
+        <div className={styles.sectionLabel}>USE CASES</div>
+        <h2 className={styles.sectionTitle}>How people are using Clearspace</h2>
+        
+        <div className={styles.useGrid}>
+          <div className={styles.useCard}>
+            <span className={styles.useIcon}>🎓</span>
+            <h4 className={styles.useTitle}>Power study</h4>
+            <p className={styles.useDesc}>
+              Upload lecture slides, textbook chapters, and syllabus briefs. Ask Clearspace to outline complex concepts, quiz your understanding, or draft instant summaries.
             </p>
+            <span className={styles.useLinkText}>Learn faster and deeper.</span>
           </div>
-          <div className={styles.featureCard}>
-            <div className={styles.featureIcon}>⚡</div>
-            <h3 className={styles.featureTitle}>Smart automations</h3>
-            <p className={styles.featureDesc}>
-              Automate repetitive tasks so you can focus on what matters.
+
+          <div className={styles.useCard}>
+            <span className={styles.useIcon}>📁</span>
+            <h4 className={styles.useTitle}>Organize thinking</h4>
+            <p className={styles.useDesc}>
+              Import raw brainstorming sheets, competitor analyses, and notes. Ask Clearspace to convert chaotic streams of thought into beautifully formatted presentation templates.
             </p>
+            <span className={styles.useLinkText}>Present with confidence.</span>
           </div>
-          <div className={styles.featureCard}>
-            <div className={styles.featureIcon}>□</div>
-            <h3 className={styles.featureTitle}>Flexible databases</h3>
-            <p className={styles.featureDesc}>
-              Build tables, boards, and views that fit exactly how you think.
+
+          <span className={styles.useCard}>
+            <span className={styles.useIcon}>💡</span>
+            <h4 className={styles.useTitle}>Spark new ideas</h4>
+            <p className={styles.useDesc}>
+              Link Google calendars, task logs, and meeting agendas. Ask Clearspace to synthesize schedules, reveal hidden project trends, and recommend creative pathways.
             </p>
+            <span className={styles.useLinkText}>Unlock your creative potential.</span>
+          </span>
+        </div>
+      </section>
+
+      {/* WHAT PEOPLE ARE SAYING */}
+      <section className={styles.testimonials}>
+        <div className={styles.sectionLabel}>TESTIMONIALS</div>
+        <h2 className={styles.sectionTitle}>What people are saying</h2>
+
+        <div className={styles.testimonialsGrid}>
+          <div className={styles.testimonialCard}>
+            <p className={styles.testimonialQuote}>
+              "Clearspace blew our mind. The speed and quality of context retrieval is unmatched."
+            </p>
+            <div className={styles.testimonialAuthor}>
+              <div className={styles.testimonialAvatar}>HF</div>
+              <span className={styles.testimonialName}>HardFork</span>
+            </div>
+          </div>
+
+          <div className={styles.testimonialCard}>
+            <p className={styles.testimonialQuote}>
+              "This could be the next killer app in generative AI. Perfect for research."
+            </p>
+            <div className={styles.testimonialAuthor}>
+              <div className={styles.testimonialAvatar}>CB</div>
+              <span className={styles.testimonialName}>CNBC Reports</span>
+            </div>
+          </div>
+
+          <div className={styles.testimonialCard}>
+            <p className={styles.testimonialQuote}>
+              "A glimpse into AI's future in the workplace. Clean, focused, and intuitive."
+            </p>
+            <div className={styles.testimonialAuthor}>
+              <div className={styles.testimonialAvatar}>BR</div>
+              <span className={styles.testimonialName}>Barron's Tech</span>
+            </div>
           </div>
         </div>
       </section>
 
-      {/* HOW IT WORKS SECTION */}
-      <section className={styles.howItWorks}>
-        <h2 className={styles.sectionTitle}>Simple by design.</h2>
-        <div className={styles.stepsContainer}>
-          <div className={styles.stepsLine}></div>
-          <div className={styles.step}>
-            <div className={styles.stepNumber}>1</div>
-            <h3 className={styles.stepTitle}>Create a workspace</h3>
-            <p className={styles.stepDesc}>Set up your account in seconds.</p>
+      {/* PRIVACY SECTION WITH ORBITAL ANIMATION */}
+      <section id="privacy" className={styles.privacySection}>
+        <div className={styles.privacyContent}>
+          <h2 className={styles.privacyTitle}>Your data is safe with us</h2>
+          <p className={styles.privacyDesc}>
+            We value your privacy and never use your personal files, notes, emails, or schedules to train Clearspace AI models. Your workspace is 100% private.
+          </p>
+        </div>
+
+        {/* ORBITAL WIDGET */}
+        <div className={styles.orbitContainer}>
+          <div className={styles.orbitCenter}>
+            <Lock size={28} color="#10b981" />
           </div>
-          <div className={styles.step}>
-            <div className={styles.stepNumber}>2</div>
-            <h3 className={styles.stepTitle}>Build your system</h3>
-            <p className={styles.stepDesc}>Add pages and databases effortlessly.</p>
+          
+          <div className={`${styles.orbitRing} ${styles.orbitRing1}`}>
+            <div className={styles.orbitItem}>
+              <FileText size={14} color="#3b82f6" />
+            </div>
+            <div className={styles.orbitItem}>
+              <User size={14} color="#10b981" />
+            </div>
           </div>
-          <div className={styles.step}>
-            <div className={styles.stepNumber}>3</div>
-            <h3 className={styles.stepTitle}>Work without friction</h3>
-            <p className={styles.stepDesc}>Stay focused on what matters.</p>
+
+          <div className={`${styles.orbitRing} ${styles.orbitRing2}`}>
+            <div className={styles.orbitItem}>
+              <Calendar size={14} color="#eab308" />
+            </div>
+            <div className={styles.orbitItem}>
+              <Mail size={14} color="#ef4444" />
+            </div>
           </div>
         </div>
       </section>
 
-      {/* SOCIAL PROOF BAR */}
-      <section className={styles.socialProof}>
-        <p className={styles.socialText}>Trusted by 1,200+ teams and solo builders</p>
-        <div className={styles.companyPills}>
-          <span className={styles.companyPill}>Archway</span>
-          <span className={styles.companyPill}>Solvd</span>
-          <span className={styles.companyPill}>Loopkit</span>
-          <span className={styles.companyPill}>Forma</span>
-          <span className={styles.companyPill}>Trellis</span>
-        </div>
-      </section>
-
-      {/* FINAL CTA SECTION */}
+      {/* FINAL CALL TO ACTION */}
       <section className={styles.finalCta}>
         <h2 className={styles.finalCtaTitle}>Ready to clear the clutter?</h2>
-        <Link href="/signup" className={styles.primaryBtn} style={{ marginBottom: "16px" }}>
-          Get started free →
+        <Link href="/signup" className={styles.primaryBtn} style={{ padding: "14px 36px", fontSize: "16px", marginBottom: "16px" }}>
+          Get Started Free
         </Link>
         <p className={styles.heroFineprint}>Takes 30 seconds to set up</p>
       </section>
@@ -158,10 +282,15 @@ export default function LandingPage() {
         <div className={styles.footerLinks}>
           <Link href="#" className={styles.footerLink}>Privacy</Link>
           <Link href="#" className={styles.footerLink}>Terms</Link>
-          <Link href="#" className={styles.footerLink}>Twitter</Link>
+          <Link href="#" className={styles.footerLink}>Discord</Link>
           <Link href="#" className={styles.footerLink}>GitHub</Link>
         </div>
       </footer>
     </div>
   );
+}
+
+// Helper to handle direction of row styling cleanly
+function showcaseRowClassName(reversed: boolean): string {
+  return reversed ? styles.showcaseRowReversed : styles.showcaseRow;
 }
