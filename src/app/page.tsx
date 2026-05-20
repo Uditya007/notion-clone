@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
+import { supabase } from "@/lib/supabase/client";
 import styles from "./home.module.css";
 
 export default function LandingPage() {
@@ -10,12 +11,13 @@ export default function LandingPage() {
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
-    const user = localStorage.getItem("currentUser");
-    if (user) {
-      router.push("/workspace");
-    } else {
-      setIsLoading(false);
-    }
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      if (session) {
+        router.push("/workspace");
+      } else {
+        setIsLoading(false);
+      }
+    });
   }, [router]);
 
   if (isLoading) return null; // or a simple spinner, but null avoids flash

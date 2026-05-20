@@ -1,27 +1,19 @@
-"use client";
 import Sidebar from "@/components/Sidebar";
 import AIChatPanel from "@/components/AIChatPanel";
-import { useEffect, useState } from "react";
-import { useRouter } from "next/navigation";
-import { isAuthenticated } from "@/lib/auth";
+import { createClient } from "@/lib/supabase/server";
+import { redirect } from "next/navigation";
 
-export default function WorkspaceLayout({
+export default async function WorkspaceLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
-  const router = useRouter();
-  const [isAuth, setIsAuth] = useState(false);
+  const supabase = await createClient();
+  const { data: { user } } = await supabase.auth.getUser();
 
-  useEffect(() => {
-    if (!isAuthenticated()) {
-      router.push("/login");
-    } else {
-      setIsAuth(true);
-    }
-  }, [router]);
-
-  if (!isAuth) return null;
+  if (!user) {
+    redirect("/login");
+  }
 
   return (
     <div className="app-container">

@@ -3,7 +3,7 @@
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
-import { saveUser, isAuthenticated } from "@/lib/auth";
+import { supabase } from "@/lib/supabase/client";
 import styles from "./signup.module.css";
 
 export default function SignupPage() {
@@ -13,21 +13,45 @@ export default function SignupPage() {
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState("");
+  const [successMessage, setSuccessMessage] = useState("");
+  const [isLoading, setIsLoading] = useState(false);
 
   useEffect(() => {
-    if (isAuthenticated()) {
-      router.push("/workspace");
-    }
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      if (session) {
+        router.push("/workspace");
+      }
+    });
   }, [router]);
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError("");
+    setSuccessMessage("");
+    setIsLoading(true);
+
     try {
-      saveUser(name, email, password);
-      router.push("/workspace");
+      const { error } = await supabase.auth.signUp({
+        email,
+        password,
+        options: {
+          data: {
+            full_name: name,
+          },
+          emailRedirectTo: `${window.location.origin}/auth/callback`,
+        },
+      });
+
+      if (error) {
+        setError(error.message);
+        setIsLoading(false);
+      } else {
+        setSuccessMessage("Please check your email to confirm your account!");
+        setIsLoading(false);
+      }
     } catch (err: any) {
-      setError(err.message || "Something went wrong");
+      setError("An unexpected error occurred. Please try again.");
+      setIsLoading(false);
     }
   };
 
@@ -55,6 +79,7 @@ export default function SignupPage() {
 
           <form onSubmit={handleSubmit}>
             {error && <div className={styles.error}>{error}</div>}
+            {successMessage && <div className={styles.success} style={{ color: "#10b981", marginBottom: "16px", fontSize: "14px", fontWeight: 500 }}>{successMessage}</div>}
             
             <div className={styles.formGroup}>
               <input
@@ -64,6 +89,7 @@ export default function SignupPage() {
                 value={name}
                 onChange={(e) => setName(e.target.value)}
                 required
+                disabled={isLoading}
               />
             </div>
 
@@ -75,6 +101,7 @@ export default function SignupPage() {
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 required
+                disabled={isLoading}
               />
             </div>
 
@@ -86,18 +113,20 @@ export default function SignupPage() {
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 required
+                disabled={isLoading}
               />
               <button
                 type="button"
                 className={styles.togglePassword}
                 onClick={() => setShowPassword(!showPassword)}
+                disabled={isLoading}
               >
                 {showPassword ? "Hide" : "Show"}
               </button>
             </div>
 
-            <button type="submit" className={styles.submitBtn}>
-              Create account
+            <button type="submit" className={styles.submitBtn} disabled={isLoading}>
+              {isLoading ? "Creating account..." : "Create account"}
             </button>
           </form>
 
