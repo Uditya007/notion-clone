@@ -322,7 +322,36 @@ export default function Editor() {
   if (activePageId === 'templates') return <TemplatesView />;
   if (activePageId === 'trash') return <TrashView />;
 
-  if (!activePage) return null;
+  if (!activePage) {
+    return (
+      <div className={styles.welcomeContainer}>
+        <div className={styles.welcomeContent}>
+          <div className={styles.welcomeEmoji}>👋</div>
+          <h1 className={styles.welcomeTitle}>Welcome to Clearspace</h1>
+          <p className={styles.welcomeSubtitle}>
+            Your beautiful, secure digital workspace. Choose an existing page from your sidebar or click the "+ Add Page" button to get started!
+          </p>
+          <div className={styles.welcomeFeatures}>
+            <div className={styles.featureCard}>
+              <span className={styles.featureIcon}>📝</span>
+              <h3>Quick Notes</h3>
+              <p>Write ideas, draft blogs, or take rich meeting notes with TipTap.</p>
+            </div>
+            <div className={styles.featureCard}>
+              <span className={styles.featureIcon}>🗄</span>
+              <h3>Databases</h3>
+              <p>Organize projects, boards, galleries, and custom item trackers.</p>
+            </div>
+            <div className={styles.featureCard}>
+              <span className={styles.featureIcon}>✨</span>
+              <h3>AI Assistant</h3>
+              <p>Prompt Claude to co-write, translate, or chat about your notes.</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   const onlineUsers = [
     { id: 1, name: 'Alex', color: '#ff4d4d' },
