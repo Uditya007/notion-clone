@@ -1,10 +1,8 @@
 import { NextResponse } from "next/server";
-import { getServerSession } from "next-auth/next";
-import { authOptions } from "../../auth/[...nextauth]/route";
+import { getGoogleToken } from "@/lib/google-auth";
 
 export async function GET(req: Request) {
-  const session = await getServerSession(authOptions);
-  const token = (session as any)?.accessToken;
+  const token = await getGoogleToken();
   
   if (!token) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
@@ -36,8 +34,7 @@ export async function GET(req: Request) {
 }
 
 export async function POST(req: Request) {
-  const session = await getServerSession(authOptions);
-  const token = (session as any)?.accessToken;
+  const token = await getGoogleToken();
   
   if (!token) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
@@ -68,8 +65,7 @@ export async function POST(req: Request) {
 }
 
 export async function PATCH(req: Request) {
-  const session = await getServerSession(authOptions);
-  const token = (session as any)?.accessToken;
+  const token = await getGoogleToken();
   
   if (!token) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
@@ -100,8 +96,7 @@ export async function PATCH(req: Request) {
 }
 
 export async function DELETE(req: Request) {
-  const session = await getServerSession(authOptions);
-  const token = (session as any)?.accessToken;
+  const token = await getGoogleToken();
   
   if (!token) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });

@@ -2,7 +2,7 @@
 import styles from './CalendarView.module.css';
 import { Calendar as CalendarIcon, Clock, Users, Plus, ChevronLeft, ChevronRight, Video, ExternalLink } from 'lucide-react';
 import { useState, useEffect } from 'react';
-import { useSession, signIn, signOut } from 'next-auth/react';
+import { supabase } from '@/lib/supabase/client';
 
 type CalendarEvent = {
   id: string;
@@ -16,13 +16,69 @@ type CalendarEvent = {
 };
 
 export default function CalendarView() {
-  const { data: session, status } = useSession();
+  const [isConnected, setIsConnected] = useState(false);
+  const [connectedEmail, setConnectedEmail] = useState<string | null>(null);
   const [view, setView] = useState<'Month' | 'Week' | 'Day'>('Month');
   const [currentDate, setCurrentDate] = useState(new Date());
   const [events, setEvents] = useState<CalendarEvent[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [selectedEvent, setSelectedEvent] = useState<CalendarEvent | null>(null);
   const [error, setError] = useState<string | null>(null);
+
+  const checkConnectionStatus = async () => {
+    try {
+      const res = await fetch('/api/google/connect');
+      if (res.ok) {
+        const data = await res.json();
+        if (data?.connected) {
+          setIsConnected(true);
+          setConnectedEmail(data.email);
+          return true;
+        }
+      }
+    } catch (err) {
+      console.error(err);
+    }
+    setIsConnected(false);
+    setConnectedEmail(null);
+    return false;
+  };
+
+  const handleConnectGoogle = async () => {
+    try {
+      setError(null);
+      const { error } = await supabase.auth.signInWithOAuth({
+        provider: 'google',
+        options: {
+          redirectTo: `${window.location.origin}/auth/callback`,
+          queryParams: {
+            access_type: 'offline',
+            prompt: 'consent'
+          },
+          scopes: 'email profile https://www.googleapis.com/auth/calendar https://www.googleapis.com/auth/gmail.modify'
+        }
+      });
+      if (error) throw error;
+    } catch (err: any) {
+      setError(err.message || 'Failed to connect Google Account');
+    }
+  };
+
+  const handleDisconnectGoogle = async () => {
+    try {
+      setIsLoading(true);
+      const res = await fetch('/api/google/connect', { method: 'DELETE' });
+      if (res.ok) {
+        setIsConnected(false);
+        setConnectedEmail(null);
+        setEvents([]);
+      }
+    } catch (err) {
+      console.error(err);
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
   // New Event Form State
   const [isAddingEvent, setIsAddingEvent] = useState(false);
@@ -93,7 +149,7 @@ export default function CalendarView() {
   };
 
   const fetchEvents = async () => {
-    if (!session) return;
+    if (!isConnected) return;
     setIsLoading(true);
     setError(null);
     
@@ -145,10 +201,14 @@ export default function CalendarView() {
   };
 
   useEffect(() => {
-    if (session) {
-      fetchEvents();
-    }
-  }, [session, currentDate]);
+    const init = async () => {
+      const connected = await checkConnectionStatus();
+      if (connected) {
+        fetchEvents();
+      }
+    };
+    init();
+  }, [isConnected, currentDate]);
 
   const [draggedEventId, setDraggedEventId] = useState<string | null>(null);
 
@@ -208,7 +268,7 @@ export default function CalendarView() {
       
       // Real API update
       const evToUpdate = events.find(e => e.id === draggedEventId);
-      if (evToUpdate && session) {
+      if (evToUpdate && isConnected) {
         try {
           // If it had a specific time, we need to preserve the time but change the date
           let newStart;
@@ -279,12 +339,12 @@ export default function CalendarView() {
         </div>
         
         <div className={styles.integrationNotice}>
-          <div className={styles.noticeDot} style={{ backgroundColor: session ? '#10b981' : '#a1a1aa' }} />
-          <span>{session ? `Synced with ${session.user?.email}` : 'Not connected'}</span>
+          <div className={styles.noticeDot} style={{ backgroundColor: isConnected ? '#10b981' : '#a1a1aa' }} />
+          <span>{isConnected ? `Synced with ${connectedEmail || 'Google Calendar'}` : 'Not connected'}</span>
         </div>
       </div>
 
-      {!session ? (
+      {!isConnected ? (
         <div className={styles.emptyStateContainer} style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: '16px' }}>
           <CalendarIcon size={48} opacity={0.2} />
           <h3 style={{ fontSize: '18px', fontWeight: 600 }}>Connect Google Calendar</h3>
@@ -292,7 +352,7 @@ export default function CalendarView() {
             Sync your real events and manage your schedule directly inside Clearspace.
           </p>
           <button 
-            onClick={() => signIn("google")}
+            onClick={handleConnectGoogle}
             style={{ padding: '8px 16px', background: 'var(--text-main)', color: 'var(--bg-main)', borderRadius: '6px', fontWeight: 500, fontSize: '14px', display: 'flex', alignItems: 'center', gap: '8px', cursor: 'pointer' }}
           >
             Connect Google Account
@@ -306,7 +366,7 @@ export default function CalendarView() {
             {error}
           </p>
           <button 
-            onClick={() => signOut()}
+            onClick={handleDisconnectGoogle}
             style={{ padding: '8px 16px', background: 'var(--text-main)', color: 'var(--bg-main)', borderRadius: '6px', fontWeight: 500, fontSize: '14px', cursor: 'pointer', border: 'none' }}
           >
             Sign Out & Reconnect
