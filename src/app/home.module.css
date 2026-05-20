@@ -1,7 +1,7 @@
 .container {
   min-height: 100vh;
-  background-color: #050505;
-  color: #ffffff;
+  background-color: #ffffff;
+  color: #0f172a;
   display: flex;
   flex-direction: column;
   overflow-x: hidden;
@@ -17,7 +17,7 @@
   left: 20%;
   width: 60%;
   height: 60%;
-  background: radial-gradient(circle, rgba(16, 185, 129, 0.08) 0%, rgba(59, 130, 246, 0.05) 50%, transparent 100%);
+  background: radial-gradient(circle, rgba(16, 185, 129, 0.05) 0%, rgba(59, 130, 246, 0.03) 50%, transparent 100%);
   z-index: 0;
   pointer-events: none;
 }
@@ -30,9 +30,9 @@
   align-items: center;
   justify-content: space-between;
   padding: 20px 48px;
-  background-color: rgba(5, 5, 5, 0.7);
+  background-color: rgba(255, 255, 255, 0.8);
   backdrop-filter: blur(16px);
-  border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+  border-bottom: 1px solid rgba(15, 23, 42, 0.06);
   z-index: 100;
 }
 
@@ -47,14 +47,14 @@
   height: 28px;
   background: linear-gradient(135deg, #10b981 0%, #3b82f6 100%);
   border-radius: 6px;
-  box-shadow: 0 4px 12px rgba(16, 185, 129, 0.35);
+  box-shadow: 0 4px 12px rgba(16, 185, 129, 0.2);
 }
 
 .logoText {
   font-size: 18px;
   font-weight: 700;
   letter-spacing: -0.02em;
-  background: linear-gradient(to right, #ffffff 60%, rgba(255, 255, 255, 0.7));
+  background: linear-gradient(to right, #0f172a 60%, rgba(15, 23, 42, 0.7));
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
 }
@@ -66,7 +66,7 @@
 }
 
 .navLink {
-  color: rgba(255, 255, 255, 0.6);
+  color: rgba(15, 23, 42, 0.6);
   text-decoration: none;
   font-size: 14px;
   font-weight: 500;
@@ -74,7 +74,7 @@
 }
 
 .navLink:hover {
-  color: #ffffff;
+  color: #0f172a;
 }
 
 .navActions {
@@ -84,7 +84,7 @@
 }
 
 .loginLink {
-  color: rgba(255, 255, 255, 0.8);
+  color: rgba(15, 23, 42, 0.8);
   text-decoration: none;
   font-size: 14px;
   font-weight: 600;
@@ -92,7 +92,7 @@
 }
 
 .loginLink:hover {
-  color: #ffffff;
+  color: #0f172a;
 }
 
 .primaryBtn {
@@ -104,7 +104,7 @@
   font-weight: 600;
   text-decoration: none;
   border: none;
-  box-shadow: 0 4px 14px rgba(16, 185, 129, 0.25);
+  box-shadow: 0 4px 14px rgba(16, 185, 129, 0.2);
   transition: transform 0.2s, box-shadow 0.2s;
   display: inline-flex;
   align-items: center;
@@ -112,24 +112,24 @@
 
 .primaryBtn:hover {
   transform: translateY(-1px);
-  box-shadow: 0 6px 20px rgba(16, 185, 129, 0.35);
+  box-shadow: 0 6px 20px rgba(16, 185, 129, 0.3);
 }
 
 .secondaryBtn {
-  background-color: rgba(255, 255, 255, 0.03);
-  color: #ffffff;
+  background-color: rgba(15, 23, 42, 0.02);
+  color: #0f172a;
   padding: 10px 20px;
   border-radius: 8px;
   font-size: 14px;
   font-weight: 600;
   text-decoration: none;
-  border: 1px solid rgba(255, 255, 255, 0.12);
+  border: 1px solid rgba(15, 23, 42, 0.1);
   transition: background-color 0.2s, border-color 0.2s;
 }
 
 .secondaryBtn:hover {
-  background-color: rgba(255, 255, 255, 0.08);
-  border-color: rgba(255, 255, 255, 0.25);
+  background-color: rgba(15, 23, 42, 0.06);
+  border-color: rgba(15, 23, 42, 0.2);
 }
 
 /* HERO */
@@ -145,13 +145,13 @@
 }
 
 .pillBadge {
-  background-color: rgba(16, 185, 129, 0.08);
-  border: 1px solid rgba(16, 185, 129, 0.2);
+  background-color: rgba(16, 185, 129, 0.06);
+  border: 1px solid rgba(16, 185, 129, 0.15);
   padding: 6px 14px;
   border-radius: 30px;
   font-size: 12px;
   font-weight: 600;
-  color: #10b981;
+  color: #059669;
   margin-bottom: 32px;
   letter-spacing: 0.05em;
   text-transform: uppercase;
@@ -170,7 +170,7 @@
   font-weight: 800;
   letter-spacing: -0.04em;
   margin-bottom: 24px;
-  color: #ffffff;
+  color: #0f172a;
 }
 
 .heroHighlight {
@@ -182,7 +182,7 @@
 .heroSubtext {
   font-size: 18px;
   line-height: 1.6;
-  color: rgba(255, 255, 255, 0.6);
+  color: rgba(15, 23, 42, 0.65);
   margin-bottom: 40px;
   max-width: 600px;
 }
@@ -196,14 +196,14 @@
 
 .heroFineprint {
   font-size: 13px;
-  color: rgba(255, 255, 255, 0.4);
+  color: rgba(15, 23, 42, 0.45);
 }
 
 /* SECTION HEADERS */
 .sectionLabel {
   font-size: 12px;
   font-weight: 700;
-  color: #10b981;
+  color: #059669;
   letter-spacing: 0.15em;
   text-transform: uppercase;
   margin-bottom: 16px;
@@ -216,7 +216,7 @@
   letter-spacing: -0.02em;
   margin-bottom: 64px;
   text-align: center;
-  color: #ffffff;
+  color: #0f172a;
 }
 
 /* SPLIT PRODUCT SECTIONS */
@@ -251,14 +251,14 @@
 .showcaseIconWrapper {
   width: 48px;
   height: 48px;
-  background-color: rgba(255, 255, 255, 0.03);
-  border: 1px solid rgba(255, 255, 255, 0.1);
+  background-color: rgba(15, 23, 42, 0.02);
+  border: 1px solid rgba(15, 23, 42, 0.08);
   border-radius: 12px;
   display: flex;
   align-items: center;
   justify-content: center;
   margin-bottom: 24px;
-  color: #10b981;
+  color: #059669;
 }
 
 .showcaseTitle {
@@ -266,24 +266,24 @@
   font-weight: 700;
   margin-bottom: 16px;
   letter-spacing: -0.01em;
-  color: #ffffff;
+  color: #0f172a;
 }
 
 .showcaseDesc {
   font-size: 16px;
   line-height: 1.6;
-  color: rgba(255, 255, 255, 0.65);
+  color: rgba(15, 23, 42, 0.65);
   margin-bottom: 32px;
 }
 
 .showcaseVisual {
   position: relative;
-  background-color: rgba(255, 255, 255, 0.02);
-  border: 1px solid rgba(255, 255, 255, 0.08);
+  background-color: #f8fafc;
+  border: 1px solid rgba(15, 23, 42, 0.06);
   border-radius: 16px;
   aspect-ratio: 4/3;
   overflow: hidden;
-  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.4);
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.06);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -292,11 +292,11 @@
 /* CUSTOM VISUAL MOCKUPS */
 .visualMockupFile {
   width: 80%;
-  background-color: #111;
+  background-color: #ffffff;
   border-radius: 12px;
-  border: 1px solid rgba(255, 255, 255, 0.1);
+  border: 1px solid rgba(15, 23, 42, 0.08);
   padding: 16px;
-  box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+  box-shadow: 0 10px 30px rgba(0,0,0,0.05);
   animation: float 6s ease-in-out infinite;
 }
 
@@ -308,7 +308,7 @@
 
 .mockupLine {
   height: 8px;
-  background: rgba(255,255,255,0.06);
+  background: rgba(15, 23, 42, 0.04);
   border-radius: 4px;
   margin-bottom: 12px;
 }
@@ -316,7 +316,7 @@
 .mockupLineShort {
   width: 60%;
   height: 8px;
-  background: rgba(255,255,255,0.06);
+  background: rgba(15, 23, 42, 0.04);
   border-radius: 4px;
   margin-bottom: 12px;
 }
@@ -326,22 +326,22 @@
   align-items: center;
   gap: 8px;
   padding: 6px 12px;
-  background-color: rgba(16, 185, 129, 0.1);
-  border: 1px solid rgba(16, 185, 129, 0.2);
+  background-color: rgba(16, 185, 129, 0.08);
+  border: 1px solid rgba(16, 185, 129, 0.15);
   border-radius: 20px;
   font-size: 12px;
-  color: #10b981;
+  color: #059669;
   font-weight: 500;
   margin-top: 16px;
 }
 
 .visualMockupAI {
   width: 75%;
-  background-color: #111;
+  background-color: #ffffff;
   border-radius: 12px;
   border: 1px solid #10b981;
   padding: 20px;
-  box-shadow: 0 10px 30px rgba(16, 185, 129, 0.1);
+  box-shadow: 0 10px 30px rgba(16, 185, 129, 0.06);
   animation: float-delayed 6s ease-in-out infinite;
 }
 
@@ -360,11 +360,11 @@
 
 .aiPill {
   padding: 8px;
-  background: rgba(255, 255, 255, 0.03);
-  border: 1px solid rgba(255, 255, 255, 0.08);
+  background: rgba(15, 23, 42, 0.02);
+  border: 1px solid rgba(15, 23, 42, 0.06);
   border-radius: 6px;
   font-size: 11px;
-  color: rgba(255,255,255,0.8);
+  color: rgba(15, 23, 42, 0.7);
   text-align: center;
   font-weight: 500;
   cursor: pointer;
@@ -391,8 +391,8 @@
 }
 
 .useCard {
-  background-color: rgba(255, 255, 255, 0.015);
-  border: 1px solid rgba(255, 255, 255, 0.06);
+  background-color: rgba(15, 23, 42, 0.01);
+  border: 1px solid rgba(15, 23, 42, 0.05);
   padding: 36px;
   border-radius: 16px;
   transition: transform 0.2s, border-color 0.2s;
@@ -400,13 +400,13 @@
 
 .useCard:hover {
   transform: translateY(-4px);
-  border-color: rgba(16, 185, 129, 0.3);
+  border-color: rgba(16, 185, 129, 0.2);
 }
 
 .useIcon {
   font-size: 28px;
   margin-bottom: 24px;
-  color: #10b981;
+  color: #059669;
   display: block;
 }
 
@@ -414,20 +414,20 @@
   font-size: 20px;
   font-weight: 600;
   margin-bottom: 12px;
-  color: #ffffff;
+  color: #0f172a;
 }
 
 .useDesc {
   font-size: 14px;
   line-height: 1.6;
-  color: rgba(255, 255, 255, 0.6);
+  color: rgba(15, 23, 42, 0.6);
   margin-bottom: 20px;
 }
 
 .useLinkText {
   font-size: 12px;
   font-weight: 600;
-  color: rgba(255, 255, 255, 0.4);
+  color: rgba(15, 23, 42, 0.4);
   font-style: italic;
 }
 
@@ -446,8 +446,8 @@
 }
 
 .testimonialCard {
-  background-color: rgba(255,255,255,0.01);
-  border: 1px solid rgba(255, 255, 255, 0.05);
+  background-color: rgba(15, 23, 42, 0.01);
+  border: 1px solid rgba(15, 23, 42, 0.05);
   border-radius: 16px;
   padding: 32px;
   display: flex;
@@ -461,7 +461,7 @@
   font-weight: 600;
   line-height: 1.4;
   margin-bottom: 24px;
-  color: #ffffff;
+  color: #0f172a;
   letter-spacing: -0.01em;
 }
 
@@ -469,7 +469,7 @@
   display: flex;
   align-items: center;
   gap: 12px;
-  border-top: 1px solid rgba(255,255,255,0.06);
+  border-top: 1px solid rgba(15, 23, 42, 0.06);
   padding-top: 16px;
 }
 
@@ -477,27 +477,27 @@
   width: 32px;
   height: 32px;
   border-radius: 50%;
-  background: rgba(255, 255, 255, 0.05);
-  border: 1px solid rgba(255, 255, 255, 0.2);
+  background: rgba(15, 23, 42, 0.03);
+  border: 1px solid rgba(15, 23, 42, 0.1);
   display: flex;
   align-items: center;
   justify-content: center;
   font-size: 11px;
   font-weight: 700;
-  color: rgba(255,255,255,0.7);
+  color: rgba(15, 23, 42, 0.7);
 }
 
 .testimonialName {
   font-size: 13px;
   font-weight: 600;
-  color: rgba(255, 255, 255, 0.7);
+  color: rgba(15, 23, 42, 0.7);
 }
 
 /* PRIVACY BANNER */
 .privacySection {
-  background-color: rgba(255, 255, 255, 0.01);
-  border-top: 1px solid rgba(255, 255, 255, 0.05);
-  border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+  background-color: rgba(15, 23, 42, 0.01);
+  border-top: 1px solid rgba(15, 23, 42, 0.05);
+  border-bottom: 1px solid rgba(15, 23, 42, 0.05);
   padding: 100px 24px;
   text-align: center;
 }
@@ -517,7 +517,7 @@
 .privacyDesc {
   font-size: 15px;
   line-height: 1.6;
-  color: rgba(255, 255, 255, 0.6);
+  color: rgba(15, 23, 42, 0.6);
   margin-bottom: 40px;
 }
 
@@ -535,20 +535,20 @@
 .orbitCenter {
   width: 64px;
   height: 64px;
-  background: rgba(255, 255, 255, 0.03);
-  border: 1px solid rgba(255, 255, 255, 0.15);
+  background: rgba(15, 23, 42, 0.02);
+  border: 1px solid rgba(15, 23, 42, 0.1);
   border-radius: 50%;
   display: flex;
   align-items: center;
   justify-content: center;
   font-size: 24px;
-  box-shadow: 0 0 40px rgba(16, 185, 129, 0.25);
+  box-shadow: 0 0 40px rgba(16, 185, 129, 0.15);
   z-index: 10;
 }
 
 .orbitRing {
   position: absolute;
-  border: 1px dashed rgba(255, 255, 255, 0.08);
+  border: 1px dashed rgba(15, 23, 42, 0.08);
   border-radius: 50%;
 }
 
@@ -568,14 +568,14 @@
   position: absolute;
   width: 32px;
   height: 32px;
-  background: #080808;
-  border: 1px solid rgba(255, 255, 255, 0.12);
+  background: #ffffff;
+  border: 1px solid rgba(15, 23, 42, 0.08);
   border-radius: 50%;
   display: flex;
   align-items: center;
   justify-content: center;
   font-size: 14px;
-  box-shadow: 0 4px 10px rgba(0,0,0,0.5);
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.05);
 }
 
 .orbitRing1 .orbitItem:nth-child(1) { top: -16px; left: 54px; }
@@ -612,28 +612,28 @@
 
 /* FOOTER */
 .footer {
-  border-top: 1px solid rgba(255, 255, 255, 0.08);
+  border-top: 1px solid rgba(15, 23, 42, 0.08);
   padding: 40px 48px;
   display: flex;
   align-items: center;
   justify-content: space-between;
   margin-top: auto;
   z-index: 10;
-  background-color: #050505;
+  background-color: #ffffff;
 }
 
 .footerLeft {
   display: flex;
   align-items: center;
   gap: 12px;
-  color: rgba(255, 255, 255, 0.4);
+  color: rgba(15, 23, 42, 0.4);
   font-size: 14px;
 }
 
 .footerLogoIcon {
   width: 20px;
   height: 20px;
-  background-color: rgba(255, 255, 255, 0.2);
+  background-color: rgba(15, 23, 42, 0.1);
   border-radius: 4px;
 }
 
@@ -643,14 +643,14 @@
 }
 
 .footerLink {
-  color: rgba(255, 255, 255, 0.4);
+  color: rgba(15, 23, 42, 0.4);
   text-decoration: none;
   font-size: 14px;
   transition: color 0.2s;
 }
 
 .footerLink:hover {
-  color: rgba(255, 255, 255, 0.8);
+  color: rgba(15, 23, 42, 0.8);
 }
 
 /* MOBILE RESPONSIVE */
