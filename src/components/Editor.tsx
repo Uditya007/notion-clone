@@ -141,6 +141,45 @@ export default function Editor() {
     updatePageAttribute({ cover_image: COVER_IMAGES[nextIndex] });
   };
 
+  const fileInputRef = useRef<HTMLInputElement>(null);
+
+  const handleUploadCover = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    const MAX_SIZE = 5 * 1024 * 1024;
+    if (file.size > MAX_SIZE) {
+      alert("File exceeds 5MB size limit.");
+      return;
+    }
+
+    const formData = new FormData();
+    formData.append("file", file);
+
+    setSaveStatus('saving');
+    try {
+      const res = await fetch("/api/upload", {
+        method: "POST",
+        body: formData,
+      });
+
+      if (res.ok) {
+        const { url } = await res.json();
+        await updatePageAttribute({ cover_image: url });
+        setSaveStatus('saved');
+      } else {
+        const err = await res.json();
+        alert(err.error || "Failed to upload cover.");
+        setSaveStatus('saved');
+      }
+    } catch (err) {
+      console.error("Upload error:", err);
+      alert("An error occurred during file upload.");
+      setSaveStatus('saved');
+    }
+  };
+
+
   const editor = useEditor({
     extensions: [
       StarterKit,
@@ -338,11 +377,20 @@ export default function Editor() {
         </div>
       </header>
 
+      <input 
+        type="file" 
+        ref={fileInputRef} 
+        onChange={handleUploadCover} 
+        style={{ display: 'none' }} 
+        accept="image/jpeg,image/png,image/webp" 
+      />
+
       {activePage.cover_image && (
         <div className={styles.coverImage}>
           <img src={activePage.cover_image} alt="Cover" />
           <div className={styles.coverControls}>
              <button className={styles.coverBtn} onClick={changeCoverImage}>Change cover</button>
+             <button className={styles.coverBtn} onClick={() => fileInputRef.current?.click()}>Upload cover</button>
              <button className={styles.coverBtn} onClick={() => updatePageAttribute({ cover_image: null })}>Remove</button>
           </div>
         </div>
@@ -350,9 +398,12 @@ export default function Editor() {
 
       <div className={`${styles.contentWrapper} ${!activePage.cover_image ? styles.noCoverContent : ''}`}>
         {!activePage.cover_image && (
-          <div className={styles.addCoverWrapper}>
+          <div className={styles.addCoverWrapper} style={{ display: 'flex', gap: '8px' }}>
              <button className={styles.addCoverBtn} onClick={changeCoverImage}>
                <ImageIcon size={14} /> Add cover
+             </button>
+             <button className={styles.addCoverBtn} onClick={() => fileInputRef.current?.click()}>
+               <ImageIcon size={14} /> Upload custom cover
              </button>
           </div>
         )}
