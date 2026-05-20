@@ -40,12 +40,24 @@ const SLASH_COMMANDS = [
   { title: 'Ask AI', icon: '✨', action: () => {} },
 ];
 
+const getUserColor = (id: string) => {
+  const colors = ['#ff4d4d', '#4da6ff', '#2ecc71', '#f1c40f', '#9b59b6', '#e67e22'];
+  let sum = 0;
+  for (let i = 0; i < id.length; i++) {
+    sum += id.charCodeAt(i);
+  }
+  return colors[sum % colors.length];
+};
+
 export default function Editor() {
   const [isMounted, setIsMounted] = useState(false);
   const { activePageId, setActivePage } = useAppStore();
   const [activePage, setActivePageData] = useState<any>(null);
   const [workspaceName, setWorkspaceName] = useState("My Workspace");
   const [hasDatabase, setHasDatabase] = useState(false);
+  
+  const [currentUser, setCurrentUser] = useState<any>(null);
+  const [onlineUsersList, setOnlineUsersList] = useState<any[]>([]);
   
   const activePageIdRef = useRef(activePageId);
   activePageIdRef.current = activePageId;
@@ -99,26 +111,53 @@ export default function Editor() {
   useEffect(() => {
     setIsMounted(true);
     fetchProfile();
+
+    supabase.auth.getUser().then(({ data: { user } }) => {
+      if (user) {
+        setCurrentUser({
+          id: user.id,
+          name: user.email?.split('@')[0] || 'Contributor',
+          color: getUserColor(user.id)
+        });
+      }
+    });
   }, []);
 
   useEffect(() => {
     if (activePageId && !['inbox', 'calendar', 'tasks', 'automations', 'templates', 'trash'].includes(activePageId)) {
       fetchPageData(activePageId);
 
-      const channel = supabase
-        .channel(`realtime:page:${activePageId}`)
+      const channel = supabase.channel(`realtime:page:${activePageId}`);
+      
+      channel
+        .on('presence', { event: 'sync' }, () => {
+          const state = channel.presenceState();
+          const list = Object.values(state).flat().map((p: any) => p.user).filter(Boolean);
+          // Deduplicate by user.id
+          const uniqueList = list.filter((item, index, self) => 
+            index === self.findIndex((t) => t.id === item.id)
+          );
+          setOnlineUsersList(uniqueList);
+        })
         .on('postgres_changes', { event: 'UPDATE', schema: 'public', table: 'pages', filter: `id=eq.${activePageId}` }, (payload: any) => {
           setActivePageData(payload.new);
         })
-        .subscribe();
+        .subscribe(async (status) => {
+          if (status === 'SUBSCRIBED' && currentUser) {
+            await channel.track({
+              user: currentUser
+            });
+          }
+        });
 
       return () => {
         supabase.removeChannel(channel);
       };
     } else {
       setActivePageData(null);
+      setOnlineUsersList([]);
     }
-  }, [activePageId]);
+  }, [activePageId, currentUser]);
 
   const updatePageAttribute = async (updates: any) => {
     if (!activePageId) return;
@@ -327,11 +366,6 @@ export default function Editor() {
     return <CommandCenter />;
   }
 
-  const onlineUsers = [
-    { id: 1, name: 'Alex', color: '#ff4d4d' },
-    { id: 2, name: 'Sarah', color: '#4da6ff' },
-  ];
-
   return (
     <div className={styles.editorContainer}>
       <header className={styles.header}>
@@ -342,14 +376,15 @@ export default function Editor() {
         </div>
         <div className={styles.headerActions}>
           <div className={styles.presenceAvatars}>
-            {onlineUsers.map(user => (
+            {onlineUsersList.map(user => (
               <div 
                 key={user.id} 
                 className={styles.presenceAvatar}
-                style={{ backgroundColor: user.color }}
-                title={`${user.name} is editing`}
+                style={{ backgroundColor: user.color, border: `2px solid ${user.color}` }}
+                title={`${user.name} is editing live`}
               >
-                {user.name.charAt(0)}
+                {user.name.charAt(0).toUpperCase()}
+                <span className={styles.presenceDot} />
               </div>
             ))}
           </div>
@@ -426,6 +461,20 @@ export default function Editor() {
           onChange={(e) => updatePageAttribute({ title: e.target.value })}
           placeholder="Untitled"
         />
+
+        {onlineUsersList.length > 1 && (
+          <div className={styles.collaboratorActiveBanner}>
+            <span className={styles.pulsingLight} />
+            <span>
+              {onlineUsersList
+                .filter(u => u.id !== currentUser?.id)
+                .map(u => u.name)
+                .join(', ')}{' '}
+              {onlineUsersList.filter(u => u.id !== currentUser?.id).length === 1 ? 'is' : 'are'}{' '}
+              viewing and editing this document in real-time.
+            </span>
+          </div>
+        )}
         
         <div className={styles.viewToggles}>
           <button 
