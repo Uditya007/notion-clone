@@ -58,6 +58,50 @@ export default function Editor() {
   
   const [currentUser, setCurrentUser] = useState<any>(null);
   const [onlineUsersList, setOnlineUsersList] = useState<any[]>([]);
+
+  // Page History flyout panel states
+  const [showHistoryPanel, setShowHistoryPanel] = useState(false);
+  const [historyLogs, setHistoryLogs] = useState<any[]>([]);
+  const [isFetchingHistory, setIsFetchingHistory] = useState(false);
+
+  const fetchPageHistory = async () => {
+    if (!activePageId) return;
+    setIsFetchingHistory(true);
+    try {
+      const res = await fetch(`/api/pages/history?pageId=${activePageId}`);
+      if (res.ok) {
+        const data = await res.json();
+        setHistoryLogs(data);
+      }
+    } catch (err) {
+      console.error("Error fetching page history:", err);
+    } finally {
+      setIsFetchingHistory(false);
+    }
+  };
+
+  const handleRestoreVersion = async (entryId: string) => {
+    if (!activePageId) return;
+    if (!confirm("✦ Are you sure you want to restore this version of the document?")) return;
+
+    try {
+      const res = await fetch('/api/pages/history', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ pageId: activePageId, entryId })
+      });
+
+      if (res.ok) {
+        alert("✦ Page version successfully restored!");
+        fetchPageData(activePageId);
+        fetchPageHistory();
+      } else {
+        alert("Failed to restore page snapshot.");
+      }
+    } catch (err) {
+      console.error(err);
+    }
+  };
   
   const activePageIdRef = useRef(activePageId);
   activePageIdRef.current = activePageId;
@@ -392,7 +436,16 @@ export default function Editor() {
             {saveStatus === 'saving' ? 'Saving...' : 'Saved'}
           </div>
           <button className={styles.shareHeaderBtn} onClick={() => setShowShareModal(true)}>Share</button>
-          <button className={styles.iconBtn} title="Page History"><Clock size={18} /></button>
+          <button 
+            className={`${styles.iconBtn} ${showHistoryPanel ? styles.iconBtnActive : ''}`} 
+            title="Page History"
+            onClick={() => {
+              setShowHistoryPanel(!showHistoryPanel);
+              if (!showHistoryPanel) fetchPageHistory();
+            }}
+          >
+            <Clock size={18} />
+          </button>
           <button 
             className={`${styles.iconBtn} ${activePage.is_favorite ? styles.iconBtnActive : ''}`}
             onClick={() => updatePageAttribute({ is_favorite: !activePage.is_favorite })}
@@ -415,8 +468,10 @@ export default function Editor() {
         </div>
       </header>
 
-      <input 
-        type="file" 
+      <div className={styles.editorLayoutWrapper}>
+        <div className={styles.scrollableContent}>
+          <input 
+            type="file" 
         ref={fileInputRef} 
         onChange={handleUploadCover} 
         style={{ display: 'none' }} 
@@ -639,8 +694,44 @@ export default function Editor() {
               )}
             </>
           )}
+        </div> {/* closes editorMain */}
+      </div> {/* closes contentWrapper */}
+    </div> {/* closes scrollableContent */}
+
+      {showHistoryPanel && (
+        <div className={styles.historySidebar}>
+          <div className={styles.historyHeader}>
+            <span className={styles.historyTitle}>Version History</span>
+            <button className={styles.closeHistoryBtn} onClick={() => setShowHistoryPanel(false)}>✕</button>
+          </div>
+          
+          <div className={styles.historyList}>
+            {isFetchingHistory ? (
+              <div className={styles.historyLoading}>Loading edit timeline...</div>
+            ) : historyLogs.length === 0 ? (
+              <div className={styles.historyEmpty}>No edits recorded yet. Start modifying parameters to generate snapshots!</div>
+            ) : (
+              historyLogs.map(log => (
+                <div key={log.id} className={styles.historyItem}>
+                  <div className={styles.historyMeta}>
+                    <span className={styles.historyEmail}>{log.user_email}</span>
+                    <span className={styles.historyTime}>{new Date(log.created_at).toLocaleTimeString()}</span>
+                  </div>
+                  <div className={styles.historyDesc}>
+                    Updated page <strong>{log.action_type}</strong>
+                  </div>
+                  <div className={styles.historyDiff}>
+                    <div className={styles.diffRemoved}>- {log.old_val || 'None'}</div>
+                    <div className={styles.diffAdded}>+ {log.new_val || 'None'}</div>
+                  </div>
+                  <button className={styles.restoreBtn} onClick={() => handleRestoreVersion(log.id)}>Restore this version</button>
+                </div>
+              ))
+            )}
+          </div>
         </div>
-      </div>
+      )}
+    </div> {/* closes editorLayoutWrapper */}
       
       {showShareModal && <ShareModal onClose={() => setShowShareModal(false)} />}
     </div>

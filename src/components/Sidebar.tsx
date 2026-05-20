@@ -229,7 +229,7 @@ export default function Sidebar() {
             if (window.innerWidth <= 768) setIsCollapsed(true);
           }}>
             <Sparkles size={16} />
-            <span>Clearspace AI</span>
+            <span>Cora AI</span>
           </button>
           <button className={styles.actionItem} onClick={() => setIsAIBuilderOpen(true)}>
             <Sparkles size={16} style={{ color: '#a855f7' }} />

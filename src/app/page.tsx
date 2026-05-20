@@ -44,7 +44,7 @@ export default function LandingPage() {
       <nav className={styles.navbar}>
         <div className={styles.logoArea}>
           <div className={styles.logoIcon}></div>
-          <span className={styles.logoText}>Clearspace</span>
+          <span className={styles.logoText}>Cora</span>
         </div>
         
         <div className={styles.navLinks}>
@@ -74,7 +74,7 @@ export default function LandingPage() {
         </p>
         <div className={styles.heroButtons}>
           <Link href="/signup" className={styles.primaryBtn} style={{ padding: "12px 28px", fontSize: "15px" }}>
-            Try Clearspace
+            Try Cora
           </Link>
         </div>
         <p className={styles.heroFineprint}>
@@ -95,7 +95,7 @@ export default function LandingPage() {
             </div>
             <h3 className={styles.showcaseTitle}>Upload your sources</h3>
             <p className={styles.showcaseDesc}>
-              Upload PDFs, web articles, Google Docs, calendars, and emails. Clearspace instantly maps connections between disparate ideas, powered by state-of-the-art multimodal understanding.
+              Upload PDFs, web articles, Google Docs, calendars, and emails. Cora instantly maps connections between disparate ideas, powered by state-of-the-art multimodal understanding.
             </p>
             <div style={{ display: "flex", gap: "12px" }}>
               <Link href="/signup" className={styles.secondaryBtn} style={{ display: "inline-flex", alignItems: "center", gap: "6px" }}>
@@ -145,7 +145,7 @@ export default function LandingPage() {
             </div>
             <h3 className={styles.showcaseTitle}>Instant insights</h3>
             <p className={styles.showcaseDesc}>
-              With all your materials in place, Clearspace becomes your personalized AI expert. Get auto-generated study guides, briefing documents, interactive timelines, and instant answers tailored exclusively to your documents.
+              With all your materials in place, Cora becomes your personalized AI expert. Get auto-generated study guides, briefing documents, interactive timelines, and instant answers tailored exclusively to your documents.
             </p>
             <div>
               <Link href="/signup" className={styles.primaryBtn}>
@@ -159,14 +159,14 @@ export default function LandingPage() {
       {/* HOW PEOPLE ARE USING IT */}
       <section id="use-cases" className={styles.howPeopleUse}>
         <div className={styles.sectionLabel}>USE CASES</div>
-        <h2 className={styles.sectionTitle}>How people are using Clearspace</h2>
+        <h2 className={styles.sectionTitle}>How people are using Cora</h2>
         
         <div className={styles.useGrid}>
           <div className={styles.useCard}>
             <span className={styles.useIcon}>🎓</span>
             <h4 className={styles.useTitle}>Power study</h4>
             <p className={styles.useDesc}>
-              Upload lecture slides, textbook chapters, and syllabus briefs. Ask Clearspace to outline complex concepts, quiz your understanding, or draft instant summaries.
+              Upload lecture slides, textbook chapters, and syllabus briefs. Ask Cora to outline complex concepts, quiz your understanding, or draft instant summaries.
             </p>
             <span className={styles.useLinkText}>Learn faster and deeper.</span>
           </div>
@@ -175,7 +175,7 @@ export default function LandingPage() {
             <span className={styles.useIcon}>📁</span>
             <h4 className={styles.useTitle}>Organize thinking</h4>
             <p className={styles.useDesc}>
-              Import raw brainstorming sheets, competitor analyses, and notes. Ask Clearspace to convert chaotic streams of thought into beautifully formatted presentation templates.
+              Import raw brainstorming sheets, competitor analyses, and notes. Ask Cora to convert chaotic streams of thought into beautifully formatted presentation templates.
             </p>
             <span className={styles.useLinkText}>Present with confidence.</span>
           </div>
@@ -184,7 +184,7 @@ export default function LandingPage() {
             <span className={styles.useIcon}>💡</span>
             <h4 className={styles.useTitle}>Spark new ideas</h4>
             <p className={styles.useDesc}>
-              Link Google calendars, task logs, and meeting agendas. Ask Clearspace to synthesize schedules, reveal hidden project trends, and recommend creative pathways.
+              Link Google calendars, task logs, and meeting agendas. Ask Cora to synthesize schedules, reveal hidden project trends, and recommend creative pathways.
             </p>
             <span className={styles.useLinkText}>Unlock your creative potential.</span>
           </span>
@@ -199,7 +199,7 @@ export default function LandingPage() {
         <div className={styles.testimonialsGrid}>
           <div className={styles.testimonialCard}>
             <p className={styles.testimonialQuote}>
-              "Clearspace blew our mind. The speed and quality of context retrieval is unmatched."
+              "Cora blew our mind. The speed and quality of context retrieval is unmatched."
             </p>
             <div className={styles.testimonialAuthor}>
               <div className={styles.testimonialAvatar}>HF</div>
@@ -234,7 +234,7 @@ export default function LandingPage() {
         <div className={styles.privacyContent}>
           <h2 className={styles.privacyTitle}>Your data is safe with us</h2>
           <p className={styles.privacyDesc}>
-            We value your privacy and never use your personal files, notes, emails, or schedules to train Clearspace AI models. Your workspace is 100% private.
+            We value your privacy and never use your personal files, notes, emails, or schedules to train Cora AI models. Your workspace is 100% private.
           </p>
         </div>
 
@@ -277,7 +277,7 @@ export default function LandingPage() {
       <footer className={styles.footer}>
         <div className={styles.footerLeft}>
           <div className={styles.footerLogoIcon}></div>
-          <span>Clearspace © 2026</span>
+          <span>Cora © 2026</span>
         </div>
         <div className={styles.footerLinks}>
           <Link href="#" className={styles.footerLink}>Privacy</Link>
