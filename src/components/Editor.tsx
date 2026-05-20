@@ -20,7 +20,11 @@ import AgentsView from "./AgentsView";
 import TemplatesView from "./TemplatesView";
 import ShareModal from "./ShareModal";
 import TrashView from "./TrashView";
+import ExportModal from "./ExportModal";
 import CommandCenter from "./CommandCenter";
+import AudioRecorder from "./AudioRecorder";
+import AnalyticsPanel from "./AnalyticsPanel";
+import { Mic, BarChart2 } from "lucide-react";
 import { useCompletion } from '@ai-sdk/react';
 import DatabaseView from "./DatabaseView";
 import { supabase } from "@/lib/supabase/client";
@@ -113,6 +117,9 @@ export default function Editor() {
 
   const [showAiMenu, setShowAiMenu] = useState(false);
   const [showShareModal, setShowShareModal] = useState(false);
+  const [showExportModal, setShowExportModal] = useState(false);
+  const [isAudioRecordingOpen, setIsAudioRecordingOpen] = useState(false);
+  const [showAnalyticsPanel, setShowAnalyticsPanel] = useState(false);
   const [saveStatus, setSaveStatus] = useState<'saved' | 'saving'>('saved');
   const [slashIndex, setSlashIndex] = useState(0);
 
@@ -435,16 +442,47 @@ export default function Editor() {
           <div className={styles.saveIndicator}>
             {saveStatus === 'saving' ? 'Saving...' : 'Saved'}
           </div>
+          <button 
+            className={styles.shareHeaderBtn} 
+            onClick={() => setShowExportModal(true)}
+            style={{ 
+              background: 'linear-gradient(135deg, rgba(59, 130, 246, 0.1) 0%, rgba(37, 99, 235, 0.1) 100%)', 
+              border: '1px solid rgba(59, 130, 246, 0.2)',
+              color: '#3b82f6',
+              marginRight: '6px'
+            }}
+          >
+            Export
+          </button>
           <button className={styles.shareHeaderBtn} onClick={() => setShowShareModal(true)}>Share</button>
+          <button 
+            className={`${styles.iconBtn} ${isAudioRecordingOpen ? styles.iconBtnActive : ''}`} 
+            title="Record AI Voice Note"
+            onClick={() => setIsAudioRecordingOpen(!isAudioRecordingOpen)}
+            style={{ color: '#8b5cf6' }}
+          >
+            <Mic size={18} />
+          </button>
           <button 
             className={`${styles.iconBtn} ${showHistoryPanel ? styles.iconBtnActive : ''}`} 
             title="Page History"
             onClick={() => {
               setShowHistoryPanel(!showHistoryPanel);
+              setShowAnalyticsPanel(false);
               if (!showHistoryPanel) fetchPageHistory();
             }}
           >
             <Clock size={18} />
+          </button>
+          <button 
+            className={`${styles.iconBtn} ${showAnalyticsPanel ? styles.iconBtnActive : ''}`} 
+            title="Document Analytics"
+            onClick={() => {
+              setShowAnalyticsPanel(!showAnalyticsPanel);
+              setShowHistoryPanel(false);
+            }}
+          >
+            <BarChart2 size={18} />
           </button>
           <button 
             className={`${styles.iconBtn} ${activePage.is_favorite ? styles.iconBtnActive : ''}`}
@@ -548,7 +586,11 @@ export default function Editor() {
 
         <div className={styles.editorMain}>
           {activePage.type === 'board' ? (
-            <KanbanBoard />
+            <KanbanBoard 
+              pageId={activePageId!} 
+              initialContent={activePage?.content || ''} 
+              onUpdateContent={(newContent) => updatePageAttribute({ content: newContent })} 
+            />
           ) : (
             <>
               {editor && (
@@ -698,42 +740,65 @@ export default function Editor() {
       </div> {/* closes contentWrapper */}
     </div> {/* closes scrollableContent */}
 
-      {showHistoryPanel && (
-        <div className={styles.historySidebar}>
-          <div className={styles.historyHeader}>
-            <span className={styles.historyTitle}>Version History</span>
-            <button className={styles.closeHistoryBtn} onClick={() => setShowHistoryPanel(false)}>✕</button>
+        {showHistoryPanel && (
+          <div className={styles.historySidebar}>
+            <div className={styles.historyHeader}>
+              <span className={styles.historyTitle}>Version History</span>
+              <button className={styles.closeHistoryBtn} onClick={() => setShowHistoryPanel(false)}>✕</button>
+            </div>
+            
+            <div className={styles.historyList}>
+              {isFetchingHistory ? (
+                <div className={styles.historyLoading}>Loading edit timeline...</div>
+              ) : historyLogs.length === 0 ? (
+                <div className={styles.historyEmpty}>No edits recorded yet. Start modifying parameters to generate snapshots!</div>
+              ) : (
+                historyLogs.map(log => (
+                  <div key={log.id} className={styles.historyItem}>
+                    <div className={styles.historyMeta}>
+                      <span className={styles.historyEmail}>{log.user_email}</span>
+                      <span className={styles.historyTime}>{new Date(log.created_at).toLocaleTimeString()}</span>
+                    </div>
+                    <div className={styles.historyDesc}>
+                      Updated page <strong>{log.action_type}</strong>
+                    </div>
+                    <div className={styles.historyDiff}>
+                      <div className={styles.diffRemoved}>- {log.old_val || 'None'}</div>
+                      <div className={styles.diffAdded}>+ {log.new_val || 'None'}</div>
+                    </div>
+                    <button className={styles.restoreBtn} onClick={() => handleRestoreVersion(log.id)}>Restore this version</button>
+                  </div>
+                ))
+              )}
+            </div>
           </div>
-          
-          <div className={styles.historyList}>
-            {isFetchingHistory ? (
-              <div className={styles.historyLoading}>Loading edit timeline...</div>
-            ) : historyLogs.length === 0 ? (
-              <div className={styles.historyEmpty}>No edits recorded yet. Start modifying parameters to generate snapshots!</div>
-            ) : (
-              historyLogs.map(log => (
-                <div key={log.id} className={styles.historyItem}>
-                  <div className={styles.historyMeta}>
-                    <span className={styles.historyEmail}>{log.user_email}</span>
-                    <span className={styles.historyTime}>{new Date(log.created_at).toLocaleTimeString()}</span>
-                  </div>
-                  <div className={styles.historyDesc}>
-                    Updated page <strong>{log.action_type}</strong>
-                  </div>
-                  <div className={styles.historyDiff}>
-                    <div className={styles.diffRemoved}>- {log.old_val || 'None'}</div>
-                    <div className={styles.diffAdded}>+ {log.new_val || 'None'}</div>
-                  </div>
-                  <button className={styles.restoreBtn} onClick={() => handleRestoreVersion(log.id)}>Restore this version</button>
-                </div>
-              ))
-            )}
-          </div>
-        </div>
-      )}
+        )}
+
+        {showAnalyticsPanel && (
+          <AnalyticsPanel 
+            pageId={activePageId!} 
+            onClose={() => setShowAnalyticsPanel(false)}
+          />
+        )}
     </div> {/* closes editorLayoutWrapper */}
       
       {showShareModal && <ShareModal onClose={() => setShowShareModal(false)} />}
+      {showExportModal && (
+        <ExportModal 
+          pageId={activePageId!} 
+          pageTitle={activePage?.title || 'Untitled'} 
+          pageIcon={activePage?.icon} 
+          onClose={() => setShowExportModal(false)} 
+        />
+      )}
+      {isAudioRecordingOpen && (
+        <AudioRecorder 
+          onTranscribeComplete={(html) => {
+            editor?.chain().focus().insertContent(html).run();
+          }}
+          onClose={() => setIsAudioRecordingOpen(false)}
+        />
+      )}
     </div>
   );
 }

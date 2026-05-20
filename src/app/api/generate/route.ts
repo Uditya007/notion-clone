@@ -1,13 +1,13 @@
 import { streamText } from 'ai';
 import { createGoogleGenerativeAI } from '@ai-sdk/google';
+import { createClient } from '@/lib/supabase/server';
 
 export const dynamic = 'force-dynamic';
 
-// Use default Node.js runtime for 100% stable environment variable loading in local dev
 export async function POST(req: Request) {
-  const { prompt, context, command } = await req.json();
+  const { prompt, context, command, grounded } = await req.json();
 
-  console.log("[API/GENERATE] Received command:", command);
+  console.log("[API/GENERATE] Received command:", command, "grounded:", grounded);
   console.log("[API/GENERATE] GOOGLE_GENERATIVE_AI_API_KEY exists in process.env:", !!process.env.GOOGLE_GENERATIVE_AI_API_KEY);
 
   // If no API key is provided, gracefully fallback to the Mock stream
@@ -15,7 +15,7 @@ export async function POST(req: Request) {
     const stream = new ReadableStream({
       async start(controller) {
         const encoder = new TextEncoder();
-        const mockResponse = `\n\n*(Mock AI Response. Add GOOGLE_GENERATIVE_AI_API_KEY to .env.local for real Gemini AI)*\n\nYou asked to [${command}]. Based on your context, here is the generated response simulating Gemini 2.5 Flash.`;
+        const mockResponse = `\n\n*(Mock AI Response. Add GOOGLE_GENERATIVE_AI_API_KEY to .env.local for real Gemini AI)*\n\nYou asked: "${prompt}".\n\n[Grounded Workspace Q&A Mode: ${grounded ? 'ACTIVE' : 'INACTIVE'}]\n\nBased on your workspace context, here is the generated response simulating Gemini 2.5 Flash.`;
         const words = mockResponse.split(' ');
         for (const word of words) {
           controller.enqueue(encoder.encode(word + ' '));
@@ -30,10 +30,37 @@ export async function POST(req: Request) {
   }
 
   // Construct system prompt based on the specific command
-  let systemPrompt = "You are a helpful writing assistant built directly into a Notion-like editor.";
+  let systemPrompt = "You are a helpful writing assistant built directly into the Cora workspace editor.";
   
   if (context) {
-    systemPrompt += `\n\nHere is the current content of the document the user is working on. Use it as context:\n"""\n${context}\n"""`;
+    systemPrompt += `\n\nHere is the current content of the document or chat history the user is working on. Use it as context:\n"""\n${context}\n"""`;
+  }
+
+  // Handle grounded search capability across all user pages
+  if (grounded) {
+    try {
+      const supabase = await createClient();
+      const { data: { user } } = await supabase.auth.getUser();
+      if (user) {
+        const { data: pages } = await supabase
+          .from('pages')
+          .select('*')
+          .eq('user_id', user.id)
+          .eq('is_deleted', false)
+          .limit(10); // get top 10 pages for grounding
+        
+        if (pages && pages.length > 0) {
+          const docContext = pages.map((page: any, idx: number) => {
+            const cleanContent = page.content ? page.content.replace(/<[^>]*>/g, ' ').substring(0, 1000) : 'Empty Page';
+            return `[Document Source ${idx + 1}] Title: "${page.title || 'Untitled'}" (ID: ${page.id})\nContent Snippet: ${cleanContent}\n---`;
+          }).join('\n\n');
+
+          systemPrompt += `\n\nWORKSPACE KNOWLEDGE GROUNDING:\nYou have access to the user's workspace pages. Answer questions grounded in these documents when relevant. If you cite information from a source, mention its Title in your answer.\n\nWorkspace Documents:\n"""\n${docContext}\n"""`;
+        }
+      }
+    } catch (err) {
+      console.warn("[API/GENERATE] Grounding page fetch failed, proceeding with prompt:", err);
+    }
   }
 
   if (command === 'summarize') {
@@ -78,7 +105,7 @@ Always be extremely polite and helpful. If you execute a task or event command, 
 
     console.log("[API/GENERATE] Calling streamText with gemini-2.5-flash...");
     const result = await streamText({
-      model: google('gemini-2.5-flash'), // Extremely fast and free tier available
+      model: google('gemini-2.5-flash'),
       system: systemPrompt,
       prompt: prompt || "Execute the requested command on the document context.",
     });
@@ -98,4 +125,3 @@ Always be extremely polite and helpful. If you execute a task or event command, 
     );
   }
 }
-

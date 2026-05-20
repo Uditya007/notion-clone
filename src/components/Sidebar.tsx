@@ -15,10 +15,11 @@ import {
   CheckSquare,
   Zap,
   Copy,
-  Sparkles
+  Sparkles,
+  Download
 } from "lucide-react";
 import styles from "./Sidebar.module.css";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useAppStore } from "@/store/useAppStore";
 import { supabase } from "@/lib/supabase/client";
 import AIBuilder from "./AIBuilder";
@@ -31,6 +32,7 @@ export default function Sidebar() {
   const [isAIBuilderOpen, setIsAIBuilderOpen] = useState(false);
   
   const { activePageId, setActivePage, setSearchOpen, setSettingsOpen, isAIPanelOpen, setAIPanelOpen } = useAppStore();
+  const importFileInputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
     fetchPages();
@@ -119,6 +121,36 @@ export default function Sidebar() {
       }
     } catch (err) {
       console.error("Error deleting page:", err);
+    }
+  };
+
+  const handleImportFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    const formData = new FormData();
+    formData.append('file', file);
+
+    try {
+      const res = await fetch("/api/pages/import", {
+        method: "POST",
+        body: formData,
+      });
+
+      if (res.ok) {
+        const newPage = await res.json();
+        alert(`Successfully imported "${newPage.title}" into Cora!`);
+        fetchPages();
+        setActivePage(newPage.id);
+      } else {
+        const err = await res.json();
+        alert(err.error || "Failed to import file.");
+      }
+    } catch (err) {
+      console.error("Import error:", err);
+      alert("An error occurred during import.");
+    } finally {
+      if (importFileInputRef.current) importFileInputRef.current.value = '';
     }
   };
 
@@ -233,8 +265,22 @@ export default function Sidebar() {
           </button>
           <button className={styles.actionItem} onClick={() => setIsAIBuilderOpen(true)}>
             <Sparkles size={16} style={{ color: '#a855f7' }} />
-            <span style={{ fontWeight: 600, color: 'var(--text-main)' }}>✦ AI Builder</span>
+            <span style={{ fontWeight: 600, color: 'var(--text-main)' }}>✦ AI Workspace Builder</span>
           </button>
+          
+          {/* Import file actions */}
+          <button className={styles.actionItem} onClick={() => importFileInputRef.current?.click()}>
+            <Download size={16} style={{ transform: 'rotate(180deg)', color: '#3b82f6' }} />
+            <span style={{ fontWeight: 600, color: 'var(--text-main)' }}>✦ Import Document</span>
+          </button>
+          <input 
+            type="file" 
+            ref={importFileInputRef} 
+            onChange={handleImportFileChange}
+            accept=".md,.html,.htm"
+            style={{ display: 'none' }}
+          />
+
           <button className={styles.actionItem} onClick={() => setSettingsOpen(true)}>
             <Settings size={16} />
             <span>Settings</span>

@@ -3,7 +3,7 @@
 import { useEffect, useRef, useState } from 'react';
 import { useAppStore } from '@/store/useAppStore';
 import styles from './AIChatView.module.css';
-import { ArrowLeft, ArrowUp, Copy, ThumbsDown, ThumbsUp } from 'lucide-react';
+import { ArrowLeft, ArrowUp, Copy, ThumbsDown, ThumbsUp, Sparkles } from 'lucide-react';
 import { useCompletion } from '@ai-sdk/react';
 import { supabase } from '@/lib/supabase/client';
 
@@ -13,6 +13,7 @@ export default function AIChatView() {
   const [convTitle, setConvTitle] = useState('New Chat');
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const [inputText, setInputText] = useState('');
+  const [isGrounded, setIsGrounded] = useState(true);
 
   const fetchMessages = async (convId: string) => {
     try {
@@ -138,7 +139,8 @@ export default function AIChatView() {
     await complete(text, {
       body: {
         context: historyContext ? `Past conversation context:\n${historyContext}` : '',
-        command: 'prompt'
+        command: 'prompt',
+        grounded: isGrounded
       }
     });
   };
@@ -208,16 +210,23 @@ export default function AIChatView() {
 
       <div className={styles.inputArea}>
         <div className={styles.pills}>
+          <button 
+            className={`${styles.pillBtn} ${isGrounded ? styles.pillBtnActive : ''}`} 
+            onClick={() => setIsGrounded(!isGrounded)}
+            title="Ask Cora to answer based on documents in your workspace"
+          >
+            <Sparkles size={12} style={{ display: 'inline', marginRight: 4 }} /> 
+            {isGrounded ? 'Grounded in Workspace (ON)' : 'Grounded (OFF)'}
+          </button>
           <button className={styles.pillBtn} onClick={() => handleSend("Please improve the writing of the following text: ", true)}>✦ Improve writing</button>
           <button className={styles.pillBtn} onClick={() => handleSend("Summarize the key points of the current page in bullet points", true)}>✦ Summarize</button>
           <button className={styles.pillBtn} onClick={() => handleSend("Extract all action items and tasks from the following text", true)}>✦ Find action items</button>
-          <button className={styles.pillBtn} onClick={() => handleSend("Translate the following to French: ", true)}>✦ Translate</button>
         </div>
         
         <div className={styles.inputWrapper}>
           <textarea 
             className={styles.textarea}
-            placeholder="Ask Clearspace AI anything..."
+            placeholder="Ask Cora AI anything..."
             value={inputText}
             onChange={(e) => setInputText(e.target.value)}
             onKeyDown={handleKeyDown}

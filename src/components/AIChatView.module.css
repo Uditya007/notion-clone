@@ -210,6 +210,15 @@
   color: var(--text-main);
 }
 
+.pillBtnActive {
+  background: linear-gradient(135deg, rgba(139, 92, 246, 0.15) 0%, rgba(59, 130, 246, 0.15) 100%) !important;
+  border-color: rgba(139, 92, 246, 0.4) !important;
+  color: #a78bfa !important;
+  font-weight: 500;
+  box-shadow: 0 0 8px rgba(139, 92, 246, 0.15);
+}
+
+
 /* Mobile responsive styles */
 @media (max-width: 768px) {
   .messages {

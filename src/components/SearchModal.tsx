@@ -3,12 +3,14 @@
 import { useEffect, useState, useRef } from 'react';
 import { useAppStore } from '@/store/useAppStore';
 import styles from './Modals.module.css';
-import { Search, FileText, X } from 'lucide-react';
+import { Search, FileText, X, Sparkles, AlertCircle } from 'lucide-react';
+import { useCompletion } from '@ai-sdk/react';
 
 export default function SearchModal() {
   const { isSearchOpen, setSearchOpen, setActivePage } = useAppStore();
   const [pagesList, setPagesList] = useState<any[]>([]);
   const [query, setQuery] = useState('');
+  const [isAiMode, setIsAiMode] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
 
   const fetchPages = async () => {
@@ -23,11 +25,18 @@ export default function SearchModal() {
     }
   };
 
+  const { complete, completion, isLoading, setCompletion } = useCompletion({
+    api: '/api/search/qa',
+    streamProtocol: 'text',
+  });
+
   useEffect(() => {
     if (isSearchOpen) {
       fetchPages();
       setTimeout(() => inputRef.current?.focus(), 10);
       setQuery('');
+      setIsAiMode(false);
+      setCompletion('');
     }
   }, [isSearchOpen]);
 
@@ -45,6 +54,21 @@ export default function SearchModal() {
     return () => window.removeEventListener('keydown', handleKeyDown);
   }, [isSearchOpen, setSearchOpen]);
 
+  const triggerAiSearch = async () => {
+    if (!query.trim()) return;
+    setIsAiMode(true);
+    setCompletion('');
+    await complete(query);
+  };
+
+  const handleInputKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (e.key === 'Enter') {
+      if (e.metaKey || e.ctrlKey) {
+        triggerAiSearch();
+      }
+    }
+  };
+
   if (!isSearchOpen) return null;
 
   const filteredPages = pagesList.filter((page: any) => 
@@ -60,20 +84,66 @@ export default function SearchModal() {
           <input 
             ref={inputRef}
             className={styles.searchInput}
-            placeholder="Search Workspace..."
+            placeholder="Search workspace or ask AI... (Press Ctrl+Enter for AI Answer)"
             value={query}
-            onChange={(e) => setQuery(e.target.value)}
+            onChange={(e) => {
+              setQuery(e.target.value);
+              if (isAiMode) {
+                setIsAiMode(false);
+                setCompletion('');
+              }
+            }}
+            onKeyDown={handleInputKeyDown}
           />
+          {query.trim() && (
+            <button 
+              className={styles.aiSearchTriggerBtn} 
+              onClick={triggerAiSearch}
+              title="Ask Cora AI to answer based on workspace context"
+            >
+              <Sparkles size={14} className={styles.sparkleIcon} />
+              <span>Ask AI</span>
+            </button>
+          )}
           <button className={styles.closeBtn} onClick={() => setSearchOpen(false)}>
             <X size={16} />
           </button>
         </div>
+
         <div className={styles.searchResults}>
-          {filteredPages.length === 0 ? (
-            <div className={styles.noResults}>No results found.</div>
+          {isAiMode ? (
+            <div className={styles.aiContainer}>
+              <div className={styles.aiHeader}>
+                <Sparkles size={16} className={styles.aiHeaderSparkle} />
+                <span className={styles.aiHeaderTitle}>Cora AI Workspace Answer</span>
+              </div>
+              <div className={styles.aiBody}>
+                {completion ? (
+                  <div className={styles.aiText} dangerouslySetInnerHTML={{ 
+                    __html: completion
+                      .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
+                      .replace(/\n/g, '<br />')
+                  }} />
+                ) : isLoading ? (
+                  <div className={styles.aiSearchingState}>
+                    <span className={styles.pulsingOrb} />
+                    Analyzing workspace documents and generating response...
+                  </div>
+                ) : (
+                  <div className={styles.aiEmptyText}>Type a question and ask Cora AI!</div>
+                )}
+                {isLoading && <span className={styles.aiCursorDot} />}
+              </div>
+              <div className={styles.aiFooter}>
+                <AlertCircle size={12} />
+                Grounded in your workspace documents
+              </div>
+            </div>
+          ) : filteredPages.length === 0 ? (
+            <div className={styles.noResults}>No matching pages found. Try asking Cora AI instead!</div>
           ) : (
             <div className={styles.resultsList}>
-              <div className={styles.resultsLabel}>Pages</div>
+              <div className={styles.resultsLabel}>Matching Pages</div>
               {filteredPages.map((page: any) => (
                 <div 
                   key={page.id} 
