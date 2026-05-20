@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createClient as createServerClient } from "@/lib/supabase/server";
 import * as dbLib from "@/lib/db/databases";
+import { evaluateAndTriggerAutomations } from "@/lib/db/automations";
 
 export async function GET(req: NextRequest) {
   try {
@@ -74,6 +75,10 @@ export async function PATCH(req: NextRequest) {
     if (action === "updateCell") {
       const { dbId, rowId, columnId, value } = body;
       const updated = await dbLib.updateCell(supabase, dbId, rowId, columnId, value);
+      
+      // Asynchronously trigger automations check so that client remains blazing fast
+      evaluateAndTriggerAutomations(supabase, dbId, rowId, columnId, value, session.user.id).catch(console.error);
+      
       return NextResponse.json(updated);
     }
 

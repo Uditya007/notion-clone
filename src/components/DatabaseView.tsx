@@ -2,13 +2,23 @@
 
 import { useState, useEffect } from 'react';
 import styles from './DatabaseView.module.css';
-import { Plus, Filter, ArrowUpDown, LayoutGrid, LayoutTemplate, LayoutList } from 'lucide-react';
+import { Plus, Filter, ArrowUpDown, LayoutGrid, LayoutTemplate, LayoutList, Sparkles, Trash2 } from 'lucide-react';
 import DatabaseRowModal from './DatabaseRowModal';
 import { supabase } from '@/lib/supabase/client';
 
 export default function DatabaseView({ dbId }: { dbId: string }) {
   const [db, setDb] = useState<any>(null);
   const [selectedRowId, setSelectedRowId] = useState<string | null>(null);
+
+  // Database Automations Panel States
+  const [showAutomationModal, setShowAutomationModal] = useState(false);
+  const [automationsList, setAutomationsList] = useState<any[]>([]);
+  const [selectedColId, setSelectedColId] = useState('');
+  const [triggerVal, setTriggerVal] = useState('');
+  const [actionType, setActionType] = useState('email');
+  const [actionConfigEmail, setActionConfigEmail] = useState('');
+  const [actionConfigSummary, setActionConfigSummary] = useState('');
+  const [isSavingRule, setIsSavingRule] = useState(false);
 
   const fetchDatabase = async () => {
     try {
@@ -19,6 +29,19 @@ export default function DatabaseView({ dbId }: { dbId: string }) {
       }
     } catch (err) {
       console.error("Error fetching inline database:", err);
+    }
+  };
+
+  const fetchAutomations = async () => {
+    if (!db?.id) return;
+    try {
+      const res = await fetch(`/api/databases/automations?dbId=${db.id}`);
+      if (res.ok) {
+        const data = await res.json();
+        setAutomationsList(data);
+      }
+    } catch (err) {
+      console.error(err);
     }
   };
 
@@ -52,6 +75,12 @@ export default function DatabaseView({ dbId }: { dbId: string }) {
       supabase.removeChannel(channelDb);
     };
   }, [dbId]);
+
+  useEffect(() => {
+    if (showAutomationModal && db?.id) {
+      fetchAutomations();
+    }
+  }, [showAutomationModal, db?.id]);
 
   if (!db) return <div style={{ color: 'var(--text-muted)', padding: '16px' }}>Loading Database...</div>;
 
@@ -108,6 +137,58 @@ export default function DatabaseView({ dbId }: { dbId: string }) {
       });
     } catch (err) {
       console.error("Error updating view:", err);
+    }
+  };
+
+  const handleCreateAutomationRule = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!selectedColId || !triggerVal.trim() || !actionType) return;
+
+    setIsSavingRule(true);
+    try {
+      const config: any = {};
+      if (actionType === 'email') config.emailTo = actionConfigEmail;
+      if (actionType === 'calendar') config.calendarSummary = actionConfigSummary;
+
+      const res = await fetch('/api/databases/automations', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          dbId: db.id,
+          triggerColId: selectedColId,
+          triggerVal,
+          actionType,
+          actionConfig: config
+        })
+      });
+
+      if (res.ok) {
+        alert("✦ Automation rule created successfully!");
+        setSelectedColId('');
+        setTriggerVal('');
+        setActionConfigEmail('');
+        setActionConfigSummary('');
+        fetchAutomations();
+      } else {
+        alert("Error creating automation rule.");
+      }
+    } catch (err) {
+      console.error(err);
+    } finally {
+      setIsSavingRule(false);
+    }
+  };
+
+  const handleDeleteRule = async (ruleId: string) => {
+    try {
+      const res = await fetch(`/api/databases/automations?dbId=${db.id}&ruleId=${ruleId}`, {
+        method: 'DELETE'
+      });
+      if (res.ok) {
+        fetchAutomations();
+      }
+    } catch (err) {
+      console.error(err);
     }
   };
 
@@ -227,6 +308,9 @@ export default function DatabaseView({ dbId }: { dbId: string }) {
           </button>
         </div>
         <div className={styles.controls}>
+          <button className={styles.controlBtn} onClick={() => setShowAutomationModal(true)}>
+            <Sparkles size={14} /> Automate
+          </button>
           <button className={styles.controlBtn}><Filter size={14} /> Filter</button>
           <button className={styles.controlBtn}><ArrowUpDown size={14} /> Sort</button>
           <button className={styles.primaryBtn} onClick={handleAddRow}>New</button>
@@ -243,6 +327,125 @@ export default function DatabaseView({ dbId }: { dbId: string }) {
           rowId={selectedRowId} 
           onClose={() => setSelectedRowId(null)} 
         />
+      )}
+
+      {/* Database Automations Modal Form */}
+      {showAutomationModal && (
+        <div className={styles.modalOverlay}>
+          <div className={styles.modal}>
+            <h3>
+              <Sparkles size={20} className={styles.modalHeaderIcon} />
+              Database Automations
+            </h3>
+            <p style={{ fontSize: '13px', color: 'var(--text-muted)', margin: 0 }}>Configure automated triggers to execute specific AI recommendations or push updates directly to your calendar or mailbox.</p>
+            
+            {/* Active Rules list */}
+            <span className={styles.modalSectionTitle}>Active Automation Rules</span>
+            <div className={styles.rulesList}>
+              {automationsList.length === 0 ? (
+                <div style={{ fontSize: '12px', color: 'var(--text-muted)', textAlign: 'center', padding: '16px' }}>No active triggers configured. Build one below!</div>
+              ) : (
+                automationsList.map(rule => {
+                  const targetColName = db.columns.find((c: any) => c.id === rule.trigger_col_id)?.name || 'Column';
+                  return (
+                    <div key={rule.id} className={styles.ruleItem}>
+                      <span className={styles.ruleText}>
+                        When <strong>{targetColName}</strong> changes to <strong>"{rule.trigger_val}"</strong> → Execute <strong>{rule.action_type.toUpperCase()}</strong>
+                      </span>
+                      <button className={styles.ruleDeleteBtn} onClick={() => handleDeleteRule(rule.id)}>
+                        <Trash2 size={14} />
+                      </button>
+                    </div>
+                  );
+                })
+              )}
+            </div>
+
+            {/* Create Trigger Rule Form */}
+            <span className={styles.modalSectionTitle}>Add Automation Trigger</span>
+            <form onSubmit={handleCreateAutomationRule} style={{ display: 'flex', flexDirection: 'column', gap: '14px' }}>
+              <div className={styles.formRow}>
+                <div className={styles.formGroup}>
+                  <label className={styles.formLabel}>When Column...</label>
+                  <select 
+                    className={styles.selectField}
+                    value={selectedColId}
+                    onChange={e => setSelectedColId(e.target.value)}
+                    required
+                  >
+                    <option value="">-- Select Column --</option>
+                    {db.columns.map((c: any) => (
+                      <option key={c.id} value={c.id}>{c.name}</option>
+                    ))}
+                  </select>
+                </div>
+
+                <div className={styles.formGroup}>
+                  <label className={styles.formLabel}>Changes To Value...</label>
+                  <input 
+                    className={styles.inputField}
+                    placeholder="e.g. Done, High, In Progress"
+                    value={triggerVal}
+                    onChange={e => setTriggerVal(e.target.value)}
+                    required
+                  />
+                </div>
+              </div>
+
+              <div className={styles.formGroup}>
+                <label className={styles.formLabel}>Execute Action...</label>
+                <select 
+                  className={styles.selectField}
+                  value={actionType}
+                  onChange={e => setActionType(e.target.value)}
+                  required
+                >
+                  <option value="email">📧 Send Email Alert</option>
+                  <option value="calendar">📅 Add Google Calendar Task</option>
+                  <option value="ai">🤖 Spawn Deep AI Analysis Page</option>
+                </select>
+              </div>
+
+              {actionType === 'email' && (
+                <div className={styles.formGroup}>
+                  <label className={styles.formLabel}>Send Notification To Email</label>
+                  <input 
+                    className={styles.inputField}
+                    type="email"
+                    placeholder="e.g. manager@corp.com"
+                    value={actionConfigEmail}
+                    onChange={e => setActionConfigEmail(e.target.value)}
+                    required
+                  />
+                </div>
+              )}
+
+              {actionType === 'calendar' && (
+                <div className={styles.formGroup}>
+                  <label className={styles.formLabel}>Calendar Event Summary</label>
+                  <input 
+                    className={styles.inputField}
+                    placeholder="e.g. Schedule meeting for task completion"
+                    value={actionConfigSummary}
+                    onChange={e => setActionConfigSummary(e.target.value)}
+                    required
+                  />
+                </div>
+              )}
+
+              <div className={styles.modalFooter}>
+                <button type="button" className={styles.tabBtn} onClick={() => setShowAutomationModal(false)}>Close</button>
+                <button 
+                  type="submit" 
+                  className={styles.primaryBtn}
+                  disabled={isSavingRule}
+                >
+                  {isSavingRule ? 'Creating...' : 'Create Trigger'}
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
       )}
     </div>
   );
