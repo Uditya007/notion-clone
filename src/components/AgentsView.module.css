@@ -144,7 +144,7 @@
 }
 
 .actionBtn:hover {
-  background: var(--gray-100);
+  background: var(--bg-hover);
 }
 
 .actionBtnPrimary {

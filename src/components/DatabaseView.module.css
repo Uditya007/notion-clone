@@ -125,7 +125,7 @@
 }
 
 .cellInput:focus {
-  background: rgba(255, 255, 255, 0.05);
+  background: var(--bg-hover);
 }
 
 .titleCell {
@@ -448,8 +448,8 @@
 }
 
 .ruleDeleteBtn:hover {
-  background: var(--gray-100);
-  color: var(--black);
+  background: var(--bg-hover);
+  color: var(--text-main);
 }
 
 .formGroup {

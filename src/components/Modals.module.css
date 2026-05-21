@@ -58,8 +58,8 @@
 }
 
 .closeBtn:hover {
-  background: var(--gray-100);
-  color: var(--black);
+  background: var(--bg-hover);
+  color: var(--text-main);
 }
 
 .shareContent {
@@ -256,7 +256,7 @@
 }
 
 .publishBtn:hover {
-  background: var(--gray-100);
+  background: var(--bg-hover);
 }
 
 /* FOOTER */
@@ -376,8 +376,8 @@
 }
 
 .settingsNavItem:hover {
-  background: var(--gray-150);
-  color: var(--black);
+  background: var(--bg-hover);
+  color: var(--text-main);
 }
 
 .settingsNavActive {
@@ -576,6 +576,6 @@
 }
 
 .settingBtnPrimary:hover {
-  background: var(--gray-800);
+  background: var(--primary-hover);
 }
 

@@ -16,12 +16,12 @@
   left: 0;
   right: 0;
   bottom: 0;
-  background-image: linear-gradient(var(--gray-100) 1px, transparent 1px),
-                    linear-gradient(90deg, var(--gray-100) 1px, transparent 1px);
+  background-image: linear-gradient(var(--border) 1px, transparent 1px),
+                    linear-gradient(90deg, var(--border) 1px, transparent 1px);
   background-size: 40px 40px;
   z-index: 0;
   pointer-events: none;
-  opacity: 0.8;
+  opacity: 0.6;
 }
 
 /* NAVBAR */
@@ -509,8 +509,8 @@
 
 /* FINAL CTA */
 .finalCta {
-  background-color: var(--black);
-  color: var(--white);
+  background-color: var(--primary);
+  color: var(--primary-text);
   padding: 100px 48px;
   text-align: center;
   display: flex;
@@ -524,22 +524,23 @@
   font-size: 48px;
   font-weight: 800;
   letter-spacing: -0.04em;
-  color: var(--white);
+  color: var(--primary-text);
 }
 
 .finalCtaBtn {
-  background: var(--white);
-  color: var(--black);
+  background: var(--primary-text);
+  color: var(--primary);
   padding: 14px 28px;
   border-radius: var(--radius-sm);
   font-size: 14px;
   font-weight: 700;
   transition: all 0.15s ease;
-  border: 2px solid var(--white);
+  border: 2px solid var(--primary-text);
 }
 
 .finalCtaBtn:hover {
-  background: var(--gray-100);
+  background: var(--bg-hover);
+  border-color: var(--bg-hover);
 }
 
 /* FOOTER */

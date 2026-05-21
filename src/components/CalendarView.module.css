@@ -38,7 +38,7 @@
 
 .viewToggles {
   display: flex;
-  background: var(--gray-100);
+  background: var(--bg-hover);
   padding: 4px;
   border-radius: var(--radius-sm);
   border: 1px solid var(--border);
@@ -109,7 +109,7 @@
 }
 
 .navBtn:hover {
-  background: var(--gray-100);
+  background: var(--bg-hover);
   border-color: var(--border-strong);
 }
 
@@ -127,7 +127,7 @@
 }
 
 .todayBtn:hover {
-  background: var(--gray-100);
+  background: var(--bg-hover);
   border-color: var(--border-strong);
 }
 
@@ -268,9 +268,9 @@
 }
 
 .eventChip.meeting {
-  border-left-color: var(--black);
-  background: var(--gray-100);
-  color: var(--black);
+  border-left-color: var(--primary);
+  background: var(--bg-active);
+  color: var(--text-main);
   font-weight: 600;
 }
 
@@ -447,7 +447,7 @@
   cursor: grabbing;
 }
 
-.eventCard.meeting { border-left-color: var(--black); background: var(--gray-100); }
+.eventCard.meeting { border-left-color: var(--primary); background: var(--bg-active); }
 .eventCard.review { border-left-color: var(--gray-600); }
 .eventCard.planning { border-left-color: var(--gray-800); }
 .eventCard.task { border-left-color: var(--gray-500); }
@@ -503,12 +503,12 @@
   width: 72px;
   height: 72px;
   border-radius: 50%;
-  background: var(--gray-100);
+  background: var(--bg-hover);
   display: flex;
   align-items: center;
   justify-content: center;
   margin-bottom: 8px;
-  color: var(--black);
+  color: var(--primary);
 }
 
 .connectBtn {
@@ -527,7 +527,7 @@
 }
 
 .calendarScheduleClearAlert {
-  background: var(--gray-100);
+  background: var(--bg-hover);
   border: 1.5px solid var(--border-strong);
   border-radius: var(--radius-sm);
   padding: 12px 18px;
@@ -535,7 +535,7 @@
   align-items: center;
   gap: 12px;
   margin-bottom: 24px;
-  color: var(--black);
+  color: var(--text-main);
   font-size: 13px;
   font-weight: 600;
 }

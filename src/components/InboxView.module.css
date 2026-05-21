@@ -193,6 +193,15 @@
   font-size: 14px;
   line-height: 1.6;
   color: var(--text-main);
+  /* Force light container for HTML email content which often has hardcoded white backgrounds */
+  background-color: #ffffff;
+  color-scheme: light;
+}
+
+/* Reset all child elements inside email body to ensure readability */
+.detailBody * {
+  color: inherit;
+  max-width: 100%;
 }
 
 .replyArea {
@@ -288,6 +297,12 @@
   line-height: 1.5;
 }
 
+.composeBody::placeholder,
+.composeInput::placeholder {
+  color: var(--text-faint);
+  opacity: 1;
+}
+
 .composeFooter {
   padding: 12px 16px;
   border-top: 1px solid var(--border);
@@ -380,7 +395,7 @@
   justify-content: center;
   text-align: center;
   padding: 48px;
-  background: white;
+  background: var(--bg-card);
   border-radius: var(--radius-lg);
   border: 1.5px solid var(--border);
   box-shadow: var(--shadow-sm);

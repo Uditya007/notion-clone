@@ -64,16 +64,16 @@
 }
 
 .closeBtn:hover {
-  background: var(--gray-100);
-  color: var(--black);
+  background: var(--bg-hover);
+  color: var(--text-main);
 }
 
 .pulseIndicator {
   display: flex;
   align-items: center;
   gap: 8px;
-  background: var(--gray-100);
-  border: 1.5px solid var(--black);
+  background: var(--bg-hover);
+  border: 1.5px solid var(--primary);
   padding: 4px 12px;
   border-radius: var(--radius-sm);
 }
@@ -147,7 +147,7 @@
 }
 
 .cancelBtn:hover {
-  background: var(--gray-100);
+  background: var(--bg-hover);
 }
 
 .processingState {

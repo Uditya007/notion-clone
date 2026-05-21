@@ -68,8 +68,8 @@
 }
 
 .closeBtn:hover {
-  background: var(--gray-100);
-  color: var(--black);
+  background: var(--bg-hover);
+  color: var(--text-main);
 }
 
 .content {
@@ -101,10 +101,14 @@
   border-radius: var(--radius-sm);
   font-size: 14px;
   color: var(--text-main);
-  background: var(--white);
+  background: var(--bg-card);
   resize: none;
   outline: none;
   transition: all 0.15s ease;
+}
+
+.textarea::placeholder {
+  color: var(--text-faint);
 }
 
 .textarea:focus {
@@ -132,7 +136,7 @@
 }
 
 .pill {
-  background: var(--gray-100);
+  background: var(--bg-hover);
   border: 1px solid var(--border);
   color: var(--text-muted);
   padding: 6px 12px;
@@ -144,7 +148,7 @@
 }
 
 .pill:hover {
-  background: var(--gray-200);
+  background: var(--bg-active);
   color: var(--text-main);
   border-color: var(--border-strong);
 }

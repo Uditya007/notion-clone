@@ -184,15 +184,15 @@
 }
 
 .tagChecklist {
-  background: var(--gray-100);
+  background: var(--bg-hover);
   border: 1px solid var(--border);
-  color: var(--black);
+  color: var(--text-main);
 }
 
 .tagGlobal {
-  background: var(--gray-150);
+  background: var(--bg-active);
   border: 1px solid var(--border);
-  color: var(--black);
+  color: var(--text-main);
 }
 
 .deleteCardBtn {
