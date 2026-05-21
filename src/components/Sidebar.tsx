@@ -35,7 +35,7 @@ export default function Sidebar() {
   const [isCollapsed, setIsCollapsed] = useState(false);
   const [pagesList, setPagesList] = useState<any[]>([]);
   const [workspaceName, setWorkspaceName] = useState("My Workspace");
-  const [userProfile, setUserProfile] = useState<{ name: string; email: string }>({ name: "User", email: "user@clearspace.app" });
+  const [userProfile, setUserProfile] = useState<{ name: string; email: string }>({ name: "User", email: "user@cora.app" });
   const [isGoogleConnected, setIsGoogleConnected] = useState(false);
   const [isAIBuilderOpen, setIsAIBuilderOpen] = useState(false);
   const [showProfileMenu, setShowProfileMenu] = useState(false);
@@ -93,8 +93,8 @@ export default function Sidebar() {
         }
         if (data?.full_name || data?.email) {
           setUserProfile({
-            name: data.full_name || "Clearspace User",
-            email: data.email || "user@clearspace.app"
+            name: data.full_name || "Cora User",
+            email: data.email || "user@cora.app"
           });
         }
       }

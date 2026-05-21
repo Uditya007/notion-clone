@@ -140,7 +140,7 @@ export default function CalendarView() {
       if (createGoogleMeet) {
         body.conferenceData = {
           createRequest: {
-            requestId: `clearspace-${Date.now()}`,
+            requestId: `cora-${Date.now()}`,
             conferenceSolutionKey: {
               type: 'hangoutsMeet'
             }
@@ -376,7 +376,7 @@ export default function CalendarView() {
             <CalendarIcon size={36} color="var(--black)" />
           </div>
           <h3>Connect Google Calendar</h3>
-          <p>Sync your real events and manage your schedule directly inside your Clearspace canvas.</p>
+          <p>Sync your real events and manage your schedule directly inside your Cora canvas.</p>
           <button className={styles.connectBtn} onClick={handleConnectGoogle}>
             Connect Google Account
           </button>

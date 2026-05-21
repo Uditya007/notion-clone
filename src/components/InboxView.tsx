@@ -210,7 +210,7 @@ export default function InboxView() {
             <Mail size={44} color="var(--primary)" />
           </div>
           <h3>Connect Google Workspace</h3>
-          <p>Read your real emails, respond with automated AI drafts, and schedule focus timers all inside your Clearspace canvas.</p>
+          <p>Read your real emails, respond with automated AI drafts, and schedule focus timers all inside your Cora canvas.</p>
           <button className={styles.connectBtn} onClick={handleConnectGoogle}>
             Connect Google Account
           </button>

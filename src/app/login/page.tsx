@@ -6,6 +6,7 @@ import Link from "next/link";
 import { supabase } from "@/lib/supabase/client";
 import { Eye, EyeOff, Sparkles, FileText, Calendar, Database } from "lucide-react";
 import styles from "./login.module.css";
+import CoraLogo from "@/components/CoraLogo";
 
 export default function LoginPage() {
   const router = useRouter();
@@ -79,8 +80,8 @@ export default function LoginPage() {
       <div className={styles.leftPanel}>
         <Link href="/" style={{ textDecoration: "none", color: "inherit" }}>
           <div className={styles.logoArea}>
-            <div className={styles.logoIcon}></div>
-            <span className={styles.logoText}>Clearspace</span>
+            <CoraLogo className={styles.logoSvg} />
+            <span className={styles.logoText}>cora</span>
           </div>
         </Link>
 
@@ -123,8 +124,8 @@ export default function LoginPage() {
         <div className={styles.formWrapper}>
           {/* Mobile Logo */}
           <div className={styles.mobileLogo}>
-            <div className={styles.logoIcon}></div>
-            <span className={styles.logoText}>Clearspace</span>
+            <CoraLogo className={styles.logoSvg} />
+            <span className={styles.logoText}>cora</span>
           </div>
 
           <h2 className={styles.heading}>Welcome back</h2>

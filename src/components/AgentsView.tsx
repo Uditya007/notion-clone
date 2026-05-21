@@ -137,7 +137,7 @@ export default function AgentsView() {
           <Zap className={styles.headerIcon} size={24} />
           AI Agents
         </h2>
-        <span className={styles.headerDesc}>Autonomous workers running inside your Clearspace environment to manage operations and analyze logs.</span>
+        <span className={styles.headerDesc}>Autonomous workers running inside your Cora environment to manage operations and analyze logs.</span>
       </div>
 
       {/* ALWAYS-ON AGENTS */}
@@ -353,7 +353,7 @@ export default function AgentsView() {
             <p style={{ fontSize: '13px', color: 'var(--text-muted)', margin: 0 }}>Paste your conversation logs, client requirements, or audio transcript block below to decode action timelines.</p>
             <textarea 
               className={`${styles.inputField} ${styles.textarea}`}
-              placeholder="e.g. John: Hi, we need a quote for 50 licenses of Clearspace. Rahul: Sure, I will send you the proposal by Friday..."
+              placeholder="e.g. John: Hi, we need a quote for 50 licenses of Cora. Rahul: Sure, I will send you the proposal by Friday..."
               value={transcript}
               onChange={e => setTranscript(e.target.value)}
             />

@@ -126,7 +126,7 @@ export async function evaluateAndTriggerAutomations(
             body: JSON.stringify({
               to: toEmail,
               subject: `[Automation Alert] Row updated: ${rowTitle}`,
-              body: `Hello,\n\nThis is an automated notification from your Clearspace workspace. The row "${rowTitle}" has matched your trigger criteria.\n\nDatabase: ${db?.name || 'Untitled Database'}\nTrigger Match: Status is now "${newValue}".\n\nHave a great day!\nClearspace Automations Engine`
+              body: `Hello,\n\nThis is an automated notification from your Cora workspace. The row "${rowTitle}" has matched your trigger criteria.\n\nDatabase: ${db?.name || 'Untitled Database'}\nTrigger Match: Status is now "${newValue}".\n\nHave a great day!\nCora Automations Engine`
             })
           });
         } catch (emailErr) {

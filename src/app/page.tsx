@@ -6,6 +6,7 @@ import { useRouter } from "next/navigation";
 import { supabase } from "@/lib/supabase/client";
 import { ArrowRight, Play, X, Sun, Moon } from "lucide-react";
 import styles from "./home.module.css";
+import CoraLogo from "@/components/CoraLogo";
 
 export default function LandingPage() {
   const router = useRouter();
@@ -15,20 +16,23 @@ export default function LandingPage() {
   const [theme, setTheme] = useState("dark");
 
   useEffect(() => {
-    const savedTheme = localStorage.getItem("clearspace-theme") || "dark";
+    const savedTheme = localStorage.getItem("cora-theme") || "dark";
     if (savedTheme === "system") {
       const prefersDark = window.matchMedia("(prefers-color-scheme: dark)").matches;
+      document.documentElement.setAttribute("data-theme", prefersDark ? "dark" : "light");
       setTheme(prefersDark ? "dark" : "light");
     } else {
+      document.documentElement.setAttribute("data-theme", savedTheme);
       setTheme(savedTheme);
     }
+    setIsLoading(false);
   }, []);
 
   const toggleTheme = () => {
     const nextTheme = theme === "dark" ? "light" : "dark";
     setTheme(nextTheme);
-    localStorage.setItem("clearspace-theme", nextTheme);
     document.documentElement.setAttribute("data-theme", nextTheme);
+    localStorage.setItem("cora-theme", nextTheme);
   };
   
   const stepRefs = [
@@ -79,8 +83,8 @@ export default function LandingPage() {
       {/* NAVBAR */}
       <nav className={styles.navbar}>
         <div className={styles.logoArea}>
-          <div className={styles.logoIcon}>C</div>
-          <span className={styles.logoText}>Clearspace</span>
+          <CoraLogo className={styles.logoSvg} />
+          <span className={styles.logoText}>cora</span>
         </div>
         
         <div className={styles.navLinks}>
@@ -117,7 +121,7 @@ export default function LandingPage() {
         </h1>
         
         <p className={styles.heroSubtext}>
-          Clearspace is an AI-powered workspace for notes, tasks, and databases. No clutter. No learning curve.
+          Cora is an AI-powered workspace for notes, tasks, and databases. No clutter. No learning curve.
         </p>
         
         <div className={styles.heroButtons}>
@@ -143,7 +147,7 @@ export default function LandingPage() {
                 <span />
                 <span />
               </div>
-              <div className={styles.chromeUrl}>clearspace.app</div>
+              <div className={styles.chromeUrl}>cora.app</div>
             </div>
             
             {/* Fake inner layout */}
@@ -281,8 +285,8 @@ export default function LandingPage() {
       {/* FOOTER */}
       <footer className={styles.footer}>
         <div className={styles.footerLeft}>
-          <div className={styles.footerLogoIcon}></div>
-          <span>Clearspace © 2026</span>
+          <CoraLogo className={styles.footerLogoSvg} />
+          <span>Cora © 2026</span>
         </div>
         <div className={styles.footerLinks}>
           <Link href="#" className={styles.footerLink}>Privacy</Link>
@@ -296,7 +300,7 @@ export default function LandingPage() {
         <div className={styles.modalOverlay} onClick={() => setShowDemoModal(false)}>
           <div className={styles.modalCard} onClick={e => e.stopPropagation()}>
             <div className={styles.modalHeader}>
-              <h3>🎬 Clearspace Product Tour</h3>
+              <h3>🎬 Cora Product Tour</h3>
               <button className={styles.closeBtn} onClick={() => setShowDemoModal(false)}>
                 <X size={18} />
               </button>

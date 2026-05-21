@@ -65,14 +65,14 @@ export default function SettingsModal() {
       fetchProfile();
       fetchGoogleStatus();
       
-      const savedTheme = localStorage.getItem('clearspace-theme') || 'dark';
+      const savedTheme = localStorage.getItem('cora-theme') || 'dark';
       setTheme(savedTheme);
     }
   }, [isSettingsOpen]);
 
   const handleThemeChange = (newTheme: string) => {
     setTheme(newTheme);
-    localStorage.setItem('clearspace-theme', newTheme);
+    localStorage.setItem('cora-theme', newTheme);
     
     if (newTheme === 'system') {
       const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;

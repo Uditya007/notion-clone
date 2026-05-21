@@ -105,7 +105,7 @@ export default function AIChatPanel() {
         <div className={styles.header}>
           <div className={styles.headerLeft}>
             <Sparkles size={16} className={styles.headerIcon} />
-            Clearspace AI
+            Cora AI
           </div>
           <button className={styles.newAgentBtn} onClick={handleCreateConversation}>
             <Plus size={12} /> New agent

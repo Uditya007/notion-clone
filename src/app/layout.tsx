@@ -9,8 +9,8 @@ const inter = Inter({
 });
 
 export const metadata: Metadata = {
-  title: "Clearspace — Warm, AI-guided writing canvas",
-  description: "Clearspace blends the structured efficiency of Notion with the cozy, friendly intelligence of Google NotebookLM.",
+  title: "Cora — Warm, AI-guided writing canvas",
+  description: "Cora blends the structured efficiency of Notion with the cozy, friendly intelligence of Google NotebookLM.",
 };
 
 export default function RootLayout({

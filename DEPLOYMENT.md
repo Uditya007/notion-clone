@@ -1,6 +1,6 @@
-# Clearspace Deployment & Launch Checklist
+# Cora Deployment & Launch Checklist
 
-This guide provides the complete step-by-step checklist to deploy Clearspace (Next.js + Supabase) successfully in production on Vercel.
+This guide provides the complete step-by-step checklist to deploy Cora (Next.js + Supabase) successfully in production on Vercel.
 
 ---
 
@@ -64,7 +64,7 @@ For Google Sign-in to function in both production and development:
 ---
 
 ## 4. Vercel Production Environment Variables
-Go to your **Vercel Dashboard** -> **Clearspace** Project -> **Settings** -> **Environment Variables**, and configure the following keys exactly:
+Go to your **Vercel Dashboard** -> **Cora** Project -> **Settings** -> **Environment Variables**, and configure the following keys exactly:
 
 | Variable Name | Production Value |
 |---|---|

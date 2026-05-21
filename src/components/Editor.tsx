@@ -299,7 +299,7 @@ export default function Editor() {
       }
     });
 
-    const isTipDismissed = localStorage.getItem("clearspace_editor_tip_dismissed");
+    const isTipDismissed = localStorage.getItem("cora_editor_tip_dismissed");
     if (!isTipDismissed) {
       setShowTooltip(true);
     }
@@ -538,7 +538,7 @@ export default function Editor() {
   };
 
   const dismissTooltip = () => {
-    localStorage.setItem("clearspace_editor_tip_dismissed", "true");
+    localStorage.setItem("cora_editor_tip_dismissed", "true");
     setShowTooltip(false);
   };
 

@@ -28,21 +28,11 @@
   cursor: pointer;
 }
 
-.logoIcon {
+.logoSvg {
   width: 24px;
   height: 24px;
-  border-radius: 4px;
-  background-color: var(--white);
-  color: var(--black);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-weight: 800;
-  font-size: 13px;
-}
-
-.logoIcon::after {
-  content: "C";
+  color: var(--white);
+  display: block;
 }
 
 .logoText {
@@ -361,9 +351,8 @@
     margin-bottom: 32px;
   }
 
-  .mobileLogo .logoIcon {
-    background-color: var(--black);
-    color: var(--white);
+  .mobileLogo .logoSvg {
+    color: var(--black);
   }
 
   .mobileLogo .logoText {

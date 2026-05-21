@@ -192,9 +192,9 @@ export default function CommandCenter() {
       <div className={styles.welcomeContainer}>
         <div className={styles.welcomeContent}>
           <div className={styles.welcomeEmoji}>🌱</div>
-          <h1 className={styles.welcomeTitle}>Welcome to Clearspace</h1>
+          <h1 className={styles.welcomeTitle}>Welcome to Cora</h1>
           <p className={styles.welcomeSubtitle}>
-            Your premium, AI-guided writing canvas. Clearspace blends the clean hierarchy of Notion with the cozy, responsive intelligence of NotebookLM. Let's create something wonderful.
+            Your premium, AI-guided writing canvas. Cora blends the clean hierarchy of Notion with the cozy, responsive intelligence of NotebookLM. Let's create something wonderful.
           </p>
           
           <div className={styles.welcomeFeatures}>
