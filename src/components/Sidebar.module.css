@@ -42,8 +42,8 @@
 }
 
 .expandBtn:hover {
-  background-color: var(--gray-100);
-  color: var(--black);
+  background-color: var(--bg-hover);
+  color: var(--text-main);
 }
 
 /* WORKSPACE HEADER */
@@ -194,7 +194,7 @@
   display: flex;
   align-items: center;
   gap: 6px;
-  background-color: var(--gray-100);
+  background-color: var(--bg-hover);
   border: 1px solid transparent;
   padding: 6px 10px;
   border-radius: var(--radius-sm);
@@ -234,7 +234,7 @@
 }
 
 .rowBtn:hover {
-  background-color: var(--gray-100);
+  background-color: var(--bg-hover);
   color: var(--text-main);
 }
 
@@ -271,15 +271,15 @@
 }
 
 .navItem:hover {
-  background-color: var(--gray-100);
+  background-color: var(--bg-hover);
   color: var(--text-main);
 }
 
 .navActive {
-  background-color: var(--gray-100);
+  background-color: var(--bg-active);
   color: var(--text-main);
   font-weight: 600;
-  border-left: 2px solid var(--black);
+  border-left: 2px solid var(--primary);
   border-radius: 0 var(--radius-sm) var(--radius-sm) 0;
 }
 
@@ -316,7 +316,7 @@
 }
 
 .addPageBtn:hover {
-  background-color: var(--gray-100);
+  background-color: var(--bg-hover);
   color: var(--text-main);
 }
 
@@ -347,15 +347,15 @@
 }
 
 .pageItem:hover {
-  background-color: var(--gray-100);
+  background-color: var(--bg-hover);
   color: var(--text-main);
 }
 
 .pageActive {
-  background-color: var(--gray-100);
+  background-color: var(--bg-active);
   color: var(--text-main);
   font-weight: 600;
-  border-left: 2px solid var(--black);
+  border-left: 2px solid var(--primary);
   border-radius: 0 var(--radius-sm) var(--radius-sm) 0;
 }
 
@@ -384,7 +384,7 @@
 }
 
 .chevronWrapper:hover {
-  background-color: var(--gray-200);
+  background-color: var(--bg-active);
   color: var(--text-main);
 }
 
@@ -426,7 +426,7 @@
 }
 
 .iconActionBtn:hover {
-  background-color: var(--gray-200);
+  background-color: var(--bg-active);
   color: var(--text-main);
 }
 
@@ -490,7 +490,7 @@
 }
 
 .beginnerBlankBtn:hover {
-  background-color: var(--gray-100);
+  background-color: var(--bg-hover);
 }
 
 /* FOOTER / BOTTOM */
