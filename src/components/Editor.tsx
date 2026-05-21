@@ -44,6 +44,131 @@ const SLASH_COMMANDS = [
   { title: 'Ask AI Builder', icon: '✨', action: () => {} },
 ];
 
+function markdownToHtml(md: string): string {
+  if (!md) return '';
+
+  const lines = md.split('\n');
+  let html = '';
+  let inList = false;
+  let inTaskList = false;
+  let inCode = false;
+  let codeContent = '';
+
+  for (let i = 0; i < lines.length; i++) {
+    let line = lines[i].trim();
+
+    // Handle code blocks
+    if (line.startsWith('```')) {
+      if (inCode) {
+        // End of code block
+        html += `<pre><code>${codeContent.trim()}</code></pre>`;
+        inCode = false;
+        codeContent = '';
+      } else {
+        // Start of code block
+        inCode = true;
+      }
+      continue;
+    }
+
+    if (inCode) {
+      codeContent += line + '\n';
+      continue;
+    }
+
+    // Handle Headers
+    if (line.startsWith('# ')) {
+      html += `<h1>${line.substring(2)}</h1>`;
+      continue;
+    }
+    if (line.startsWith('## ')) {
+      html += `<h2>${line.substring(3)}</h2>`;
+      continue;
+    }
+    if (line.startsWith('### ')) {
+      html += `<h3>${line.substring(4)}</h3>`;
+      continue;
+    }
+
+    // Handle Checklist Items
+    if (line.startsWith('- [ ] ') || line.startsWith('- [x] ')) {
+      if (inList) {
+        html += '</ul>';
+        inList = false;
+      }
+      if (!inTaskList) {
+        html += '<ul data-type="taskList">';
+        inTaskList = true;
+      }
+      const checked = line.startsWith('- [x] ');
+      const title = line.substring(6);
+      html += `<li data-type="taskItem" data-checked="${checked ? 'true' : 'false'}" data-status="${checked ? 'done' : 'todo'}">${title}</li>`;
+      continue;
+    }
+
+    // Handle standard list items
+    if (line.startsWith('- ') || line.startsWith('* ')) {
+      if (inTaskList) {
+        html += '</ul>';
+        inTaskList = false;
+      }
+      if (!inList) {
+        html += '<ul>';
+        inList = true;
+      }
+      html += `<li>${line.substring(2)}</li>`;
+      continue;
+    }
+
+    // Close open lists if an empty or different element is found
+    if (line === '') {
+      if (inList) {
+        html += '</ul>';
+        inList = false;
+      }
+      if (inTaskList) {
+        html += '</ul>';
+        inTaskList = false;
+      }
+      continue;
+    }
+
+    // Wrap remaining lines in simple paragraphs
+    if (line.length > 0) {
+      if (inList) {
+        html += '</ul>';
+        inList = false;
+      }
+      if (inTaskList) {
+        html += '</ul>';
+        inTaskList = false;
+      }
+
+      // Inline styles replacements
+      let formattedLine = line
+        .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
+        .replace(/\*(.*?)\*/g, '<em>$1</em>')
+        .replace(/`(.*?)`/g, '<code>$1</code>');
+
+      html += `<p>${formattedLine}</p>`;
+    }
+  }
+
+  // Ensure all lists are closed
+  if (inList) html += '</ul>';
+  if (inTaskList) html += '</ul>';
+
+  return html;
+}
+
+function parseContentIfNeeded(content: string): string {
+  if (!content) return '';
+  if (/<p>|<h1>|<h2>|<h3>|<ul>|<ol>|<li>|<pre>|<code>|<blockquote>/i.test(content)) {
+    return content;
+  }
+  return markdownToHtml(content);
+}
+
 const getUserColor = (id: string) => {
   const colors = ['#ff4d4d', '#4da6ff', '#2ecc71', '#f1c40f', '#9b59b6', '#e67e22'];
   let sum = 0;
@@ -370,10 +495,13 @@ export default function Editor() {
   }, [editor, slashIndex]);
 
   useEffect(() => {
-    if (editor && activePage && activePage.type === 'editor' && editor.getHTML() !== activePage.content) {
-      editor.commands.setContent(activePage.content);
+    if (editor && activePage && activePage.type === 'editor') {
+      const parsedContent = parseContentIfNeeded(activePage.content);
+      if (editor.getHTML() !== parsedContent) {
+        editor.commands.setContent(parsedContent);
+      }
     }
-  }, [activePageId, editor]);
+  }, [activePageId, editor, activePage?.content]);
 
   const handleAiSubmit = (e: React.FormEvent) => {
     e.preventDefault();
