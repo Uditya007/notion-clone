@@ -81,6 +81,48 @@ export default function TasksView() {
     }
   };
 
+  const handleUpdateDueDate = async (taskId: string, dateStr: string) => {
+    try {
+      const res = await fetch(`/api/tasks/${taskId}`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ due_date: dateStr || null }),
+      });
+      if (res.ok) {
+        fetchTasks();
+      }
+    } catch (err) {
+      console.error('Error updating task due date:', err);
+    }
+  };
+
+  const formatTaskDue = (task: any) => {
+    if (!task.due_date) return null;
+    
+    const today = new Date();
+    const todayStr = today.toISOString().split('T')[0];
+
+    const tomorrow = new Date();
+    tomorrow.setDate(tomorrow.getDate() + 1);
+    const tomorrowStr = tomorrow.toISOString().split('T')[0];
+
+    if (task.due_date < todayStr) {
+      return { text: 'Overdue', isOverdue: true };
+    } else if (task.due_date === todayStr) {
+      return { text: 'Today', isOverdue: false };
+    } else if (task.due_date === tomorrowStr) {
+      return { text: 'Tomorrow', isOverdue: false };
+    } else {
+      try {
+        const date = new Date(task.due_date + 'T00:00:00');
+        const formatted = date.toLocaleDateString([], { month: 'short', day: 'numeric' });
+        return { text: formatted, isOverdue: false };
+      } catch (e) {
+        return { text: task.due_date, isOverdue: false };
+      }
+    }
+  };
+
   const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
     if (e.key === 'Enter') {
       handleAddTask(newTaskTitle);
@@ -143,23 +185,35 @@ export default function TasksView() {
               <p>Enjoy your clear desk space. Any tasks you add or fetch will be logged right here.</p>
             </div>
           ) : (
-            incompleteTasks.map(task => (
-              <div key={task.id} className={styles.taskListItem}>
-                <button 
-                  className={`${styles.checkbox} ${task.completed ? styles.checked : ''}`}
-                  onClick={() => handleToggleTask(task.id, task.completed)}
-                />
-                <div className={styles.taskItemContent}>
-                  <span className={styles.taskItemTitle}>{task.title}</span>
-                  <span className={`${styles.taskItemDue} ${task.due === 'Overdue' ? styles.overdue : ''}`}>
-                    <Clock size={12} /> {task.due || 'No due date'}
-                  </span>
+            incompleteTasks.map(task => {
+              const dueInfo = formatTaskDue(task);
+              return (
+                <div key={task.id} className={styles.taskListItem}>
+                  <button 
+                    className={`${styles.checkbox} ${task.completed ? styles.checked : ''}`}
+                    onClick={() => handleToggleTask(task.id, task.completed)}
+                  />
+                  <div className={styles.taskItemContent}>
+                    <span className={styles.taskItemTitle}>{task.title}</span>
+                    <div className={styles.taskDateContainer}>
+                      <label className={`${styles.taskItemDue} ${dueInfo?.isOverdue ? styles.overdue : ''}`}>
+                        <Clock size={12} />
+                        <span>{dueInfo ? dueInfo.text : 'Set due date'}</span>
+                        <input 
+                          type="date"
+                          className={styles.taskDateInputHidden}
+                          value={task.due_date || ''}
+                          onChange={(e) => handleUpdateDueDate(task.id, e.target.value)}
+                        />
+                      </label>
+                    </div>
+                  </div>
+                  <button className={styles.deleteTaskBtn} onClick={() => handleDeleteTask(task.id)} style={{ background: 'none', border: 'none', color: 'var(--text-muted)', cursor: 'pointer', marginLeft: 'auto', display: 'flex', alignItems: 'center' }}>
+                    <Trash2 size={14} />
+                  </button>
                 </div>
-                <button className={styles.deleteTaskBtn} onClick={() => handleDeleteTask(task.id)} style={{ background: 'none', border: 'none', color: 'var(--text-muted)', cursor: 'pointer', marginLeft: 'auto', display: 'flex', alignItems: 'center' }}>
-                  <Trash2 size={14} />
-                </button>
-              </div>
-            ))
+              );
+            })
           )}
         </div>
 

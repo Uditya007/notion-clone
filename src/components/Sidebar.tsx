@@ -40,24 +40,67 @@ export default function Sidebar() {
   const [isAIBuilderOpen, setIsAIBuilderOpen] = useState(false);
   const [showProfileMenu, setShowProfileMenu] = useState(false);
   
-  const { activePageId, setActivePage, setSearchOpen, setSettingsOpen } = useAppStore();
+  // Notification Alert States
+  const [alerts, setAlerts] = useState<any>({ overdue: [], dueToday: [], dueTomorrow: [], totalAlerts: 0 });
+  const [showNotifications, setShowNotifications] = useState(false);
+  
+  const { activePageId, setActivePage, setSearchOpen, setSettingsOpen, addToast } = useAppStore();
   const importFileInputRef = useRef<HTMLInputElement>(null);
   const profileMenuRef = useRef<HTMLDivElement>(null);
+  const notificationsRef = useRef<HTMLDivElement>(null);
+  const hasShownToastRef = useRef(false);
+
+  const fetchAlerts = async () => {
+    try {
+      const res = await fetch("/api/tasks/alerts");
+      if (res.ok) {
+        const data = await res.json();
+        setAlerts(data);
+        
+        // Show startup toast on first successful fetch if there are active alerts
+        if (!hasShownToastRef.current && data.totalAlerts > 0) {
+          const overdueCount = data.overdue.length;
+          const todayCount = data.dueToday.length;
+          let message = "⚠️ You have task deadlines requiring attention!";
+          if (overdueCount > 0 && todayCount > 0) {
+            message = `⚠️ Deadline alert: ${overdueCount} task${overdueCount > 1 ? 's are' : ' is'} overdue, and ${todayCount} ${todayCount > 1 ? 'are' : 'is'} due today!`;
+          } else if (overdueCount > 0) {
+            message = `⚠️ Overdue tasks: ${overdueCount} task${overdueCount > 1 ? 's require' : ' requires'} immediate completion!`;
+          } else if (todayCount > 0) {
+            message = `💡 Task reminder: You have ${todayCount} task${todayCount > 1 ? 's' : ''} due today.`;
+          }
+          addToast(message, "warning", 6000);
+          hasShownToastRef.current = true;
+        }
+      }
+    } catch (err) {
+      console.error("Error fetching alerts:", err);
+    }
+  };
 
   useEffect(() => {
     fetchPages();
     fetchProfile();
     fetchGoogleStatus();
+    fetchAlerts();
 
-    const channel = supabase
+    const pagesChannel = supabase
       .channel('realtime:pages')
       .on('postgres_changes', { event: '*', schema: 'public', table: 'pages' }, () => {
         fetchPages();
       })
       .subscribe();
 
+    const tasksChannel = supabase
+      .channel('realtime:sidebar_tasks')
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'tasks' }, () => {
+        fetchAlerts();
+      })
+      .subscribe();
+
     return () => {
-      supabase.removeChannel(channel);
+      supabase.removeChannel(pagesChannel);
+      supabase.removeChannel(tasksChannel);
     };
   }, []);
 
@@ -66,10 +109,54 @@ export default function Sidebar() {
       if (profileMenuRef.current && !profileMenuRef.current.contains(event.target as Node)) {
         setShowProfileMenu(false);
       }
+      if (notificationsRef.current && !notificationsRef.current.contains(event.target as Node)) {
+        setShowNotifications(false);
+      }
     }
     document.addEventListener("mousedown", handleClickOutside);
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
+
+  // Popover Task Item Component
+  const PopoverTaskItem = ({ task, badgeClass, badgeText }: { task: any; badgeClass: string; badgeText: string }) => {
+    const [completing, setCompleting] = useState(false);
+    
+    const handleComplete = async (e: React.MouseEvent) => {
+      e.stopPropagation();
+      setCompleting(true);
+      try {
+        const res = await fetch(`/api/tasks/${task.id}`, {
+          method: 'PATCH',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ completed: true }),
+        });
+        if (res.ok) {
+          addToast(`✦ Completed task: "${task.title}"`, "success");
+        }
+      } catch (err) {
+        console.error("Error completing task from popover:", err);
+      } finally {
+        setCompleting(false);
+      }
+    };
+
+    return (
+      <div 
+        className={styles.popoverTaskItem} 
+        onClick={() => { setActivePage('tasks'); setShowNotifications(false); }}
+      >
+        <button 
+          className={`${styles.popoverCheckbox} ${completing ? styles.checkboxSpin : ''}`} 
+          onClick={handleComplete}
+          title="Mark complete"
+        />
+        <div className={styles.popoverTaskMeta}>
+          <span className={styles.popoverTaskTitle}>{task.title}</span>
+          <span className={`${styles.popoverTaskBadge} ${badgeClass}`}>{badgeText}</span>
+        </div>
+      </div>
+    );
+  };
 
   const fetchPages = async () => {
     try {
@@ -326,9 +413,85 @@ export default function Sidebar() {
           <button className={styles.rowBtn} onClick={() => handlePageSelect('home')} title="📊 Command Center">
             <LayoutDashboard size={16} />
           </button>
-          <button className={styles.rowBtn} onClick={() => handlePageSelect('inbox')} title="🔔 Inbox">
-            <Bell size={16} />
-          </button>
+          <div className={styles.bellContainer} ref={notificationsRef}>
+            <button 
+              className={`${styles.rowBtn} ${alerts.totalAlerts > 0 ? styles.bellActive : ''} ${showNotifications ? styles.rowBtnActive : ''}`} 
+              onClick={() => setShowNotifications(!showNotifications)} 
+              title="Notifications"
+            >
+              <Bell size={16} />
+              {alerts.totalAlerts > 0 && (
+                <span className={styles.bellBadgeCount}>{alerts.totalAlerts}</span>
+              )}
+            </button>
+            
+            {showNotifications && (
+              <div className={styles.notificationsPopover}>
+                <div className={styles.popoverHeader}>
+                  <h4>Task Deadlines</h4>
+                  {alerts.totalAlerts === 0 ? (
+                    <span className={styles.allClearBadge}>✦ All Clear</span>
+                  ) : (
+                    <span className={styles.alertCountBadge}>{alerts.totalAlerts} Alert{alerts.totalAlerts > 1 ? 's' : ''}</span>
+                  )}
+                </div>
+                
+                <div className={styles.popoverScrollArea}>
+                  {alerts.totalAlerts === 0 ? (
+                    <div className={styles.popoverEmptyState}>
+                      <span className={styles.popoverSparkles}>✦</span>
+                      <p>No upcoming task deadlines!</p>
+                      <span>Keep up the amazing work!</span>
+                    </div>
+                  ) : (
+                    <>
+                      {alerts.overdue.length > 0 && (
+                        <div className={styles.alertSection}>
+                          <div className={styles.popoverSectionTitle}>Overdue</div>
+                          {alerts.overdue.map((task: any) => (
+                            <PopoverTaskItem 
+                              key={`overdue-${task.id}`} 
+                              task={task} 
+                              badgeClass={styles.overdueBadge} 
+                              badgeText="Overdue" 
+                            />
+                          ))}
+                        </div>
+                      )}
+                      
+                      {alerts.dueToday.length > 0 && (
+                        <div className={styles.alertSection}>
+                          <div className={styles.popoverSectionTitle}>Due Today</div>
+                          {alerts.dueToday.map((task: any) => (
+                            <PopoverTaskItem 
+                              key={`today-${task.id}`} 
+                              task={task} 
+                              badgeClass={styles.todayBadge} 
+                              badgeText="Today" 
+                            />
+                          ))}
+                        </div>
+                      )}
+                      
+                      {alerts.dueTomorrow.length > 0 && (
+                        <div className={styles.alertSection}>
+                          <div className={styles.popoverSectionTitle}>Due Tomorrow</div>
+                          {alerts.dueTomorrow.map((task: any) => (
+                            <PopoverTaskItem 
+                              key={`tomorrow-${task.id}`} 
+                              task={task} 
+                              badgeClass={styles.tomorrowBadge} 
+                              badgeText="Tomorrow" 
+                            />
+                          ))}
+                        </div>
+                      )}
+                    </>
+                  )}
+                </div>
+              </div>
+            )}
+          </div>
           <button className={styles.rowBtn} onClick={() => setSettingsOpen(true)} title="⚙️ Settings">
             <Settings size={16} />
           </button>

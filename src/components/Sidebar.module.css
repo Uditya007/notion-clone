@@ -607,3 +607,276 @@
     animation: fadeInFast 0.2s ease;
   }
 }
+
+/* NOTIFICATIONS POPOVER & BADGES */
+.bellContainer {
+  position: relative;
+  flex: 1;
+  display: flex;
+}
+
+.bellContainer .rowBtn {
+  width: 100%;
+}
+
+.rowBtnActive {
+  background-color: var(--bg-hover) !important;
+  color: var(--text-main) !important;
+}
+
+.bellActive {
+  color: var(--primary) !important;
+  animation: pulseBell 2s infinite;
+}
+
+@keyframes pulseBell {
+  0% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.7;
+  }
+  100% {
+    opacity: 1;
+  }
+}
+
+.bellBadgeCount {
+  position: absolute;
+  top: 2px;
+  right: 2px;
+  background-color: var(--primary, #3b82f6);
+  color: #fff;
+  font-size: 9px;
+  font-weight: 700;
+  min-width: 14px;
+  height: 14px;
+  border-radius: 7px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0 3px;
+  box-shadow: 0 0 0 2px var(--white);
+  pointer-events: none;
+  z-index: 2;
+}
+
+.notificationsPopover {
+  position: absolute;
+  top: 32px;
+  left: 0;
+  width: 280px;
+  background: var(--white);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md, 8px);
+  box-shadow: var(--shadow-lg, 0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 8px 10px -6px rgba(0, 0, 0, 0.1));
+  padding: 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  z-index: 1000;
+  animation: popIn 0.15s ease;
+}
+
+@keyframes popIn {
+  0% {
+    opacity: 0;
+    transform: translateY(-8px) scale(0.98);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+.popoverHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  border-bottom: 1px solid var(--border);
+  padding-bottom: 8px;
+}
+
+.popoverHeader h4 {
+  margin: 0;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text-main);
+}
+
+.allClearBadge {
+  font-size: 10px;
+  font-weight: 600;
+  color: #059669;
+  background-color: #ecfdf5;
+  padding: 2px 6px;
+  border-radius: 4px;
+}
+
+.alertCountBadge {
+  font-size: 10px;
+  font-weight: 600;
+  color: var(--primary, #3b82f6);
+  background-color: var(--bg-hover);
+  padding: 2px 6px;
+  border-radius: 4px;
+}
+
+.popoverScrollArea {
+  max-height: 240px;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding-right: 4px;
+}
+
+/* Scrollbar styles for popoverScrollArea */
+.popoverScrollArea::-webkit-scrollbar {
+  width: 4px;
+}
+.popoverScrollArea::-webkit-scrollbar-track {
+  background: transparent;
+}
+.popoverScrollArea::-webkit-scrollbar-thumb {
+  background: var(--border);
+  border-radius: 2px;
+}
+
+.popoverEmptyState {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 24px 8px;
+  text-align: center;
+  color: var(--text-muted);
+}
+
+.popoverSparkles {
+  font-size: 20px;
+  color: var(--primary, #3b82f6);
+  margin-bottom: 6px;
+  animation: float 3s ease-in-out infinite;
+}
+
+@keyframes float {
+  0% { transform: translateY(0px); }
+  50% { transform: translateY(-4px); }
+  100% { transform: translateY(0px); }
+}
+
+.popoverEmptyState p {
+  margin: 0 0 2px 0;
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--text-main);
+}
+
+.popoverEmptyState span {
+  font-size: 11px;
+}
+
+.alertSection {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.popoverSectionTitle {
+  font-size: 10px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--gray-400);
+  margin-bottom: 2px;
+}
+
+.popoverTaskItem {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  padding: 6px 8px;
+  border-radius: var(--radius-sm, 6px);
+  cursor: pointer;
+  transition: all 0.15s ease;
+  border: 1px solid transparent;
+}
+
+.popoverTaskItem:hover {
+  background-color: var(--bg-hover);
+  border-color: var(--border);
+}
+
+.popoverCheckbox {
+  width: 14px;
+  height: 14px;
+  border-radius: 3px;
+  border: 1.5px solid var(--gray-300);
+  background: transparent;
+  cursor: pointer;
+  flex-shrink: 0;
+  margin-top: 2px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.15s ease;
+}
+
+.popoverCheckbox:hover {
+  border-color: var(--primary, #3b82f6);
+  background-color: rgba(59, 130, 246, 0.05);
+}
+
+.checkboxSpin {
+  border-color: var(--primary, #3b82f6) !important;
+  border-top-color: transparent !important;
+  border-radius: 50% !important;
+  animation: spin 0.6s linear infinite;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+.popoverTaskMeta {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  flex: 1;
+  min-width: 0;
+}
+
+.popoverTaskTitle {
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--text-main);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.popoverTaskBadge {
+  font-size: 9px;
+  font-weight: 600;
+  padding: 1px 4px;
+  border-radius: 3px;
+  width: fit-content;
+}
+
+.overdueBadge {
+  color: #dc2626;
+  background-color: #fef2f2;
+}
+
+.todayBadge {
+  color: #d97706;
+  background-color: #fffbeb;
+}
+
+.tomorrowBadge {
+  color: var(--primary, #3b82f6);
+  background-color: rgba(59, 130, 246, 0.05);
+}
+
