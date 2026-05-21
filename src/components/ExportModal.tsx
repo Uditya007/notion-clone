@@ -41,20 +41,20 @@ export default function ExportModal({ pageId, pageTitle, pageIcon, onClose }: Ex
                 alignItems: 'center',
                 gap: '16px',
                 padding: '16px',
-                borderRadius: '8px',
+                borderRadius: 'var(--radius-sm)',
                 border: '1px solid var(--border)',
-                background: 'var(--bg-main)',
+                background: 'var(--white)',
                 cursor: 'pointer',
-                transition: 'all 0.2s ease',
+                transition: 'all 0.15s ease',
               }}
             >
               <div 
                 style={{
                   width: '40px',
                   height: '40px',
-                  borderRadius: '6px',
-                  background: 'rgba(139, 92, 246, 0.1)',
-                  color: '#8b5cf6',
+                  borderRadius: 'var(--radius-sm)',
+                  background: 'var(--gray-100)',
+                  color: 'var(--black)',
                   display: 'flex',
                   alignItems: 'center',
                   justifyContent: 'center'
@@ -77,20 +77,20 @@ export default function ExportModal({ pageId, pageTitle, pageIcon, onClose }: Ex
                 alignItems: 'center',
                 gap: '16px',
                 padding: '16px',
-                borderRadius: '8px',
+                borderRadius: 'var(--radius-sm)',
                 border: '1px solid var(--border)',
-                background: 'var(--bg-main)',
+                background: 'var(--white)',
                 cursor: 'pointer',
-                transition: 'all 0.2s ease',
+                transition: 'all 0.15s ease',
               }}
             >
               <div 
                 style={{
                   width: '40px',
                   height: '40px',
-                  borderRadius: '6px',
-                  background: 'rgba(59, 130, 246, 0.1)',
-                  color: '#3b82f6',
+                  borderRadius: 'var(--radius-sm)',
+                  background: 'var(--gray-100)',
+                  color: 'var(--black)',
                   display: 'flex',
                   alignItems: 'center',
                   justifyContent: 'center'
@@ -111,7 +111,7 @@ export default function ExportModal({ pageId, pageTitle, pageIcon, onClose }: Ex
           <button 
             className={styles.publishBtn} 
             onClick={() => triggerExport('html')}
-            style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '12.5px' }}
+            style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '12.5px', backgroundColor: 'var(--black)', color: 'var(--white)', border: 'none' }}
           >
             <Printer size={14} />
             <span>Generate & Print</span>

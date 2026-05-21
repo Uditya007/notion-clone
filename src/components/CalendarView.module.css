@@ -19,14 +19,15 @@
 }
 
 .viewIcon {
-  color: var(--primary);
+  color: var(--black);
 }
 
 .viewTitleWrapper h2 {
   font-size: 28px;
   font-weight: 700;
-  color: var(--text-main);
+  color: var(--black);
   margin: 0;
+  letter-spacing: -0.03em;
 }
 
 .headerControls {
@@ -37,27 +38,28 @@
 
 .viewToggles {
   display: flex;
-  background: var(--bg-hover);
+  background: var(--gray-100);
   padding: 4px;
-  border-radius: 6px;
+  border-radius: var(--radius-sm);
   border: 1px solid var(--border);
 }
 
 .viewToggleBtn {
   padding: 4px 12px;
   font-size: 13px;
-  font-weight: 500;
-  color: var(--text-muted);
+  font-weight: 600;
+  color: var(--gray-500);
   background: transparent;
   border: none;
-  border-radius: 4px;
+  border-radius: var(--radius-sm);
   cursor: pointer;
+  transition: all 0.15s ease;
 }
 
 .viewToggleBtn.active {
-  background: var(--bg-active);
-  color: var(--text-main);
-  box-shadow: 0 1px 2px rgba(0,0,0,0.2);
+  background: var(--black);
+  color: var(--white);
+  box-shadow: var(--shadow-sm);
 }
 
 .primaryBtn {
@@ -65,13 +67,18 @@
   align-items: center;
   gap: 6px;
   padding: 8px 16px;
-  background-color: var(--primary);
-  color: white;
-  border-radius: 6px;
+  background-color: var(--black);
+  color: var(--white);
+  border-radius: var(--radius-sm);
   font-size: 14px;
-  font-weight: 500;
+  font-weight: 600;
   border: none;
   cursor: pointer;
+  transition: background-color 0.15s ease;
+}
+
+.primaryBtn:hover {
+  background-color: var(--gray-800);
 }
 
 .calendarToolbar {
@@ -93,38 +100,43 @@
   justify-content: center;
   width: 32px;
   height: 32px;
-  border-radius: 4px;
-  background: transparent;
-  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  background: var(--white);
+  border: 1.5px solid var(--border);
   color: var(--text-main);
   cursor: pointer;
+  transition: all 0.15s ease;
 }
 
 .navBtn:hover {
-  background: var(--bg-hover);
+  background: var(--gray-100);
+  border-color: var(--border-strong);
 }
 
 .todayBtn {
   padding: 0 12px;
   height: 32px;
-  border-radius: 4px;
-  background: transparent;
-  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  background: var(--white);
+  border: 1.5px solid var(--border);
   color: var(--text-main);
   font-size: 13px;
-  font-weight: 500;
+  font-weight: 600;
   cursor: pointer;
+  transition: all 0.15s ease;
 }
 
 .todayBtn:hover {
-  background: var(--bg-hover);
+  background: var(--gray-100);
+  border-color: var(--border-strong);
 }
 
 .currentMonthLabel {
   font-size: 18px;
-  font-weight: 600;
-  color: var(--text-main);
+  font-weight: 700;
+  color: var(--black);
   margin-left: 12px;
+  letter-spacing: -0.02em;
 }
 
 .integrationNotice {
@@ -132,17 +144,17 @@
   align-items: center;
   gap: 8px;
   font-size: 13px;
-  color: var(--text-muted);
+  color: var(--gray-600);
   padding: 8px 12px;
-  background: var(--bg-hover);
-  border-radius: 6px;
+  background: var(--white);
+  border: 1px dashed var(--border-strong);
+  border-radius: var(--radius-sm);
 }
 
 .noticeDot {
   width: 8px;
   height: 8px;
   border-radius: 50%;
-  background-color: #2ea5ff;
 }
 
 /* Month Grid */
@@ -150,19 +162,21 @@
   display: grid;
   grid-template-columns: repeat(7, 1fr);
   border: 1px solid var(--border);
-  border-radius: 8px;
-  background: var(--bg-main);
+  border-radius: var(--radius-sm);
+  background: var(--white);
   overflow: hidden;
 }
 
 .weekdayHeader {
   padding: 12px;
   text-align: center;
-  font-size: 12px;
-  font-weight: 600;
-  color: var(--text-muted);
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  color: var(--gray-500);
   border-bottom: 1px solid var(--border);
   border-right: 1px solid var(--border);
+  background: var(--gray-50);
 }
 
 .weekdayHeader:last-child {
@@ -172,7 +186,7 @@
 .dayCellEmpty {
   border-right: 1px solid var(--border);
   border-bottom: 1px solid var(--border);
-  background: rgba(255, 255, 255, 0.02);
+  background: var(--gray-50);
   min-height: 120px;
 }
 
@@ -183,21 +197,22 @@
   padding: 8px;
   display: flex;
   flex-direction: column;
-  transition: background 0.2s;
+  background: var(--white);
+  transition: background-color 0.15s ease;
 }
 
 .dayCell:hover {
-  background: var(--bg-hover);
+  background: var(--gray-50);
 }
 
 .todayCell {
-  background: rgba(46, 165, 255, 0.05);
+  background: var(--gray-50);
 }
 
 .dayNumber {
-  font-size: 13px;
-  font-weight: 500;
-  color: var(--text-muted);
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--gray-500);
   margin-bottom: 8px;
   display: inline-flex;
   align-items: center;
@@ -208,8 +223,8 @@
 }
 
 .todayCell .dayNumber {
-  background: var(--primary);
-  color: white;
+  background: var(--black);
+  color: var(--white);
 }
 
 .dayEventsList {
@@ -221,18 +236,25 @@
 
 .eventChip {
   font-size: 11px;
-  padding: 4px 6px;
-  border-radius: 4px;
-  background: var(--bg-active);
+  padding: 4px 8px;
+  border-radius: var(--radius-sm);
+  background: var(--white);
   color: var(--text-main);
   cursor: grab;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
-  border-left: 3px solid var(--border);
+  border: 1px solid var(--border);
+  border-left: 3px solid var(--gray-400);
   display: flex;
   align-items: center;
   gap: 4px;
+  transition: all 0.15s ease;
+}
+
+.eventChip:hover {
+  border-color: var(--border-strong);
+  background: var(--gray-50);
 }
 
 .eventChip:active {
@@ -242,21 +264,25 @@
 .eventChipTime {
   opacity: 0.7;
   font-size: 10px;
+  font-weight: 600;
 }
 
 .eventChip.meeting {
-  border-left-color: #ff4d4d;
-  background: rgba(255, 77, 77, 0.1);
+  border-left-color: var(--black);
+  background: var(--gray-100);
+  color: var(--black);
+  font-weight: 600;
 }
 
 .eventChip.task {
-  border-left-color: #4da6ff;
-  background: rgba(77, 166, 255, 0.1);
+  border-left-color: var(--gray-500);
+  background: var(--white);
 }
 
 .eventChip.milestone {
-  border-left-color: #4dff4d;
-  background: rgba(77, 255, 77, 0.1);
+  border-left-color: var(--gray-800);
+  background: var(--white);
+  font-weight: 600;
 }
 
 /* Common Scroll Wrapper */
@@ -264,8 +290,8 @@
   height: 600px;
   overflow-y: auto;
   border: 1px solid var(--border);
-  border-radius: 8px;
-  background: var(--bg-main);
+  border-radius: var(--radius-sm);
+  background: var(--white);
 }
 
 /* Week View */
@@ -280,6 +306,7 @@
   border-right: 1px solid var(--border);
   display: flex;
   flex-direction: column;
+  background: var(--gray-50);
 }
 
 .timeSlotEmpty {
@@ -287,7 +314,7 @@
   border-bottom: 1px solid var(--border);
   position: sticky;
   top: 0;
-  background: var(--bg-main);
+  background: var(--gray-50);
   z-index: 3;
 }
 
@@ -295,7 +322,7 @@
   height: 60px;
   padding: 8px;
   font-size: 11px;
-  color: var(--text-muted);
+  color: var(--gray-500);
   text-align: right;
   border-bottom: 1px solid transparent; 
   transform: translateY(-50%);
@@ -320,7 +347,7 @@
   align-items: center;
   justify-content: center;
   border-bottom: 1px solid var(--border);
-  background: var(--bg-main);
+  background: var(--white);
   position: sticky;
   top: 0;
   z-index: 2;
@@ -328,15 +355,15 @@
 
 .dayColumnName {
   font-size: 11px;
-  font-weight: 600;
+  font-weight: 700;
   text-transform: uppercase;
-  color: var(--text-muted);
+  color: var(--gray-400);
 }
 
 .dayColumnNumber {
   font-size: 18px;
-  font-weight: 500;
-  color: var(--text-main);
+  font-weight: 600;
+  color: var(--black);
   width: 32px;
   height: 32px;
   display: flex;
@@ -347,8 +374,8 @@
 }
 
 .todayNumber {
-  background: var(--primary);
-  color: white;
+  background: var(--black);
+  color: var(--white);
 }
 
 .dayColumnBody {
@@ -360,6 +387,7 @@
   flex-direction: column;
   gap: 4px;
   z-index: 1;
+  background: var(--white);
 }
 
 .gridLines {
@@ -388,6 +416,7 @@
   flex: 1;
   position: relative;
   min-height: calc(24 * 60px);
+  background: var(--white);
 }
 
 .dayEventsContainer {
@@ -401,26 +430,33 @@
 
 .eventCard {
   padding: 12px;
-  border-radius: 6px;
-  border-left: 4px solid var(--primary);
-  background: var(--bg-hover);
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--border);
+  border-left: 4px solid var(--gray-400);
+  background: var(--white);
   cursor: grab;
+  transition: all 0.15s ease;
+}
+
+.eventCard:hover {
+  border-color: var(--border-strong);
+  background: var(--gray-50);
 }
 
 .eventCard:active {
   cursor: grabbing;
 }
 
-.eventCard.meeting { border-left-color: #ff4d4d; background: rgba(255, 77, 77, 0.1); }
-.eventCard.review { border-left-color: #4da6ff; background: rgba(77, 166, 255, 0.1); }
-.eventCard.planning { border-left-color: #4dff4d; background: rgba(77, 255, 77, 0.1); }
-.eventCard.task { border-left-color: #4da6ff; background: rgba(77, 166, 255, 0.1); }
-.eventCard.milestone { border-left-color: #4dff4d; background: rgba(77, 255, 77, 0.1); }
+.eventCard.meeting { border-left-color: var(--black); background: var(--gray-100); }
+.eventCard.review { border-left-color: var(--gray-600); }
+.eventCard.planning { border-left-color: var(--gray-800); }
+.eventCard.task { border-left-color: var(--gray-500); }
+.eventCard.milestone { border-left-color: var(--gray-800); }
 
 .eventTitle {
-  font-weight: 600;
+  font-weight: 700;
   font-size: 14px;
-  color: var(--text-main);
+  color: var(--black);
   margin-bottom: 4px;
 }
 
@@ -428,7 +464,80 @@
   display: flex;
   gap: 16px;
   font-size: 12px;
-  color: var(--text-muted);
+  color: var(--gray-500);
+}
+
+/* Connect Calendar states */
+.emptyStateContainer {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  padding: 48px;
+  background: var(--white);
+  border-radius: var(--radius-sm);
+  border: 1.5px solid var(--border-strong);
+  max-width: 480px;
+  margin: 32px auto;
+  gap: 16px;
+}
+
+.emptyStateContainer h3 {
+  font-size: 18px;
+  font-weight: 700;
+  color: var(--black);
+  margin: 0;
+  letter-spacing: -0.03em;
+}
+
+.emptyStateContainer p {
+  font-size: 13px;
+  color: var(--gray-500);
+  line-height: 1.6;
+  margin: 0;
+}
+
+.emptyIllustrationIcon {
+  width: 72px;
+  height: 72px;
+  border-radius: 50%;
+  background: var(--gray-100);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 8px;
+  color: var(--black);
+}
+
+.connectBtn {
+  padding: 10px 20px;
+  background: var(--black);
+  color: var(--white);
+  border-radius: var(--radius-sm);
+  font-weight: 600;
+  border: none;
+  cursor: pointer;
+  transition: background-color 0.15s ease;
+}
+
+.connectBtn:hover {
+  background: var(--gray-800);
+}
+
+.calendarScheduleClearAlert {
+  background: var(--gray-100);
+  border: 1.5px solid var(--border-strong);
+  border-radius: var(--radius-sm);
+  padding: 12px 18px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 24px;
+  color: var(--black);
+  font-size: 13px;
+  font-weight: 600;
 }
 
 /* Mobile responsive styles */
@@ -506,10 +615,9 @@
   }
 
   .eventChipTime {
-    display: none !important; /* Hide time to save space on mobile month view */
+    display: none !important;
   }
 
-  /* Week Grid Scrollable */
   .scrollWrapper {
     height: 450px !important;
   }
@@ -523,80 +631,3 @@
     min-width: 80px !important;
   }
 }
-
-.emptyStateContainer {
-  flex: 1;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  text-align: center;
-  padding: 48px;
-  background: white;
-  border-radius: var(--radius-lg);
-  border: 1.5px solid var(--border);
-  box-shadow: var(--shadow-sm);
-  max-width: 480px;
-  margin: 32px auto;
-  gap: 16px;
-  animation: fadeIn 0.4s ease-out;
-}
-
-.emptyStateContainer h3 {
-  font-size: 20px;
-  font-weight: 800;
-  color: var(--text-main);
-  margin: 0;
-  font-family: 'Outfit', sans-serif;
-}
-
-.emptyStateContainer p {
-  font-size: var(--font-xs);
-  color: var(--text-muted);
-  line-height: 1.6;
-  margin: 0;
-}
-
-.emptyIllustrationIcon {
-  width: 72px;
-  height: 72px;
-  border-radius: 50%;
-  background: var(--primary-light);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  margin-bottom: 8px;
-}
-
-.connectBtn {
-  padding: 8px 16px;
-  background: var(--text-main);
-  color: var(--bg-main);
-  border-radius: 6px;
-  font-weight: 500;
-  border: none;
-  cursor: pointer;
-  transition: opacity 0.2s;
-}
-
-.connectBtn:hover {
-  opacity: 0.9;
-}
-
-.calendarScheduleClearAlert {
-  background: linear-gradient(135deg, white 0%, rgba(124, 111, 205, 0.04) 100%);
-  border: 1.5px solid rgba(124, 111, 205, 0.25);
-  border-radius: var(--radius);
-  padding: 12px 18px;
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  margin-bottom: 24px;
-  color: var(--text-main);
-  font-size: var(--font-xs);
-  font-weight: 600;
-  box-shadow: var(--shadow-sm);
-  animation: slideUp 0.3s ease-out;
-}
-
-

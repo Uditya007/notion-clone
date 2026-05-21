@@ -398,7 +398,7 @@
 }
 
 .modalHeaderIcon {
-  color: #a855f7;
+  color: var(--black);
 }
 
 .modalSectionTitle {
@@ -448,8 +448,8 @@
 }
 
 .ruleDeleteBtn:hover {
-  background: rgba(239, 68, 68, 0.1);
-  color: #ef4444;
+  background: var(--gray-100);
+  color: var(--black);
 }
 
 .formGroup {
@@ -484,7 +484,7 @@
 }
 
 .selectField:focus, .inputField:focus {
-  border-color: #a855f7;
+  border-color: var(--black);
 }
 
 .modalFooter {

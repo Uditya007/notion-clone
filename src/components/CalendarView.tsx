@@ -365,7 +365,7 @@ export default function CalendarView() {
         </div>
         
         <div className={styles.integrationNotice}>
-          <div className={styles.noticeDot} style={{ backgroundColor: isConnected ? '#10b981' : '#a1a1aa' }} />
+          <div className={styles.noticeDot} style={{ backgroundColor: isConnected ? 'var(--black)' : 'var(--gray-300)' }} />
           <span>{isConnected ? `Synced with ${connectedEmail || 'Google Calendar'}` : 'Not connected'}</span>
         </div>
       </div>
@@ -373,7 +373,7 @@ export default function CalendarView() {
       {!isConnected ? (
         <div className={styles.emptyStateContainer}>
           <div className={styles.emptyIllustrationIcon}>
-            <CalendarIcon size={36} color="var(--primary)" />
+            <CalendarIcon size={36} color="var(--black)" />
           </div>
           <h3>Connect Google Calendar</h3>
           <p>Sync your real events and manage your schedule directly inside your Clearspace canvas.</p>
@@ -384,7 +384,7 @@ export default function CalendarView() {
       ) : error ? (
         <div className={styles.emptyStateContainer}>
           <div className={styles.emptyIllustrationIcon}>
-            <CalendarIcon size={36} color="var(--accent-orange)" />
+            <CalendarIcon size={36} color="var(--black)" />
           </div>
           <h3>Connection Issue</h3>
           <p>{error}</p>
@@ -396,7 +396,7 @@ export default function CalendarView() {
         <>
           {events.length === 0 && (
             <div className={styles.calendarScheduleClearAlert}>
-              <Sparkles size={16} color="var(--primary)" />
+              <Sparkles size={16} color="var(--black)" />
               <span>Your schedule is fully organized! Click any day cell to add appointments or focus matrices.</span>
             </div>
           )}
@@ -437,7 +437,6 @@ export default function CalendarView() {
                             setSelectedEvent(event);
                           }}
                           className={`${styles.eventChip} ${styles[event.type] || styles.default}`}
-                          style={{ backgroundColor: event.type === 'meeting' ? 'rgba(35, 131, 226, 0.15)' : 'var(--bg-hover)' }}
                         >
                           {event.time && <span className={styles.eventChipTime}>{event.time}</span>}
                           {event.title}
@@ -561,8 +560,8 @@ export default function CalendarView() {
               
               {selectedEvent.meetLink && (
                 <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
-                  <Video size={16} color="var(--primary)" /> 
-                  <a href={selectedEvent.meetLink} target="_blank" rel="noreferrer" style={{ color: 'var(--primary)', fontWeight: 500 }}>
+                  <Video size={16} color="var(--black)" /> 
+                  <a href={selectedEvent.meetLink} target="_blank" rel="noreferrer" style={{ color: 'var(--black)', fontWeight: 600, textDecoration: 'underline' }}>
                      Join Google Meet
                   </a>
                 </div>
@@ -580,7 +579,7 @@ export default function CalendarView() {
 
             <button 
               onClick={() => setSelectedEvent(null)}
-              style={{ width: '100%', padding: '8px', background: 'var(--bg-hover)', color: 'var(--text-main)', borderRadius: '6px', border: 'none', cursor: 'pointer' }}
+              style={{ width: '100%', padding: '8px', background: 'var(--gray-100)', color: 'var(--text-main)', borderRadius: 'var(--radius-sm)', border: '1px solid var(--border)', cursor: 'pointer', fontWeight: 600 }}
             >
               Close
             </button>
@@ -590,70 +589,70 @@ export default function CalendarView() {
       {/* Create Event Modal */}
       {isAddingEvent && (
         <div 
-          style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, backgroundColor: 'rgba(0,0,0,0.6)', zIndex: 100, display: 'flex', alignItems: 'center', justifyContent: 'center', backdropFilter: 'blur(4px)' }}
+          style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, backgroundColor: 'rgba(0,0,0,0.4)', zIndex: 100, display: 'flex', alignItems: 'center', justifyContent: 'center', backdropFilter: 'blur(4px)' }}
           onClick={() => setIsAddingEvent(false)}
         >
           <form 
             onSubmit={handleCreateEventSubmit}
-            style={{ width: '420px', backgroundColor: 'var(--bg-main)', borderRadius: '12px', padding: '24px', border: '1px solid var(--border)', boxShadow: '0 20px 40px rgba(0,0,0,0.3)', display: 'flex', flexDirection: 'column', gap: '16px' }}
+            style={{ width: '420px', backgroundColor: 'var(--white)', borderRadius: 'var(--radius-lg)', padding: '24px', border: '1px solid var(--border)', boxShadow: 'var(--shadow-xl)', display: 'flex', flexDirection: 'column', gap: '16px' }}
             onClick={e => e.stopPropagation()}
           >
-            <h3 style={{ fontSize: '20px', fontWeight: 600, color: 'var(--text-main)' }}>Create New Event</h3>
+            <h3 style={{ fontSize: '16px', fontWeight: 700, color: 'var(--black)', margin: 0 }}>Create New Event</h3>
             
             <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
-              <label style={{ fontSize: '12px', fontWeight: 500, color: 'var(--text-muted)' }}>Event Title</label>
+              <label style={{ fontSize: '11px', fontWeight: 600, textTransform: 'uppercase', color: 'var(--gray-500)' }}>Event Title</label>
               <input 
                 type="text" 
                 required
                 placeholder="e.g. Design Sync"
                 value={newEventTitle}
                 onChange={e => setNewEventTitle(e.target.value)}
-                style={{ padding: '10px 12px', borderRadius: '8px', border: '1px solid var(--border)', backgroundColor: 'var(--bg-hover)', color: 'var(--text-main)', fontSize: '14px', outline: 'none' }}
+                style={{ padding: '10px 12px', borderRadius: 'var(--radius-sm)', border: '1.5px solid var(--border)', backgroundColor: 'var(--white)', color: 'var(--text-main)', fontSize: '14px', outline: 'none' }}
               />
             </div>
 
             <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
-              <label style={{ fontSize: '12px', fontWeight: 500, color: 'var(--text-muted)' }}>Date</label>
+              <label style={{ fontSize: '11px', fontWeight: 600, textTransform: 'uppercase', color: 'var(--gray-500)' }}>Date</label>
               <input 
                 type="date" 
                 required
                 value={newEventDate}
                 onChange={e => setNewEventDate(e.target.value)}
-                style={{ padding: '10px 12px', borderRadius: '8px', border: '1px solid var(--border)', backgroundColor: 'var(--bg-hover)', color: 'var(--text-main)', fontSize: '14px', outline: 'none' }}
+                style={{ padding: '10px 12px', borderRadius: 'var(--radius-sm)', border: '1.5px solid var(--border)', backgroundColor: 'var(--white)', color: 'var(--text-main)', fontSize: '14px', outline: 'none' }}
               />
             </div>
 
             <div style={{ display: 'flex', gap: '12px' }}>
               <div style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: '6px' }}>
-                <label style={{ fontSize: '12px', fontWeight: 500, color: 'var(--text-muted)' }}>Start Time</label>
+                <label style={{ fontSize: '11px', fontWeight: 600, textTransform: 'uppercase', color: 'var(--gray-500)' }}>Start Time</label>
                 <input 
                   type="time" 
                   required
                   value={newEventStartTime}
                   onChange={e => setNewEventStartTime(e.target.value)}
-                  style={{ padding: '10px 12px', borderRadius: '8px', border: '1px solid var(--border)', backgroundColor: 'var(--bg-hover)', color: 'var(--text-main)', fontSize: '14px', outline: 'none' }}
+                  style={{ padding: '10px 12px', borderRadius: 'var(--radius-sm)', border: '1.5px solid var(--border)', backgroundColor: 'var(--white)', color: 'var(--text-main)', fontSize: '14px', outline: 'none' }}
                 />
               </div>
               <div style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: '6px' }}>
-                <label style={{ fontSize: '12px', fontWeight: 500, color: 'var(--text-muted)' }}>End Time</label>
+                <label style={{ fontSize: '11px', fontWeight: 600, textTransform: 'uppercase', color: 'var(--gray-500)' }}>End Time</label>
                 <input 
                   type="time" 
                   required
                   value={newEventEndTime}
                   onChange={e => setNewEventEndTime(e.target.value)}
-                  style={{ padding: '10px 12px', borderRadius: '8px', border: '1px solid var(--border)', backgroundColor: 'var(--bg-hover)', color: 'var(--text-main)', fontSize: '14px', outline: 'none' }}
+                  style={{ padding: '10px 12px', borderRadius: 'var(--radius-sm)', border: '1.5px solid var(--border)', backgroundColor: 'var(--white)', color: 'var(--text-main)', fontSize: '14px', outline: 'none' }}
                 />
               </div>
             </div>
 
             <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
-              <label style={{ fontSize: '12px', fontWeight: 500, color: 'var(--text-muted)' }}>Description (Optional)</label>
+              <label style={{ fontSize: '11px', fontWeight: 600, textTransform: 'uppercase', color: 'var(--gray-500)' }}>Description (Optional)</label>
               <textarea 
                 placeholder="Add meeting agenda or notes..."
                 value={newEventDescription}
                 onChange={e => setNewEventDescription(e.target.value)}
                 rows={3}
-                style={{ padding: '10px 12px', borderRadius: '8px', border: '1px solid var(--border)', backgroundColor: 'var(--bg-hover)', color: 'var(--text-main)', fontSize: '14px', outline: 'none', resize: 'vertical' }}
+                style={{ padding: '10px 12px', borderRadius: 'var(--radius-sm)', border: '1.5px solid var(--border)', backgroundColor: 'var(--white)', color: 'var(--text-main)', fontSize: '14px', outline: 'none', resize: 'vertical' }}
               />
             </div>
 
@@ -666,7 +665,7 @@ export default function CalendarView() {
                 style={{ width: '16px', height: '16px', cursor: 'pointer' }}
               />
               <label htmlFor="googleMeetCheckbox" style={{ fontSize: '14px', color: 'var(--text-main)', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '6px' }}>
-                <Video size={16} color="var(--primary)" /> Generate Google Meet Link
+                <Video size={16} color="var(--black)" /> Generate Google Meet Link
               </label>
             </div>
 
@@ -674,13 +673,13 @@ export default function CalendarView() {
               <button 
                 type="button"
                 onClick={() => setIsAddingEvent(false)}
-                style={{ flex: 1, padding: '10px', background: 'var(--bg-hover)', color: 'var(--text-main)', borderRadius: '8px', border: '1px solid var(--border)', cursor: 'pointer', fontWeight: 500 }}
+                style={{ flex: 1, padding: '10px', background: 'var(--white)', color: 'var(--text-main)', borderRadius: 'var(--radius-sm)', border: '1.5px solid var(--border)', cursor: 'pointer', fontWeight: 600 }}
               >
                 Cancel
               </button>
               <button 
                 type="submit"
-                style={{ flex: 1, padding: '10px', background: 'var(--text-main)', color: 'var(--bg-main)', borderRadius: '8px', border: 'none', cursor: 'pointer', fontWeight: 600 }}
+                style={{ flex: 1, padding: '10px', background: 'var(--black)', color: 'var(--white)', borderRadius: 'var(--radius-sm)', border: 'none', cursor: 'pointer', fontWeight: 600 }}
               >
                 Create Event
               </button>

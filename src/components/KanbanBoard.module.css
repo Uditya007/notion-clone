@@ -184,13 +184,15 @@
 }
 
 .tagChecklist {
-  background: rgba(139, 92, 246, 0.1);
-  color: #8b5cf6;
+  background: var(--gray-100);
+  border: 1px solid var(--border);
+  color: var(--black);
 }
 
 .tagGlobal {
-  background: rgba(16, 185, 129, 0.1);
-  color: #10b981;
+  background: var(--gray-150);
+  border: 1px solid var(--border);
+  color: var(--black);
 }
 
 .deleteCardBtn {

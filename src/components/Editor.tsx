@@ -462,9 +462,6 @@ export default function Editor() {
             className={styles.shareHeaderBtn} 
             onClick={() => setShowExportModal(true)}
             style={{ 
-              background: 'linear-gradient(135deg, rgba(124, 111, 205, 0.1) 0%, rgba(99, 102, 241, 0.1) 100%)', 
-              border: '1px solid var(--primary-light)',
-              color: 'var(--primary)',
               marginRight: '6px'
             }}
           >
@@ -475,7 +472,6 @@ export default function Editor() {
             className={`${styles.iconBtn} ${isAudioRecordingOpen ? styles.iconBtnActive : ''}`} 
             title="Record AI Voice Note"
             onClick={() => setIsAudioRecordingOpen(!isAudioRecordingOpen)}
-            style={{ color: '#8b5cf6' }}
           >
             <Mic size={18} />
           </button>
@@ -505,7 +501,7 @@ export default function Editor() {
             onClick={() => updatePageAttribute({ is_favorite: !activePage.is_favorite })}
             title="Toggle Favorite"
           >
-            <Star size={18} fill={activePage.is_favorite ? "var(--accent-orange)" : "none"} color={activePage.is_favorite ? "var(--accent-orange)" : "currentColor"} />
+            <Star size={18} fill={activePage.is_favorite ? "var(--black)" : "none"} color={activePage.is_favorite ? "var(--black)" : "currentColor"} />
           </button>
           <button 
             className={styles.iconBtn} 

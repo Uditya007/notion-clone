@@ -104,12 +104,12 @@ export default function SignupPage() {
         {/* Abstract Floating Cards */}
         <div className={styles.floatingCardsWrapper}>
           <div className={`${styles.abstractCard} ${styles.card1}`}>
-            <FileText size={18} color="var(--primary)" />
+            <FileText size={18} color="var(--black)" />
             <div className={styles.abstractCardLine} style={{ width: "70%" }}></div>
             <div className={styles.abstractCardLine} style={{ width: "40%" }}></div>
           </div>
           <div className={`${styles.abstractCard} ${styles.card2}`}>
-            <Database size={18} color="var(--accent-green)" />
+            <Database size={18} color="var(--black)" />
             <div style={{ display: "flex", gap: "4px", width: "100%" }}>
               <div className={styles.abstractGridSquare}></div>
               <div className={styles.abstractGridSquare}></div>
@@ -117,7 +117,7 @@ export default function SignupPage() {
             </div>
           </div>
           <div className={`${styles.abstractCard} ${styles.card3}`}>
-            <Sparkles size={18} color="var(--primary)" />
+            <Sparkles size={18} color="var(--black)" />
             <div className={styles.abstractCardLine} style={{ width: "60%" }}></div>
           </div>
         </div>

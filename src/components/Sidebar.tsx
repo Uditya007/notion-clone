@@ -15,7 +15,6 @@ import {
   CheckSquare,
   Zap,
   Copy,
-  Sparkles,
   Download,
   Home,
   LayoutDashboard,
@@ -23,7 +22,8 @@ import {
   LogOut,
   User,
   MoreHorizontal,
-  GripVertical
+  GripVertical,
+  Sparkles
 } from "lucide-react";
 import styles from "./Sidebar.module.css";
 import { useState, useEffect, useRef } from "react";
@@ -40,7 +40,7 @@ export default function Sidebar() {
   const [isAIBuilderOpen, setIsAIBuilderOpen] = useState(false);
   const [showProfileMenu, setShowProfileMenu] = useState(false);
   
-  const { activePageId, setActivePage, setSearchOpen, setSettingsOpen, isAIPanelOpen, setAIPanelOpen } = useAppStore();
+  const { activePageId, setActivePage, setSearchOpen, setSettingsOpen } = useAppStore();
   const importFileInputRef = useRef<HTMLInputElement>(null);
   const profileMenuRef = useRef<HTMLDivElement>(null);
 
@@ -217,7 +217,7 @@ export default function Sidebar() {
     const isActive = activePageId === page.id;
 
     return (
-      <div className={styles.pageTreeWrapper} style={{ paddingLeft: level === 0 ? 0 : 12 }}>
+      <div className={styles.pageTreeWrapper}>
         <div 
           className={`${styles.pageItem} ${isActive ? styles.pageActive : ''}`}
           onClick={() => handlePageSelect(page.id)}
@@ -251,7 +251,7 @@ export default function Sidebar() {
         </div>
 
         {expanded && page.children.length > 0 && (
-          <div className={styles.nestedPages} style={{ borderLeft: "1px solid var(--border)", marginLeft: "18px" }}>
+          <div className={styles.nestedPages}>
             {page.children.map((child: any) => (
               <PageTreeItem key={child.id} page={child} level={level + 1} />
             ))}
@@ -283,7 +283,6 @@ export default function Sidebar() {
             </div>
             <div className={styles.workspaceTextContainer}>
               <span className={styles.workspaceName}>{workspaceName}</span>
-              <span className={styles.workspaceSub}>Clearspace Workspace</span>
             </div>
             <ChevronDown size={14} className={styles.headerChevron} />
           </div>
@@ -303,7 +302,7 @@ export default function Sidebar() {
               <button className={styles.profileMenuItem} onClick={() => { setSettingsOpen(true); setShowProfileMenu(false); }}>
                 <Settings size={14} /> Settings
               </button>
-              <button className={styles.profileMenuItem} onClick={handleSignOut} style={{ color: "var(--accent-red)" }}>
+              <button className={styles.profileMenuItem} onClick={handleSignOut} style={{ color: "#dc2626" }}>
                 <LogOut size={14} /> Sign out
               </button>
             </div>
@@ -314,7 +313,7 @@ export default function Sidebar() {
         <div className={styles.searchContainer} onClick={() => setSearchOpen(true)}>
           <div className={styles.searchBar}>
             <Search size={14} />
-            <span>Search pages...</span>
+            <span>Search...</span>
             <kbd className={styles.searchShortcut}>⌘K</kbd>
           </div>
         </div>
@@ -336,14 +335,14 @@ export default function Sidebar() {
         </div>
 
         {/* NAVIGATION SECTION */}
-        <div className={styles.navigationSection}>
+        <div>
           <span className={styles.sectionLabel}>Workspace</span>
           <div className={styles.navGroup}>
             <button 
               className={`${styles.navItem} ${activePageId === 'home' ? styles.navActive : ''}`} 
               onClick={() => handlePageSelect('home')}
             >
-              <Home size={16} className={styles.navIconHome} />
+              <Home size={15} className={styles.navIconHome} />
               <span>Home</span>
             </button>
 
@@ -351,7 +350,7 @@ export default function Sidebar() {
               className={`${styles.navItem} ${activePageId === 'inbox' ? styles.navActive : ''}`} 
               onClick={() => handlePageSelect('inbox')}
             >
-              <Inbox size={16} className={styles.navIconInbox} />
+              <Inbox size={15} className={styles.navIconInbox} />
               <span>Inbox</span>
             </button>
 
@@ -359,7 +358,7 @@ export default function Sidebar() {
               className={`${styles.navItem} ${activePageId === 'tasks' ? styles.navActive : ''}`} 
               onClick={() => handlePageSelect('tasks')}
             >
-              <CheckSquare size={16} className={styles.navIconTasks} />
+              <CheckSquare size={15} className={styles.navIconTasks} />
               <span>My Tasks</span>
             </button>
 
@@ -367,7 +366,7 @@ export default function Sidebar() {
               className={`${styles.navItem} ${activePageId === 'calendar' ? styles.navActive : ''}`} 
               onClick={() => handlePageSelect('calendar')}
             >
-              <Calendar size={16} className={styles.navIconCalendar} />
+              <Calendar size={15} className={styles.navIconCalendar} />
               <span>Calendar</span>
             </button>
 
@@ -375,7 +374,7 @@ export default function Sidebar() {
               className={`${styles.navItem} ${activePageId === 'automations' ? styles.navActive : ''}`} 
               onClick={() => handlePageSelect('automations')}
             >
-              <Zap size={16} className={styles.navIconAutomations} />
+              <Zap size={15} className={styles.navIconAutomations} />
               <span>Agents</span>
             </button>
 
@@ -383,13 +382,13 @@ export default function Sidebar() {
               className={`${styles.navItem} ${activePageId === 'templates' ? styles.navActive : ''}`} 
               onClick={() => handlePageSelect('templates')}
             >
-              <Copy size={16} className={styles.navIconTemplates} />
+              <Copy size={15} className={styles.navIconTemplates} />
               <span>Templates</span>
             </button>
 
             {/* Document Import trigger inside sidebar items */}
             <button className={styles.navItem} onClick={() => importFileInputRef.current?.click()}>
-              <Download size={16} className={styles.navIconImport} style={{ transform: "rotate(180deg)" }} />
+              <Download size={15} className={styles.navIconImport} style={{ transform: "rotate(180deg)" }} />
               <span>Import Document</span>
             </button>
             <input 
@@ -405,8 +404,8 @@ export default function Sidebar() {
         {/* PAGES SCROLL AREA */}
         <div className={styles.scrollArea}>
           {favorites.length > 0 && (
-            <div className={styles.pagesSection}>
-              <span className={styles.sectionLabel}>Favorites ★</span>
+            <div>
+              <span className={styles.sectionLabel}>Favorites</span>
               <div className={styles.pageTree}>
                 {favorites.map((page: any) => (
                   <PageTreeItem key={`fav-${page.id}`} page={{ ...page, children: [] }} />
@@ -415,7 +414,7 @@ export default function Sidebar() {
             </div>
           )}
 
-          <div className={styles.pagesSection}>
+          <div>
             <div className={styles.pagesSectionHeader}>
               <span className={styles.sectionLabel}>Pages</span>
               <button className={styles.addPageBtn} onClick={(e) => handleAddPage(e, null)} title="Create new page">
@@ -426,13 +425,13 @@ export default function Sidebar() {
             {/* Page tree or beginner state if empty */}
             {pagesList.length === 0 ? (
               <div className={styles.beginnerHelper}>
-                <span className={styles.beginnerEmoji}>📝</span>
-                <p className={styles.beginnerText}>Your pages will appear here</p>
+                <span className={styles.beginnerEmoji}>📄</span>
+                <p className={styles.beginnerText}>No pages yet</p>
                 <button className={styles.beginnerAIBtn} onClick={() => setIsAIBuilderOpen(true)}>
-                  ✦ Create with AI
+                  + Create with AI
                 </button>
                 <button className={styles.beginnerBlankBtn} onClick={(e) => handleAddPage(e, null)}>
-                  📄 Blank page
+                  + Blank page
                 </button>
               </div>
             ) : (
@@ -445,18 +444,30 @@ export default function Sidebar() {
           </div>
         </div>
 
-        {/* BOTTOM TRASH */}
+        {/* BOTTOM TRASH & USER SECTION */}
         <div className={styles.footer}>
           <button 
             className={`${styles.navItem} ${activePageId === 'trash' ? styles.navActive : ''}`} 
             onClick={() => handlePageSelect('trash')}
+            style={{ margin: 0 }}
           >
-            <Trash2 size={16} className={styles.navIconTrash} />
+            <Trash2 size={15} className={styles.navIconTrash} />
             <span>Trash</span>
             {trashCount > 0 && (
               <span className={styles.trashBadge}>{trashCount}</span>
             )}
           </button>
+
+          {/* User Profile bottom row */}
+          <div className={styles.userRow} onClick={() => setSettingsOpen(true)}>
+            <div className={styles.userAvatar}>
+              {userProfile.name.charAt(0).toUpperCase()}
+            </div>
+            <div className={styles.userMeta}>
+              <span className={styles.userName}>{userProfile.name}</span>
+              <span className={styles.userEmail}>{userProfile.email}</span>
+            </div>
+          </div>
         </div>
       </aside>
       <AIBuilder isOpen={isAIBuilderOpen} onClose={() => setIsAIBuilderOpen(false)} />

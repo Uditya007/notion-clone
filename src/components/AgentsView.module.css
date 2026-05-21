@@ -25,7 +25,7 @@
 }
 
 .headerIcon {
-  color: #a855f7;
+  color: var(--black);
 }
 
 .headerDesc {
@@ -56,21 +56,20 @@
 }
 
 .card {
-  background: var(--bg-hover);
+  background: var(--white);
   border: 1px solid var(--border);
-  border-radius: 12px;
+  border-radius: var(--radius-sm);
   padding: 20px;
   display: flex;
   flex-direction: column;
   gap: 16px;
-  transition: all 0.2s ease;
+  transition: all 0.15s ease;
   position: relative;
 }
 
 .card:hover {
-  transform: translateY(-2px);
-  border-color: rgba(168, 85, 247, 0.3);
-  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.04);
+  border-color: var(--border-strong);
+  box-shadow: var(--shadow-sm);
 }
 
 .cardHeader {
@@ -98,39 +97,30 @@
   line-height: 1.4;
 }
 
-.agentIcon {
-  color: #a855f7;
-  background: rgba(168, 85, 247, 0.1);
-  padding: 8px;
-  border-radius: 8px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-
 .toggleSwitch {
   width: 44px;
   height: 24px;
-  background: var(--border);
+  background: var(--gray-200);
   border-radius: 12px;
   padding: 2px;
   cursor: pointer;
-  transition: background-color 0.2s ease;
+  transition: background-color 0.15s ease;
   display: flex;
   align-items: center;
+  flex-shrink: 0;
 }
 
 .toggleSwitchActive {
-  background: #10b981;
+  background: var(--black);
 }
 
 .toggleKnob {
   width: 20px;
   height: 20px;
-  background: white;
+  background: var(--white);
   border-radius: 50%;
-  transition: transform 0.2s ease;
-  box-shadow: 0 1px 3px rgba(0,0,0,0.15);
+  transition: transform 0.15s ease;
+  box-shadow: var(--shadow-sm);
 }
 
 .toggleSwitchActive .toggleKnob {
@@ -138,15 +128,15 @@
 }
 
 .actionBtn {
-  background: var(--bg-main);
-  border: 1px solid var(--border);
+  background: var(--white);
+  border: 1.5px solid var(--border-strong);
   color: var(--text-main);
-  border-radius: 8px;
+  border-radius: var(--radius-sm);
   padding: 8px 12px;
   font-size: 13px;
   font-weight: 600;
   cursor: pointer;
-  transition: all 0.2s ease;
+  transition: all 0.15s ease;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -154,36 +144,31 @@
 }
 
 .actionBtn:hover {
-  background: var(--border);
-  border-color: var(--text-muted);
+  background: var(--gray-100);
 }
 
 .actionBtnPrimary {
-  background: linear-gradient(135deg, #a855f7 0%, #7c3aed 100%);
-  color: white;
+  background: var(--black);
+  color: var(--white);
   border: none;
-  box-shadow: 0 4px 12px rgba(124, 58, 237, 0.2);
 }
 
 .actionBtnPrimary:hover {
-  transform: translateY(-1px);
-  box-shadow: 0 6px 16px rgba(124, 58, 237, 0.3);
+  background: var(--gray-900);
 }
 
 .actionBtn:disabled {
-  opacity: 0.6;
+  opacity: 0.5;
   cursor: not-allowed;
-  transform: none !important;
-  box-shadow: none !important;
 }
 
 .runLogs {
   display: flex;
   flex-direction: column;
   border: 1px solid var(--border);
-  border-radius: 12px;
+  border-radius: var(--radius-sm);
   overflow: hidden;
-  background: var(--bg-hover);
+  background: var(--white);
 }
 
 .logRow {
@@ -193,7 +178,7 @@
   padding: 14px 20px;
   border-bottom: 1px solid var(--border);
   font-size: 13px;
-  transition: background-color 0.2s ease;
+  transition: background-color 0.15s ease;
 }
 
 .logRow:last-child {
@@ -201,7 +186,7 @@
 }
 
 .logRow:hover {
-  background: rgba(255, 255, 255, 0.02);
+  background: var(--gray-50);
 }
 
 .logAgentInfo {
@@ -218,11 +203,12 @@
 }
 
 .logSuccess {
-  color: #10b981;
+  color: var(--black);
 }
 
 .logFailed {
-  color: #ef4444;
+  color: var(--gray-500);
+  text-decoration: line-through;
 }
 
 .logTime {
@@ -239,54 +225,58 @@
   white-space: nowrap;
 }
 
-/* Modal Inputs for transcript/page choice */
+/* Modals overlays & parameter cards */
 .modalOverlay {
   position: fixed;
   top: 0;
   left: 0;
   right: 0;
   bottom: 0;
-  background: rgba(0, 0, 0, 0.6);
+  background-color: rgba(0, 0, 0, 0.4);
+  backdrop-filter: blur(4px);
+  -webkit-backdrop-filter: blur(4px);
   z-index: 1000;
   display: flex;
   align-items: center;
   justify-content: center;
-  backdrop-filter: blur(4px);
+  animation: fadeInFast 0.2s ease;
 }
 
 .modal {
-  background: var(--bg-main);
+  background: var(--white);
   border: 1px solid var(--border);
-  border-radius: 16px;
+  border-radius: var(--radius-lg);
   padding: 24px;
   width: 440px;
   max-width: 90%;
-  box-shadow: 0 20px 40px rgba(0,0,0,0.3);
+  box-shadow: var(--shadow-xl);
   display: flex;
   flex-direction: column;
   gap: 16px;
+  animation: popIn 0.2s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
 .modal h3 {
   margin: 0;
-  font-size: 18px;
-  font-weight: 600;
-  color: var(--text-main);
+  font-size: 16px;
+  font-weight: 700;
+  color: var(--black);
 }
 
 .inputField {
   width: 100%;
   padding: 10px 12px;
-  border: 1px solid var(--border);
-  background: var(--bg-hover);
+  border: 1.5px solid var(--border);
+  background: var(--white);
   color: var(--text-main);
-  border-radius: 8px;
+  border-radius: var(--radius-sm);
   font-size: 14px;
   outline: none;
+  transition: all 0.15s ease;
 }
 
 .inputField:focus {
-  border-color: #a855f7;
+  border-color: var(--black);
 }
 
 .textarea {
@@ -298,4 +288,25 @@
   display: flex;
   justify-content: flex-end;
   gap: 12px;
+}
+
+@media (max-width: 768px) {
+  .container {
+    padding: 20px;
+  }
+
+  .grid {
+    grid-template-columns: 1fr;
+  }
+
+  .logRow {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 8px;
+  }
+
+  .logOutput {
+    max-width: 100%;
+    white-space: normal;
+  }
 }

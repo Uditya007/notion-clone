@@ -166,7 +166,7 @@ export default function AIBuilder({ isOpen, onClose }: AIBuilderProps) {
               </div>
 
               {error && (
-                <div style={{ color: 'var(--text-danger)', fontSize: '13px', padding: '10px 14px', borderRadius: '8px', border: '1px solid var(--border)', background: 'rgba(239, 68, 68, 0.05)' }}>
+                <div style={{ color: 'var(--black)', fontSize: '13px', padding: '10px 14px', borderRadius: 'var(--radius-sm)', border: '1.5px solid var(--border-strong)', background: 'var(--gray-100)', fontWeight: 600 }}>
                   {error}
                 </div>
               )}
