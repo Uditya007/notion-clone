@@ -4,7 +4,7 @@ import Link from "next/link";
 import { useEffect, useState, useRef } from "react";
 import { useRouter } from "next/navigation";
 import { supabase } from "@/lib/supabase/client";
-import { ArrowRight, Play, X } from "lucide-react";
+import { ArrowRight, Play, X, Sun, Moon } from "lucide-react";
 import styles from "./home.module.css";
 
 export default function LandingPage() {
@@ -12,6 +12,24 @@ export default function LandingPage() {
   const [isLoading, setIsLoading] = useState(true);
   const [showDemoModal, setShowDemoModal] = useState(false);
   const [stepsVisible, setStepsVisible] = useState([false, false, false]);
+  const [theme, setTheme] = useState("dark");
+
+  useEffect(() => {
+    const savedTheme = localStorage.getItem("clearspace-theme") || "dark";
+    if (savedTheme === "system") {
+      const prefersDark = window.matchMedia("(prefers-color-scheme: dark)").matches;
+      setTheme(prefersDark ? "dark" : "light");
+    } else {
+      setTheme(savedTheme);
+    }
+  }, []);
+
+  const toggleTheme = () => {
+    const nextTheme = theme === "dark" ? "light" : "dark";
+    setTheme(nextTheme);
+    localStorage.setItem("clearspace-theme", nextTheme);
+    document.documentElement.setAttribute("data-theme", nextTheme);
+  };
   
   const stepRefs = [
     useRef<HTMLDivElement>(null),
@@ -71,6 +89,13 @@ export default function LandingPage() {
         </div>
 
         <div className={styles.navActions}>
+          <button 
+            onClick={toggleTheme} 
+            className={styles.themeToggleBtn}
+            aria-label="Toggle theme"
+          >
+            {theme === "dark" ? <Sun size={18} /> : <Moon size={18} />}
+          </button>
           <Link href="/login" className={styles.loginLink}>
             Log in
           </Link>

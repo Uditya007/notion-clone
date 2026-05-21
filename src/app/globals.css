@@ -34,6 +34,9 @@
   --primary-text: var(--white);
   --focus-ring: 0 0 0 2px var(--gray-900);
   
+  --nav-bg: rgba(255, 255, 255, 0.75);
+  --nav-border: var(--gray-200);
+  
   --sidebar-width: 260px;
   --radius-sm: 4px;
   --radius: 8px;
@@ -76,6 +79,8 @@
   --white: #ffffff;
   --black: #000000;
   --focus-ring: 0 0 0 2px var(--gray-900);
+  --nav-bg: rgba(255, 255, 255, 0.75);
+  --nav-border: var(--gray-200);
 }
 
 [data-theme="dark"] {
@@ -96,6 +101,8 @@
   --white: #121212;
   --black: #ffffff;
   --focus-ring: 0 0 0 2px var(--gray-100);
+  --nav-bg: rgba(18, 18, 18, 0.75);
+  --nav-border: var(--gray-800);
 }
 
 

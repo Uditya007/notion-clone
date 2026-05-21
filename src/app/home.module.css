@@ -32,10 +32,10 @@
   align-items: center;
   justify-content: space-between;
   padding: 20px 48px;
-  background: rgba(255, 255, 255, 0.8);
+  background: var(--nav-bg);
   backdrop-filter: blur(20px);
   -webkit-backdrop-filter: blur(20px);
-  border-bottom: 2px solid var(--black);
+  border-bottom: 1px solid var(--nav-border);
   z-index: 100;
 }
 
@@ -89,6 +89,25 @@
   gap: 20px;
 }
 
+.themeToggleBtn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  border-radius: var(--radius-sm);
+  border: 1.5px solid var(--border);
+  color: var(--black);
+  background: transparent;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.themeToggleBtn:hover {
+  background: var(--bg-hover);
+  border-color: var(--black);
+}
+
 .loginLink {
   color: var(--gray-600);
   font-size: 13px;
@@ -101,18 +120,19 @@
 }
 
 .primaryBtn {
-  background: var(--black);
-  color: var(--white);
+  background: var(--primary);
+  color: var(--primary-text);
   padding: 8px 16px;
   border-radius: var(--radius-sm);
   font-size: 13px;
   font-weight: 700;
   transition: all 0.15s ease;
-  border: 1.5px solid var(--black);
+  border: 1.5px solid var(--primary);
 }
 
 .primaryBtn:hover {
-  background: var(--gray-900);
+  background: var(--primary-hover);
+  color: var(--primary-text);
 }
 
 /* HERO SECTION */
