@@ -3,6 +3,7 @@ import { createClient } from '@/lib/supabase/server';
 import { generateText } from 'ai';
 import { createGoogleGenerativeAI } from '@ai-sdk/google';
 import { logAgentRun } from '@/lib/agents';
+import { markdownToTiptap } from '@/lib/markdownToTiptap';
 
 export const dynamic = 'force-dynamic';
 
@@ -72,11 +73,39 @@ ${pageContent}`;
     const result = JSON.parse(cleanedText);
 
     // 2. Prepend summary to page and update icon to 📋
-    const newContent = `${result.summaryHtml}<hr /><br />${pageContent}`;
+    const summaryDoc = markdownToTiptap(result.summaryHtml) as any;
+    let combinedContent = '';
+    try {
+      const existingDoc = JSON.parse(pageContent);
+      if (existingDoc && existingDoc.type === 'doc') {
+        combinedContent = JSON.stringify({
+          type: 'doc',
+          content: [
+            ...summaryDoc.content,
+            { type: 'horizontalRule' },
+            ...existingDoc.content
+          ]
+        });
+      } else {
+        throw new Error();
+      }
+    } catch {
+      // Fallback: If old page content is markdown/HTML, convert both and combine
+      const existingDoc = markdownToTiptap(pageContent) as any;
+      combinedContent = JSON.stringify({
+        type: 'doc',
+        content: [
+          ...summaryDoc.content,
+          { type: 'horizontalRule' },
+          ...existingDoc.content
+        ]
+      });
+    }
+
     const { error: updateError } = await supabase
       .from('pages')
       .update({
-        content: newContent,
+        content: combinedContent,
         icon: '📋'
       })
       .eq('id', pageId);

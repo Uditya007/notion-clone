@@ -8,7 +8,7 @@ import { useRouter } from 'next/navigation';
 import { supabase } from '@/lib/supabase/client';
 
 export default function SettingsModal() {
-  const { isSettingsOpen, setSettingsOpen } = useAppStore();
+  const { isSettingsOpen, setSettingsOpen, addToast } = useAppStore();
   const [activeTab, setActiveTab] = useState('account');
   const router = useRouter();
   const [user, setUser] = useState<any>(null);
@@ -16,6 +16,25 @@ export default function SettingsModal() {
   const [isGoogleConnected, setIsGoogleConnected] = useState(false);
   const [googleEmail, setGoogleEmail] = useState("");
   const [theme, setTheme] = useState('dark');
+  const [isMigrating, setIsMigrating] = useState(false);
+
+  const handleFixContent = async () => {
+    setIsMigrating(true);
+    try {
+      const res = await fetch('/api/admin/fix-content');
+      if (res.ok) {
+        const data = await res.json();
+        addToast(`Fixed ${data.fixed} pages`, 'success');
+      } else {
+        addToast('Failed to run migration', 'error');
+      }
+    } catch (err) {
+      console.error(err);
+      addToast('An error occurred during page formatting', 'error');
+    } finally {
+      setIsMigrating(false);
+    }
+  };
 
   const fetchProfile = async () => {
     try {
@@ -219,6 +238,27 @@ export default function SettingsModal() {
                         Connect Google
                       </button>
                     )}
+                  </div>
+                </div>
+
+                <div className={styles.settingsSubSection}>
+                  <h3 className={styles.settingsSubSectionTitle}>Administrative Tools</h3>
+                  <div className={styles.settingItem}>
+                    <div>
+                      <div className={styles.settingLabel}>
+                        <Settings size={16} /> Fix Page Formatting
+                      </div>
+                      <div className={styles.settingDesc}>
+                        Formats and cleans up old markdown pages into standard interactive rich text.
+                      </div>
+                    </div>
+                    <button 
+                      onClick={handleFixContent}
+                      disabled={isMigrating}
+                      className={styles.settingBtnPrimary}
+                    >
+                      {isMigrating ? 'Running...' : 'Fix formatting'}
+                    </button>
                   </div>
                 </div>
               </div>

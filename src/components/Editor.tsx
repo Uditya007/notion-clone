@@ -28,6 +28,7 @@ import { Mic, BarChart2 } from "lucide-react";
 import { useCompletion } from '@ai-sdk/react';
 import DatabaseView from "./DatabaseView";
 import { supabase } from "@/lib/supabase/client";
+import { markdownToTiptap } from "@/lib/markdownToTiptap";
 
 const SLASH_COMMANDS = [
   { title: 'Text', icon: '📝', action: (editor: any) => editor.chain().focus().clearNodes().run() },
@@ -424,7 +425,7 @@ export default function Editor() {
       const pageId = activePageIdRef.current;
       if (pageId && activePage?.type === 'editor') {
         setSaveStatus('saving');
-        triggerDebouncedSave(pageId, editor.getHTML());
+        triggerDebouncedSave(pageId, JSON.stringify(editor.getJSON()));
         
         const text = editor.getText();
         if (text.endsWith('/ai')) {
@@ -494,11 +495,49 @@ export default function Editor() {
     return () => document.removeEventListener('keydown', handleKeyDown, true);
   }, [editor, slashIndex]);
 
+  const lastLoadedPageIdRef = useRef<string | null>(null);
+
+  const loadContent = (content: string) => {
+    if (!editor) return;
+    if (!content || content.trim() === '') {
+      if (editor.isEmpty) return;
+      editor.commands.setContent({ type: 'doc', content: [] });
+      return;
+    }
+
+    try {
+      const parsed = JSON.parse(content);
+      if (parsed && typeof parsed === 'object' && parsed.type === 'doc') {
+        const currentJSON = editor.getJSON();
+        if (JSON.stringify(currentJSON) !== JSON.stringify(parsed)) {
+          editor.commands.setContent(parsed);
+        }
+        return;
+      }
+    } catch {}
+
+    // HTML fallback
+    if (/<p>|<h1>|<h2>|<h3>|<ul>|<ol>|<li>|<pre>|<code>|<blockquote>|<strong>|<em>|<hr>/i.test(content)) {
+      if (editor.getHTML() !== content) {
+        editor.commands.setContent(content);
+      }
+      return;
+    }
+
+    // Markdown fallback - convert it
+    const tiptapJson = markdownToTiptap(content);
+    editor.commands.setContent(tiptapJson);
+    const pageId = activePageIdRef.current;
+    if (pageId) {
+      triggerDebouncedSave(pageId, JSON.stringify(tiptapJson));
+    }
+  };
+
   useEffect(() => {
     if (editor && activePage && activePage.type === 'editor') {
-      const parsedContent = parseContentIfNeeded(activePage.content);
-      if (editor.getHTML() !== parsedContent) {
-        editor.commands.setContent(parsedContent);
+      if (lastLoadedPageIdRef.current !== activePageId || !editor.isFocused) {
+        loadContent(activePage.content);
+        lastLoadedPageIdRef.current = activePageId;
       }
     }
   }, [activePageId, editor, activePage?.content]);
@@ -525,8 +564,10 @@ export default function Editor() {
 
   const insertAiContent = () => {
     if (editor && completion) {
-      const formatted = completion.split('\n\n').map(p => `<p>${p}</p>`).join('');
-      editor.commands.insertContent(formatted);
+      const tiptapJson = markdownToTiptap(completion) as any;
+      if (tiptapJson && tiptapJson.content) {
+        editor.commands.insertContent(tiptapJson.content);
+      }
       setCompletion('');
       setShowAiMenu(false);
     }

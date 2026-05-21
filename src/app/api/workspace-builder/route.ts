@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
 import { generateText } from 'ai';
 import { createGoogleGenerativeAI } from '@ai-sdk/google';
+import { markdownToTiptap } from '@/lib/markdownToTiptap';
 
 export const dynamic = 'force-dynamic';
 
@@ -110,6 +111,10 @@ Return this exact JSON format:
     // Recursive helper to insert pages
     const insertPageRecursive = async (pageData: PageSchema, parentId: string | null = null): Promise<string> => {
       // 1. Create page
+      const formattedContent = pageData.type === 'editor' && pageData.content
+        ? JSON.stringify(markdownToTiptap(pageData.content))
+        : (pageData.content || '');
+
       const { data: newPage, error: pageError } = await supabase
         .from('pages')
         .insert([{
@@ -117,7 +122,7 @@ Return this exact JSON format:
           title: pageData.title || 'Untitled',
           icon: pageData.icon || '📄',
           type: pageData.type || 'editor',
-          content: pageData.content || '',
+          content: formattedContent,
           parent_id: parentId,
         }])
         .select()

@@ -3,6 +3,7 @@ import { createClient } from '@/lib/supabase/server';
 import { generateText } from 'ai';
 import { createGoogleGenerativeAI } from '@ai-sdk/google';
 import { logAgentRun } from '@/lib/agents';
+import { markdownToTiptap } from '@/lib/markdownToTiptap';
 
 export const dynamic = 'force-dynamic';
 
@@ -67,7 +68,7 @@ Ensure the HTML includes visually distinctive sections (e.g. background callouts
         title: `Client Call Analysis — ${clientName}`,
         icon: '📞',
         type: 'editor',
-        content: result.analysisHtml
+        content: JSON.stringify(markdownToTiptap(result.analysisHtml))
       }])
       .select()
       .single();
