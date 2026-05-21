@@ -73,7 +73,7 @@
 }
 
 .navLink {
-  color: var(--gray-600);
+  color: var(--text-muted);
   font-size: 13px;
   font-weight: 600;
   transition: color 0.15s ease;
@@ -109,7 +109,7 @@
 }
 
 .loginLink {
-  color: var(--gray-600);
+  color: var(--text-muted);
   font-size: 13px;
   font-weight: 600;
   transition: color 0.15s ease;
@@ -120,19 +120,20 @@
 }
 
 .primaryBtn {
-  background: var(--primary);
-  color: var(--primary-text);
+  background: var(--black);
+  color: var(--white);
   padding: 8px 16px;
   border-radius: var(--radius-sm);
   font-size: 13px;
   font-weight: 700;
   transition: all 0.15s ease;
-  border: 1.5px solid var(--primary);
+  border: 1.5px solid var(--black);
 }
 
 .primaryBtn:hover {
   background: var(--primary-hover);
-  color: var(--primary-text);
+  color: var(--white);
+  border-color: var(--primary-hover);
 }
 
 /* HERO SECTION */
@@ -176,7 +177,7 @@
   font-size: 18px;
   font-weight: 500;
   line-height: 1.6;
-  color: var(--gray-600);
+  color: var(--text-muted);
   margin-bottom: 36px;
   max-width: 460px;
 }
@@ -228,7 +229,7 @@
 .trustLine {
   font-size: 12px;
   font-weight: 600;
-  color: var(--gray-500);
+  color: var(--text-muted);
   margin-bottom: 60px;
   display: flex;
   gap: 8px;
@@ -412,7 +413,7 @@
   font-weight: 700;
   letter-spacing: 0.1em;
   text-transform: uppercase;
-  color: var(--gray-500);
+  color: var(--text-muted);
   margin-bottom: 8px;
   display: block;
 }
@@ -451,7 +452,7 @@
 .featureDesc {
   font-size: 14px;
   font-weight: 500;
-  color: var(--gray-600);
+  color: var(--text-muted);
   max-width: 300px;
   text-align: right;
 }
@@ -508,7 +509,7 @@
 .stepDesc {
   font-size: 14px;
   font-weight: 500;
-  color: var(--gray-600);
+  color: var(--text-muted);
   line-height: 1.5;
   z-index: 1;
 }
@@ -582,7 +583,7 @@
 }
 
 .footerLink {
-  color: var(--gray-600);
+  color: var(--text-muted);
   font-size: 13px;
   font-weight: 600;
   transition: color 0.15s ease;
