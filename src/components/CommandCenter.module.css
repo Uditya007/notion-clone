@@ -42,7 +42,7 @@
 }
 
 .tickerTape {
-  background: white;
+  background: var(--bg-card);
   border: 1px solid var(--border);
   border-radius: 99px;
   padding: 8px 20px;
@@ -77,7 +77,7 @@
 
 /* AI Command Bar */
 .aiCommandBar {
-  background: white;
+  background: var(--bg-card);
   border: 1.5px solid var(--border);
   border-radius: var(--radius-lg);
   padding: 16px;
@@ -151,7 +151,7 @@
 .pill:hover {
   border-color: var(--primary-light);
   color: var(--primary);
-  background: white;
+  background: var(--bg-hover);
 }
 
 /* Grid System */
@@ -162,7 +162,7 @@
 }
 
 .widget {
-  background: white;
+  background: var(--bg-card);
   border: 1.5px solid var(--border);
   border-radius: var(--radius-lg);
   padding: 24px;
@@ -228,7 +228,7 @@
 }
 
 .timerBtn {
-  background: white;
+  background: var(--bg-card);
   border: 1.5px solid var(--border);
   color: var(--text-main);
   border-radius: 99px;
@@ -314,7 +314,7 @@
 }
 
 .recentCard:hover {
-  background: white;
+  background: var(--bg-hover);
   border-color: var(--primary-light);
   transform: translateY(-2px);
   box-shadow: var(--shadow-sm);
@@ -400,7 +400,7 @@
 }
 
 .featureCard {
-  background: white;
+  background: var(--bg-card);
   border: 1.5px solid var(--border);
   border-radius: var(--radius-lg);
   padding: 24px;
@@ -419,7 +419,7 @@
 }
 
 .aiCard {
-  background: linear-gradient(135deg, white 0%, rgba(124, 111, 205, 0.04) 100%);
+  background: linear-gradient(135deg, var(--bg-card) 0%, rgba(124, 111, 205, 0.04) 100%);
   border-color: rgba(124, 111, 205, 0.25);
 }
 

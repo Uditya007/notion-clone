@@ -707,8 +707,8 @@
 .allClearBadge {
   font-size: 10px;
   font-weight: 600;
-  color: #059669;
-  background-color: #ecfdf5;
+  color: #10b981;
+  background-color: rgba(16, 185, 129, 0.15);
   padding: 2px 6px;
   border-radius: 4px;
 }
@@ -812,7 +812,7 @@
   width: 14px;
   height: 14px;
   border-radius: 3px;
-  border: 1.5px solid var(--gray-300);
+  border: 1.5px solid var(--border-strong);
   background: transparent;
   cursor: pointer;
   flex-shrink: 0;
@@ -866,17 +866,17 @@
 }
 
 .overdueBadge {
-  color: #dc2626;
-  background-color: #fef2f2;
+  color: #ef4444;
+  background-color: rgba(239, 68, 68, 0.15);
 }
 
 .todayBadge {
-  color: #d97706;
-  background-color: #fffbeb;
+  color: #f59e0b;
+  background-color: rgba(245, 158, 11, 0.15);
 }
 
 .tomorrowBadge {
-  color: var(--primary, #3b82f6);
-  background-color: rgba(59, 130, 246, 0.05);
+  color: #3b82f6;
+  background-color: rgba(59, 130, 246, 0.15);
 }
 

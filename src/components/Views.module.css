@@ -402,7 +402,7 @@
   justify-content: center;
   text-align: center;
   padding: 36px 24px;
-  background: white;
+  background: var(--bg-card);
   border: 1.5px dashed var(--border);
   border-radius: var(--radius-lg);
   margin-top: 12px;

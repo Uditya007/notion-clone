@@ -13,7 +13,7 @@
 
 .toast {
   pointer-events: auto;
-  background: white;
+  background: var(--bg-card);
   border: 1.5px solid var(--border);
   border-radius: var(--radius);
   padding: 14px 18px;
@@ -56,7 +56,7 @@
 /* Success Toast */
 .success {
   border-left: 4.5px solid var(--accent-green);
-  background: linear-gradient(135deg, white 0%, rgba(16, 185, 129, 0.02) 100%);
+  background: linear-gradient(135deg, var(--bg-card) 0%, rgba(16, 185, 129, 0.02) 100%);
 }
 
 .successIcon {
@@ -67,7 +67,7 @@
 /* Error Toast */
 .error {
   border-left: 4.5px solid var(--accent-red);
-  background: linear-gradient(135deg, white 0%, rgba(239, 68, 68, 0.02) 100%);
+  background: linear-gradient(135deg, var(--bg-card) 0%, rgba(239, 68, 68, 0.02) 100%);
 }
 
 .errorIcon {
@@ -78,7 +78,7 @@
 /* Info Toast */
 .info {
   border-left: 4.5px solid var(--primary);
-  background: linear-gradient(135deg, white 0%, rgba(124, 111, 205, 0.02) 100%);
+  background: linear-gradient(135deg, var(--bg-card) 0%, rgba(124, 111, 205, 0.02) 100%);
 }
 
 .infoIcon {
@@ -89,7 +89,7 @@
 /* Warning Toast */
 .warning {
   border-left: 4.5px solid var(--accent-orange);
-  background: linear-gradient(135deg, white 0%, rgba(245, 158, 11, 0.02) 100%);
+  background: linear-gradient(135deg, var(--bg-card) 0%, rgba(245, 158, 11, 0.02) 100%);
 }
 
 .warningIcon {
