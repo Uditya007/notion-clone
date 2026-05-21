@@ -8,6 +8,137 @@
   position: relative;
 }
 
+/* ============================================
+   CARTOON BOT SLIDING ANIMATION
+   ============================================ */
+
+@keyframes botSlide {
+  0%   { transform: translateX(110vw); }
+  100% { transform: translateX(-220px); }
+}
+
+@keyframes botBob {
+  0%, 100% { transform: translateY(0px) rotate(-1deg); }
+  25%       { transform: translateY(-10px) rotate(1deg); }
+  50%       { transform: translateY(-5px) rotate(-1deg); }
+  75%       { transform: translateY(-12px) rotate(0.5deg); }
+}
+
+@keyframes botBobAlt {
+  0%, 100% { transform: translateY(0px) rotate(1deg); }
+  30%       { transform: translateY(-8px) rotate(-1.5deg); }
+  60%       { transform: translateY(-14px) rotate(1deg); }
+  80%       { transform: translateY(-4px) rotate(-0.5deg); }
+}
+
+@keyframes eyeGlow {
+  0%, 100% { opacity: 0.65; }
+  50%       { opacity: 1; }
+}
+
+@keyframes bubblePop {
+  0%   { opacity: 0; transform: scale(0.6) translateY(6px); }
+  20%  { opacity: 1; transform: scale(1.05) translateY(0); }
+  80%  { opacity: 1; transform: scale(1) translateY(0); }
+  100% { opacity: 0; transform: scale(0.8) translateY(-4px); }
+}
+
+/* Track — spans the full viewport width, sits behind text */
+.botTrack {
+  position: absolute;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 100vw;
+  bottom: 40px;
+  height: 160px;
+  overflow: hidden;
+  z-index: 1;
+  pointer-events: none;
+  user-select: none;
+}
+
+/* The sliding strip that moves all bots left */
+.botSlider {
+  display: flex;
+  align-items: flex-end;
+  gap: 180px;
+  width: max-content;
+  height: 100%;
+  animation: botSlide 22s linear infinite;
+  will-change: transform;
+}
+
+/* Individual bot wrapper — handles the bob */
+.botUnit {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  animation: botBob 2.4s ease-in-out infinite;
+  color: var(--black);
+  flex-shrink: 0;
+}
+
+.botUnit2 {
+  animation: botBobAlt 2.8s ease-in-out infinite;
+  animation-delay: 0.4s;
+}
+
+.botUnit3 {
+  animation: botBob 2.1s ease-in-out infinite;
+  animation-delay: 0.9s;
+}
+
+/* Bot SVG itself */
+.botSvg {
+  filter: drop-shadow(0 4px 12px rgba(0, 0, 0, 0.08));
+  transition: filter 0.3s ease;
+}
+
+.botSvg2 {
+  opacity: 0.85;
+}
+
+.botSvg3 {
+  opacity: 0.9;
+}
+
+/* Speech bubble above each bot */
+.botBubble {
+  background: var(--white);
+  border: 1.5px solid var(--border-strong);
+  border-radius: 12px 12px 12px 2px;
+  padding: 5px 10px;
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--text-muted);
+  white-space: nowrap;
+  box-shadow: var(--shadow-sm);
+  animation: bubblePop 3s ease-in-out infinite;
+  order: -1;
+}
+
+.botBubble2 {
+  animation-delay: 1.1s;
+  border-radius: 12px 12px 2px 12px;
+}
+
+.botBubble3 {
+  animation-delay: 2.2s;
+  border-radius: 12px 12px 12px 2px;
+}
+
+/* Dark mode: invert bot opacity slightly */
+[data-theme="dark"] .botUnit {
+  color: var(--gray-400);
+}
+
+[data-theme="dark"] .botBubble {
+  background: var(--bg-card);
+  border-color: var(--border);
+}
+
+
 /* Elegant grid texture overlay */
 .container::before {
   content: "";
@@ -140,6 +271,7 @@
   margin: 0 auto;
   z-index: 10;
   position: relative;
+  width: 100%;
 }
 
 .pillBadge {

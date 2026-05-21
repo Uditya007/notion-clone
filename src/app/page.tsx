@@ -111,6 +111,100 @@ export default function LandingPage() {
 
       {/* HERO SECTION */}
       <section className={styles.hero}>
+
+        {/* CARTOON BOT SLIDING ANIMATION */}
+        <div className={styles.botTrack} aria-hidden="true">
+          <div className={styles.botSlider}>
+            {/* Bot 1 */}
+            <div className={styles.botUnit}>
+              <svg width="72" height="88" viewBox="0 0 72 88" fill="none" xmlns="http://www.w3.org/2000/svg" className={styles.botSvg}>
+                {/* Antenna */}
+                <rect x="34" y="0" width="4" height="12" rx="2" fill="currentColor" opacity="0.3"/>
+                <circle cx="36" cy="0" r="4" fill="currentColor" opacity="0.5"/>
+                {/* Head */}
+                <rect x="8" y="12" width="56" height="40" rx="12" fill="currentColor" opacity="0.12"/>
+                <rect x="10" y="14" width="52" height="36" rx="10" fill="currentColor" opacity="0.08"/>
+                {/* Eyes */}
+                <rect x="18" y="24" width="14" height="10" rx="5" fill="currentColor" opacity="0.35"/>
+                <rect x="40" y="24" width="14" height="10" rx="5" fill="currentColor" opacity="0.35"/>
+                <circle cx="25" cy="29" r="3" fill="currentColor" opacity="0.7"/>
+                <circle cx="47" cy="29" r="3" fill="currentColor" opacity="0.7"/>
+                <circle cx="26" cy="28" r="1" fill="white" opacity="0.9"/>
+                <circle cx="48" cy="28" r="1" fill="white" opacity="0.9"/>
+                {/* Smile */}
+                <path d="M24 38 Q36 46 48 38" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" fill="none" opacity="0.4"/>
+                {/* Ear bolts */}
+                <rect x="2" y="26" width="8" height="14" rx="4" fill="currentColor" opacity="0.2"/>
+                <rect x="62" y="26" width="8" height="14" rx="4" fill="currentColor" opacity="0.2"/>
+                {/* Body */}
+                <rect x="14" y="54" width="44" height="28" rx="10" fill="currentColor" opacity="0.1"/>
+                {/* Chest light */}
+                <circle cx="36" cy="65" r="5" fill="currentColor" opacity="0.25"/>
+                <circle cx="36" cy="65" r="2.5" fill="currentColor" opacity="0.45"/>
+                {/* Arms */}
+                <rect x="0" y="56" width="12" height="22" rx="6" fill="currentColor" opacity="0.12"/>
+                <rect x="60" y="56" width="12" height="22" rx="6" fill="currentColor" opacity="0.12"/>
+                {/* Legs */}
+                <rect x="18" y="80" width="12" height="8" rx="4" fill="currentColor" opacity="0.15"/>
+                <rect x="42" y="80" width="12" height="8" rx="4" fill="currentColor" opacity="0.15"/>
+              </svg>
+              <div className={styles.botBubble}>Thinking...</div>
+            </div>
+
+            {/* Bot 2 - slightly different */}
+            <div className={`${styles.botUnit} ${styles.botUnit2}`}>
+              <svg width="60" height="76" viewBox="0 0 72 88" fill="none" xmlns="http://www.w3.org/2000/svg" className={`${styles.botSvg} ${styles.botSvg2}`}>
+                <rect x="34" y="0" width="4" height="12" rx="2" fill="currentColor" opacity="0.25"/>
+                <circle cx="36" cy="0" r="4" fill="currentColor" opacity="0.4"/>
+                <rect x="8" y="12" width="56" height="40" rx="12" fill="currentColor" opacity="0.1"/>
+                <rect x="18" y="22" width="14" height="12" rx="6" fill="currentColor" opacity="0.3"/>
+                <rect x="40" y="22" width="14" height="12" rx="6" fill="currentColor" opacity="0.3"/>
+                <circle cx="25" cy="28" r="4" fill="currentColor" opacity="0.6"/>
+                <circle cx="47" cy="28" r="4" fill="currentColor" opacity="0.6"/>
+                <circle cx="26" cy="27" r="1.5" fill="white" opacity="0.9"/>
+                <circle cx="48" cy="27" r="1.5" fill="white" opacity="0.9"/>
+                <path d="M22 40 Q36 48 50 40" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" fill="none" opacity="0.35"/>
+                <rect x="2" y="24" width="8" height="16" rx="4" fill="currentColor" opacity="0.18"/>
+                <rect x="62" y="24" width="8" height="16" rx="4" fill="currentColor" opacity="0.18"/>
+                <rect x="14" y="54" width="44" height="28" rx="10" fill="currentColor" opacity="0.08"/>
+                <circle cx="36" cy="65" r="6" fill="currentColor" opacity="0.2"/>
+                <rect x="0" y="56" width="12" height="22" rx="6" fill="currentColor" opacity="0.1"/>
+                <rect x="60" y="56" width="12" height="22" rx="6" fill="currentColor" opacity="0.1"/>
+                <rect x="18" y="80" width="12" height="8" rx="4" fill="currentColor" opacity="0.12"/>
+                <rect x="42" y="80" width="12" height="8" rx="4" fill="currentColor" opacity="0.12"/>
+              </svg>
+              <div className={`${styles.botBubble} ${styles.botBubble2}`}>On it! ⚡</div>
+            </div>
+
+            {/* Bot 3 */}
+            <div className={`${styles.botUnit} ${styles.botUnit3}`}>
+              <svg width="80" height="96" viewBox="0 0 72 88" fill="none" xmlns="http://www.w3.org/2000/svg" className={`${styles.botSvg} ${styles.botSvg3}`}>
+                <rect x="32" y="0" width="4" height="14" rx="2" fill="currentColor" opacity="0.28"/>
+                <rect x="38" y="2" width="3" height="10" rx="1.5" fill="currentColor" opacity="0.2"/>
+                <circle cx="34" cy="0" r="5" fill="currentColor" opacity="0.45"/>
+                <rect x="6" y="14" width="60" height="42" rx="14" fill="currentColor" opacity="0.11"/>
+                <rect x="16" y="23" width="16" height="12" rx="6" fill="currentColor" opacity="0.3"/>
+                <rect x="40" y="23" width="16" height="12" rx="6" fill="currentColor" opacity="0.3"/>
+                <circle cx="24" cy="29" r="4" fill="currentColor" opacity="0.65"/>
+                <circle cx="48" cy="29" r="4" fill="currentColor" opacity="0.65"/>
+                <circle cx="25" cy="28" r="1.5" fill="white" opacity="0.95"/>
+                <circle cx="49" cy="28" r="1.5" fill="white" opacity="0.95"/>
+                <path d="M20 40 Q36 50 52 40" stroke="currentColor" strokeWidth="3" strokeLinecap="round" fill="none" opacity="0.38"/>
+                <rect x="0" y="25" width="8" height="18" rx="4" fill="currentColor" opacity="0.2"/>
+                <rect x="64" y="25" width="8" height="18" rx="4" fill="currentColor" opacity="0.2"/>
+                <rect x="12" y="58" width="48" height="24" rx="10" fill="currentColor" opacity="0.09"/>
+                <circle cx="36" cy="67" r="7" fill="currentColor" opacity="0.22"/>
+                <circle cx="36" cy="67" r="3" fill="currentColor" opacity="0.4"/>
+                <rect x="0" y="60" width="10" height="20" rx="5" fill="currentColor" opacity="0.12"/>
+                <rect x="62" y="60" width="10" height="20" rx="5" fill="currentColor" opacity="0.12"/>
+                <rect x="16" y="80" width="14" height="8" rx="4" fill="currentColor" opacity="0.14"/>
+                <rect x="42" y="80" width="14" height="8" rx="4" fill="currentColor" opacity="0.14"/>
+              </svg>
+              <div className={`${styles.botBubble} ${styles.botBubble3}`}>✨ Ready!</div>
+            </div>
+          </div>
+        </div>
+
         <div className={styles.pillBadge}>
           <span>Now in public beta</span>
         </div>
