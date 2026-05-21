@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import { useRouter } from "next/navigation";
 import { supabase } from "@/lib/supabase/client";
 import { 
@@ -18,13 +18,27 @@ import {
   ChevronRight,
   TrendingUp,
   Award,
-  BookOpen
+  BookOpen,
+  UserPlus,
+  ArrowRight,
+  Play,
+  Check,
+  Star,
+  X
 } from "lucide-react";
 import styles from "./home.module.css";
 
 export default function LandingPage() {
   const router = useRouter();
   const [isLoading, setIsLoading] = useState(true);
+  const [showDemoModal, setShowDemoModal] = useState(false);
+  const [stepsVisible, setStepsVisible] = useState([false, false, false]);
+  
+  const stepRefs = [
+    useRef<HTMLDivElement>(null),
+    useRef<HTMLDivElement>(null),
+    useRef<HTMLDivElement>(null)
+  ];
 
   useEffect(() => {
     supabase.auth.getSession().then(({ data: { session } }) => {
@@ -36,6 +50,31 @@ export default function LandingPage() {
     });
   }, [router]);
 
+  useEffect(() => {
+    if (isLoading) return;
+
+    const observer = new IntersectionObserver((entries) => {
+      entries.forEach((entry) => {
+        if (entry.isIntersecting) {
+          const index = stepRefs.findIndex(ref => ref.current === entry.target);
+          if (index !== -1) {
+            setStepsVisible(prev => {
+              const updated = [...prev];
+              updated[index] = true;
+              return updated;
+            });
+          }
+        }
+      });
+    }, { threshold: 0.15 });
+
+    stepRefs.forEach(ref => {
+      if (ref.current) observer.observe(ref.current);
+    });
+
+    return () => observer.disconnect();
+  }, [isLoading]);
+
   if (isLoading) return null;
 
   return (
@@ -44,13 +83,13 @@ export default function LandingPage() {
       <nav className={styles.navbar}>
         <div className={styles.logoArea}>
           <div className={styles.logoIcon}></div>
-          <span className={styles.logoText}>Cora</span>
+          <span className={styles.logoText}>Clearspace</span>
         </div>
         
         <div className={styles.navLinks}>
-          <Link href="#features" className={styles.navLink}>Overview</Link>
-          <Link href="#use-cases" className={styles.navLink}>Plans</Link>
-          <Link href="#privacy" className={styles.navLink}>Privacy</Link>
+          <Link href="#features" className={styles.navLink}>Features</Link>
+          <Link href="#how-it-works" className={styles.navLink}>How it works</Link>
+          <Link href="#testimonials" className={styles.navLink}>Testimonials</Link>
         </div>
 
         <div className={styles.navActions}>
@@ -58,226 +97,256 @@ export default function LandingPage() {
             Log in
           </Link>
           <Link href="/signup" className={styles.primaryBtn}>
-            Get the app <ChevronRight size={16} style={{ marginLeft: "4px" }} />
+            Start free
           </Link>
         </div>
       </nav>
 
       {/* HERO SECTION */}
       <section className={styles.hero}>
-        <div className={styles.pillBadge}>Now in public beta ✦</div>
+        <div className={styles.pillBadge}>
+          <span>✦ Now in public beta</span>
+        </div>
+        
         <h1 className={styles.heroTitle}>
-          Understand <span className={styles.heroHighlight}>Anything</span>
+          Your second brain,<br />
+          <span className={styles.heroHighlight}>beautifully organized.</span>
         </h1>
+        
         <p className={styles.heroSubtext}>
-          Your research and thinking partner, grounded in the information you trust, built with the latest Gemini models.
+          Clearspace combines notes, tasks, databases, and AI in one warm, focused workspace. No learning curve — just start writing.
         </p>
+        
         <div className={styles.heroButtons}>
-          <Link href="/signup" className={styles.primaryBtn} style={{ padding: "12px 28px", fontSize: "15px" }}>
-            Try Cora
+          <Link href="/signup" className={styles.heroPrimaryBtn}>
+            Start for free <ArrowRight size={16} />
           </Link>
+          <button onClick={() => setShowDemoModal(true)} className={styles.heroSecondaryBtn}>
+            <Play size={14} fill="currentColor" /> Watch demo
+          </button>
         </div>
-        <p className={styles.heroFineprint}>
-          Free forever plan · Integrated Google Calendar & Gmail
-        </p>
-      </section>
-
-      {/* PRODUCT FEATURES SHOWCASE (SPLIT ROWS) */}
-      <section id="features" className={styles.productShowcase}>
-        <div className={styles.sectionLabel}>Your AI-Powered Research Partner</div>
-        <h2 className={styles.sectionTitle} style={{ marginBottom: "20px" }}>Simply powerful. Powerfully simple.</h2>
         
-        {/* Row 1 */}
-        <div className={showcaseRowClassName(false)}>
-          <div className={styles.showcaseText}>
-            <div className={styles.showcaseIconWrapper}>
-              <Layers size={22} />
-            </div>
-            <h3 className={styles.showcaseTitle}>Upload your sources</h3>
-            <p className={styles.showcaseDesc}>
-              Upload PDFs, web articles, Google Docs, calendars, and emails. Cora instantly maps connections between disparate ideas, powered by state-of-the-art multimodal understanding.
-            </p>
-            <div style={{ display: "flex", gap: "12px" }}>
-              <Link href="/signup" className={styles.secondaryBtn} style={{ display: "inline-flex", alignItems: "center", gap: "6px" }}>
-                Connect Sources <ChevronRight size={14} />
-              </Link>
-            </div>
-          </div>
-          <div className={styles.showcaseVisual}>
-            <div className={styles.visualMockupFile}>
-              <div style={{ display: "flex", alignItems: "center", gap: "8px", marginBottom: "16px" }}>
-                <FileText size={18} color="#10b981" />
-                <span style={{ fontSize: "13px", fontWeight: 600 }}>quarterly_report.pdf</span>
-              </div>
-              <div className={styles.mockupLine}></div>
-              <div className={styles.mockupLine}></div>
-              <div className={styles.mockupLineShort}></div>
-              
-              <div className={styles.mockupFilePill}>
-                <Sparkles size={12} /> Key Insights Generated
-              </div>
-            </div>
-          </div>
-        </div>
-
-        {/* Row 2 */}
-        <div className={showcaseRowClassName(true)}>
-          <div className={styles.showcaseVisual}>
-            <div className={styles.visualMockupAI}>
-              <div style={{ display: "flex", alignItems: "center", gap: "8px", marginBottom: "12px" }}>
-                <Brain size={18} color="#10b981" />
-                <span style={{ fontSize: "13px", fontWeight: 600, color: "#fff" }}>Study Companion AI</span>
-              </div>
-              <p style={{ fontSize: "12px", color: "rgba(255,255,255,0.6)", margin: "0 0 16px" }}>
-                "Here is a comprehensive breakdown of the core strategies discussed in your uploaded briefs."
-              </p>
-              <div className={styles.aiPillsGrid}>
-                <div className={styles.aiPill}>📝 Study Guide</div>
-                <div className={styles.aiPill}>💡 Briefing Doc</div>
-                <div className={styles.aiPill}>❓ FAQ sheet</div>
-                <div className={styles.aiPill}>⏳ Timeline</div>
-              </div>
-            </div>
-          </div>
-          <div className={styles.showcaseText}>
-            <div className={styles.showcaseIconWrapper}>
-              <Sparkles size={22} />
-            </div>
-            <h3 className={styles.showcaseTitle}>Instant insights</h3>
-            <p className={styles.showcaseDesc}>
-              With all your materials in place, Cora becomes your personalized AI expert. Get auto-generated study guides, briefing documents, interactive timelines, and instant answers tailored exclusively to your documents.
-            </p>
-            <div>
-              <Link href="/signup" className={styles.primaryBtn}>
-                Try Live Chat
-              </Link>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* HOW PEOPLE ARE USING IT */}
-      <section id="use-cases" className={styles.howPeopleUse}>
-        <div className={styles.sectionLabel}>USE CASES</div>
-        <h2 className={styles.sectionTitle}>How people are using Cora</h2>
-        
-        <div className={styles.useGrid}>
-          <div className={styles.useCard}>
-            <span className={styles.useIcon}>🎓</span>
-            <h4 className={styles.useTitle}>Power study</h4>
-            <p className={styles.useDesc}>
-              Upload lecture slides, textbook chapters, and syllabus briefs. Ask Cora to outline complex concepts, quiz your understanding, or draft instant summaries.
-            </p>
-            <span className={styles.useLinkText}>Learn faster and deeper.</span>
-          </div>
-
-          <div className={styles.useCard}>
-            <span className={styles.useIcon}>📁</span>
-            <h4 className={styles.useTitle}>Organize thinking</h4>
-            <p className={styles.useDesc}>
-              Import raw brainstorming sheets, competitor analyses, and notes. Ask Cora to convert chaotic streams of thought into beautifully formatted presentation templates.
-            </p>
-            <span className={styles.useLinkText}>Present with confidence.</span>
-          </div>
-
-          <span className={styles.useCard}>
-            <span className={styles.useIcon}>💡</span>
-            <h4 className={styles.useTitle}>Spark new ideas</h4>
-            <p className={styles.useDesc}>
-              Link Google calendars, task logs, and meeting agendas. Ask Cora to synthesize schedules, reveal hidden project trends, and recommend creative pathways.
-            </p>
-            <span className={styles.useLinkText}>Unlock your creative potential.</span>
+        <div className={styles.trustLine}>
+          <span className={styles.trustItem}>
+            <Check size={14} className={styles.greenCheck} /> Free forever
+          </span>
+          <span className={styles.trustItem}>
+            <Check size={14} className={styles.greenCheck} /> No credit card
+          </span>
+          <span className={styles.trustItem}>
+            <Check size={14} className={styles.greenCheck} /> Setup in 30 seconds
           </span>
         </div>
+
+        {/* APP MOCKUP */}
+        <div className={styles.mockupWrapper}>
+          <div className={styles.appMockup}>
+            {/* Fake browser chrome */}
+            <div className={styles.mockupChrome}>
+              <div className={styles.chromeDots}>
+                <span className={styles.dotRed} />
+                <span className={styles.dotYellow} />
+                <span className={styles.dotGreen} />
+              </div>
+              <div className={styles.chromeUrl}>clearspace.app/workspace</div>
+            </div>
+            
+            {/* Fake inner layout */}
+            <div className={styles.mockupInner}>
+              {/* Fake Sidebar */}
+              <div className={styles.fakeSidebar}>
+                <div className={styles.fakeAvatarRow}>
+                  <div className={styles.fakeAvatar}>U</div>
+                  <div className={styles.fakeSidebarLineShort}></div>
+                </div>
+                <div className={styles.fakeSearchInput}>🔍 Search pages...</div>
+                <div className={styles.fakeSidebarGroup}>
+                  <div className={styles.fakeSidebarLine}></div>
+                  <div className={styles.fakeSidebarLineShort}></div>
+                  <div className={styles.fakeSidebarLine}></div>
+                </div>
+                <div className={styles.fakeSidebarGroup}>
+                  <div className={styles.fakeSidebarLineShort}></div>
+                  <div className={styles.fakeSidebarLine}></div>
+                </div>
+              </div>
+              
+              {/* Fake Editor */}
+              <div className={styles.fakeEditor}>
+                <div style={{ display: "flex", gap: "8px", marginBottom: "16px" }}>
+                  <span style={{ fontSize: "28px" }}>🚀</span>
+                  <div style={{ display: "flex", flexDirection: "column", gap: "6px", width: "100%" }}>
+                    <div style={{ height: "20px", background: "var(--text-main)", borderRadius: "4px", width: "65%" }}></div>
+                    <div style={{ height: "10px", background: "var(--text-faint)", borderRadius: "2px", width: "35%" }}></div>
+                  </div>
+                </div>
+                <div className={styles.fakeEditorLine}></div>
+                <div className={styles.fakeEditorLine}></div>
+                <div className={styles.fakeEditorLineShort}></div>
+                
+                <div className={styles.fakeDatabase}>
+                  <div className={styles.fakeDatabaseHeader}>
+                    <div style={{ width: "80px", height: "8px", background: "var(--border-strong)", borderRadius: "2px" }}></div>
+                    <div style={{ width: "60px", height: "8px", background: "var(--border-strong)", borderRadius: "2px" }}></div>
+                  </div>
+                  <div className={styles.fakeDatabaseRow}>
+                    <div className={styles.fakePillIndicator}>Checked</div>
+                    <div style={{ width: "110px", height: "8px", background: "var(--border)", borderRadius: "2px" }}></div>
+                  </div>
+                  <div className={styles.fakeDatabaseRow}>
+                    <div className={styles.fakePillIndicator}>In Progress</div>
+                    <div style={{ width: "80px", height: "8px", background: "var(--border)", borderRadius: "2px" }}></div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div className={styles.mockupGlow}></div>
+        </div>
       </section>
 
-      {/* WHAT PEOPLE ARE SAYING */}
-      <section className={styles.testimonials}>
-        <div className={styles.sectionLabel}>TESTIMONIALS</div>
-        <h2 className={styles.sectionTitle}>What people are saying</h2>
+      {/* FEATURES SECTION */}
+      <section id="features" className={styles.featuresSection}>
+        <div className={styles.sectionHeadingArea}>
+          <span className={styles.sectionPre}>Everything you need.</span>
+          <h2 className={styles.sectionTitle}>Nothing to figure out.</h2>
+        </div>
 
-        <div className={styles.testimonialsGrid}>
-          <div className={styles.testimonialCard}>
-            <p className={styles.testimonialQuote}>
-              "Cora blew our mind. The speed and quality of context retrieval is unmatched."
-            </p>
-            <div className={styles.testimonialAuthor}>
-              <div className={styles.testimonialAvatar}>HF</div>
-              <span className={styles.testimonialName}>HardFork</span>
-            </div>
+        <div className={styles.featuresGrid}>
+          {/* Card 1 */}
+          <div className={styles.featureCard} style={{ animationDelay: "0.1s" }}>
+            <span className={styles.featureEmoji}>📝</span>
+            <h3 className={styles.featureTitle}>Just start writing</h3>
+            <p className={styles.featureDesc}>Click anywhere and type. The editor gets out of your way.</p>
           </div>
 
-          <div className={styles.testimonialCard}>
-            <p className={styles.testimonialQuote}>
-              "This could be the next killer app in generative AI. Perfect for research."
-            </p>
-            <div className={styles.testimonialAuthor}>
-              <div className={styles.testimonialAvatar}>CB</div>
-              <span className={styles.testimonialName}>CNBC Reports</span>
-            </div>
+          {/* Card 2 */}
+          <div className={styles.featureCard} style={{ animationDelay: "0.2s" }}>
+            <span className={styles.featureEmoji}>🗄</span>
+            <h3 className={styles.featureTitle}>Databases that make sense</h3>
+            <p className={styles.featureDesc}>Build tables, boards, and lists without needing a tutorial.</p>
           </div>
 
-          <div className={styles.testimonialCard}>
-            <p className={styles.testimonialQuote}>
-              "A glimpse into AI's future in the workplace. Clean, focused, and intuitive."
-            </p>
-            <div className={styles.testimonialAuthor}>
-              <div className={styles.testimonialAvatar}>BR</div>
-              <span className={styles.testimonialName}>Barron's Tech</span>
-            </div>
+          {/* Card 3 */}
+          <div className={styles.featureCard} style={{ animationDelay: "0.3s" }}>
+            <span className={styles.featureEmoji}>✦</span>
+            <h3 className={styles.featureTitle}>AI that actually helps</h3>
+            <p className={styles.featureDesc}>Ask questions, get summaries, let AI draft pages for you.</p>
+          </div>
+
+          {/* Card 4 */}
+          <div className={styles.featureCard} style={{ animationDelay: "0.4s" }}>
+            <span className={styles.featureEmoji}>📅</span>
+            <h3 className={styles.featureTitle}>Your calendar, connected</h3>
+            <p className={styles.featureDesc}>See all your events alongside your notes and tasks — no tab switching.</p>
+          </div>
+
+          {/* Card 5 */}
+          <div className={styles.featureCard} style={{ animationDelay: "0.5s" }}>
+            <span className={styles.featureEmoji}>⚡</span>
+            <h3 className={styles.featureTitle}>Automations on autopilot</h3>
+            <p className={styles.featureDesc}>Set up once. Let Clearspace handle repetitive work for you.</p>
+          </div>
+
+          {/* Card 6 */}
+          <div className={styles.featureCard} style={{ animationDelay: "0.6s" }}>
+            <span className={styles.featureEmoji}>🔒</span>
+            <h3 className={styles.featureTitle}>Your data, safe</h3>
+            <p className={styles.featureDesc}>End-to-end secure. Your workspace belongs to you.</p>
           </div>
         </div>
       </section>
 
-      {/* PRIVACY SECTION WITH ORBITAL ANIMATION */}
-      <section id="privacy" className={styles.privacySection}>
-        <div className={styles.privacyContent}>
-          <h2 className={styles.privacyTitle}>Your data is safe with us</h2>
-          <p className={styles.privacyDesc}>
-            We value your privacy and never use your personal files, notes, emails, or schedules to train Cora AI models. Your workspace is 100% private.
-          </p>
-        </div>
-
-        {/* ORBITAL WIDGET */}
-        <div className={styles.orbitContainer}>
-          <div className={styles.orbitCenter}>
-            <Lock size={28} color="#10b981" />
-          </div>
+      {/* HOW IT WORKS SECTION */}
+      <section id="how-it-works" className={styles.howItWorksSection}>
+        <h2 className={styles.howItWorksTitle}>Up and running in 3 steps.</h2>
+        
+        <div className={styles.stepsContainer}>
+          <div className={styles.dottedConnector}></div>
           
-          <div className={`${styles.orbitRing} ${styles.orbitRing1}`}>
-            <div className={styles.orbitItem}>
-              <FileText size={14} color="#3b82f6" />
+          {/* Step 1 */}
+          <div 
+            ref={stepRefs[0]} 
+            className={`${styles.stepCard} ${stepsVisible[0] ? styles.visible : ""}`}
+          >
+            <div className={styles.stepCircle}>
+              <UserPlus size={20} />
+              <div className={styles.stepNumber}>1</div>
             </div>
-            <div className={styles.orbitItem}>
-              <User size={14} color="#10b981" />
-            </div>
+            <h3 className={styles.stepTitle}>Create your account</h3>
+            <p className={styles.stepDesc}>Sign up in seconds and get instant access to your private second brain workspace.</p>
           </div>
 
-          <div className={`${styles.orbitRing} ${styles.orbitRing2}`}>
-            <div className={styles.orbitItem}>
-              <Calendar size={14} color="#eab308" />
+          {/* Step 2 */}
+          <div 
+            ref={stepRefs[1]} 
+            className={`${styles.stepCard} ${stepsVisible[1] ? styles.visible : ""}`}
+            style={{ transitionDelay: "0.15s" }}
+          >
+            <div className={styles.stepCircle}>
+              <FileText size={20} />
+              <div className={styles.stepNumber}>2</div>
             </div>
-            <div className={styles.orbitItem}>
-              <Mail size={14} color="#ef4444" />
+            <h3 className={styles.stepTitle}>Add your first page</h3>
+            <p className={styles.stepDesc}>Click anywhere to start writing, planning project boards, or setting down personal tasks.</p>
+          </div>
+
+          {/* Step 3 */}
+          <div 
+            ref={stepRefs[2]} 
+            className={`${styles.stepCard} ${stepsVisible[2] ? styles.visible : ""}`}
+            style={{ transitionDelay: "0.3s" }}
+          >
+            <div className={styles.stepCircle}>
+              <Sparkles size={20} />
+              <div className={styles.stepNumber}>3</div>
             </div>
+            <h3 className={styles.stepTitle}>Let AI do the rest</h3>
+            <p className={styles.stepDesc}>Interact with our custom AI agent prompts to brainstorm, outline summaries, and auto-populate databases.</p>
           </div>
         </div>
       </section>
 
-      {/* FINAL CALL TO ACTION */}
+      {/* TESTIMONIAL BAR */}
+      <section id="testimonials" className={styles.testimonialsSection}>
+        <div className={styles.testimonialsHeadingArea}>
+          <span className={styles.testimonialsPre}>Loved by 1,200+ people who hate clutter</span>
+          <div className={styles.avatarsRow}>
+            <div className={styles.avatarCircle} style={{ background: "#7c6fcd", color: "white" }}>PS</div>
+            <div className={styles.avatarCircle} style={{ background: "#10b981", color: "white" }}>AJ</div>
+            <div className={styles.avatarCircle} style={{ background: "#3b82f6", color: "white" }}>LK</div>
+            <div className={styles.avatarCircle} style={{ background: "#f59e0b", color: "white" }}>RM</div>
+            <div className={styles.avatarCircle} style={{ background: "#ec4899", color: "white" }}>DH</div>
+            <div className={styles.starsContainer}>
+              <Star size={14} fill="#f59e0b" color="#f59e0b" />
+              <Star size={14} fill="#f59e0b" color="#f59e0b" />
+              <Star size={14} fill="#f59e0b" color="#f59e0b" />
+              <Star size={14} fill="#f59e0b" color="#f59e0b" />
+              <Star size={14} fill="#f59e0b" color="#f59e0b" />
+            </div>
+          </div>
+        </div>
+
+        <blockquote className={styles.blockquote}>
+          "Finally a workspace that doesn't need a YouTube tutorial to get started."
+          <cite className={styles.cite}>— Priya S., Freelance Designer</cite>
+        </blockquote>
+      </section>
+
+      {/* FINAL CTA */}
       <section className={styles.finalCta}>
-        <h2 className={styles.finalCtaTitle}>Ready to clear the clutter?</h2>
-        <Link href="/signup" className={styles.primaryBtn} style={{ padding: "14px 36px", fontSize: "16px", marginBottom: "16px" }}>
-          Get Started Free
+        <h2 className={styles.finalCtaTitle}>Ready to think more clearly?</h2>
+        <p className={styles.finalCtaSub}>Join thousands already using Clearspace to organize their work and life.</p>
+        <Link href="/signup" className={styles.finalCtaBtn}>
+          Create your free workspace →
         </Link>
-        <p className={styles.heroFineprint}>Takes 30 seconds to set up</p>
       </section>
 
       {/* FOOTER */}
       <footer className={styles.footer}>
         <div className={styles.footerLeft}>
           <div className={styles.footerLogoIcon}></div>
-          <span>Cora © 2026</span>
+          <span>Clearspace © 2026</span>
         </div>
         <div className={styles.footerLinks}>
           <Link href="#" className={styles.footerLink}>Privacy</Link>
@@ -286,11 +355,26 @@ export default function LandingPage() {
           <Link href="#" className={styles.footerLink}>GitHub</Link>
         </div>
       </footer>
+
+      {/* VIDEO DEMO MODAL */}
+      {showDemoModal && (
+        <div className={styles.modalOverlay} onClick={() => setShowDemoModal(false)}>
+          <div className={styles.modalCard} onClick={e => e.stopPropagation()}>
+            <div className={styles.modalHeader}>
+              <h3>🎬 Clearspace Product Tour</h3>
+              <button className={styles.closeBtn} onClick={() => setShowDemoModal(false)}>
+                <X size={18} />
+              </button>
+            </div>
+            <div className={styles.modalVideoBody}>
+              <div className={styles.fakeVideoPlayer}>
+                <Play size={48} fill="#7c6fcd" color="#7c6fcd" style={{ opacity: 0.85 }} />
+                <span>Simulated Interactive Workspace Walkthrough</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
-}
-
-// Helper to handle direction of row styling cleanly
-function showcaseRowClassName(reversed: boolean): string {
-  return reversed ? styles.showcaseRowReversed : styles.showcaseRow;
 }

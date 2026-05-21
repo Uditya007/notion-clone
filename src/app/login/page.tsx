@@ -4,6 +4,7 @@ import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { supabase } from "@/lib/supabase/client";
+import { Eye, EyeOff, Sparkles, FileText, Calendar, Database } from "lucide-react";
 import styles from "./login.module.css";
 
 export default function LoginPage() {
@@ -74,6 +75,7 @@ export default function LoginPage() {
 
   return (
     <div className={styles.container}>
+      {/* LEFT PANEL */}
       <div className={styles.leftPanel}>
         <Link href="/" style={{ textDecoration: "none", color: "inherit" }}>
           <div className={styles.logoArea}>
@@ -81,27 +83,64 @@ export default function LoginPage() {
             <span className={styles.logoText}>Clearspace</span>
           </div>
         </Link>
-        <div className={styles.taglineWrapper}>
-          <h1 className={styles.tagline}>Clear thinking starts with a clear workspace.</h1>
+
+        <div className={styles.leftMainContent}>
+          <blockquote className={styles.quote}>
+            "The workspace that<br />thinks with you."
+          </blockquote>
+          
+          <div className={styles.featurePills}>
+            <span className={styles.featurePill}>✦ AI writing</span>
+            <span className={styles.featurePill}>🗄 Databases</span>
+            <span className={styles.featurePill}>📅 Calendar</span>
+          </div>
         </div>
-        <div></div> {/* Spacer */}
+
+        {/* Abstract Floating Cards */}
+        <div className={styles.floatingCardsWrapper}>
+          <div className={`${styles.abstractCard} ${styles.card1}`}>
+            <FileText size={18} color="var(--primary)" />
+            <div className={styles.abstractCardLine} style={{ width: "70%" }}></div>
+            <div className={styles.abstractCardLine} style={{ width: "40%" }}></div>
+          </div>
+          <div className={`${styles.abstractCard} ${styles.card2}`}>
+            <Database size={18} color="var(--accent-green)" />
+            <div style={{ display: "flex", gap: "4px", width: "100%" }}>
+              <div className={styles.abstractGridSquare}></div>
+              <div className={styles.abstractGridSquare}></div>
+              <div className={styles.abstractGridSquare}></div>
+            </div>
+          </div>
+          <div className={`${styles.abstractCard} ${styles.card3}`}>
+            <Sparkles size={18} color="var(--primary)" />
+            <div className={styles.abstractCardLine} style={{ width: "60%" }}></div>
+          </div>
+        </div>
       </div>
 
+      {/* RIGHT PANEL */}
       <div className={styles.rightPanel}>
         <div className={styles.formWrapper}>
+          {/* Mobile Logo */}
+          <div className={styles.mobileLogo}>
+            <div className={styles.logoIcon}></div>
+            <span className={styles.logoText}>Clearspace</span>
+          </div>
+
           <h2 className={styles.heading}>Welcome back</h2>
           <p className={styles.subtext}>
             Don't have an account? <Link href="/signup" className={styles.link}>Sign up</Link>
           </p>
 
-          <form onSubmit={handleSubmit}>
+          <form onSubmit={handleSubmit} className={styles.form}>
             {error && <div className={styles.error}>{error}</div>}
             
             <div className={styles.formGroup}>
+              <label className={styles.label}>Email address</label>
               <input
                 type="email"
                 className={styles.input}
-                placeholder="Email address"
+                placeholder="you@example.com"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 required
@@ -110,27 +149,35 @@ export default function LoginPage() {
             </div>
 
             <div className={styles.formGroup}>
-              <input
-                type={showPassword ? "text" : "password"}
-                className={styles.input}
-                placeholder="Password"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                required
-                disabled={isLoading}
-              />
-              <button
-                type="button"
-                className={styles.togglePassword}
-                onClick={() => setShowPassword(!showPassword)}
-                disabled={isLoading}
-              >
-                {showPassword ? "Hide" : "Show"}
-              </button>
+              <label className={styles.label}>Password</label>
+              <div className={styles.passwordWrapper}>
+                <input
+                  type={showPassword ? "text" : "password"}
+                  className={styles.input}
+                  placeholder="••••••••"
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  required
+                  disabled={isLoading}
+                />
+                <button
+                  type="button"
+                  className={styles.togglePassword}
+                  onClick={() => setShowPassword(!showPassword)}
+                  disabled={isLoading}
+                  tabIndex={-1}
+                >
+                  {showPassword ? <EyeOff size={16} /> : <Eye size={16} />}
+                </button>
+              </div>
             </div>
 
             <button type="submit" className={styles.submitBtn} disabled={isLoading}>
-              {isLoading ? "Logging in..." : "Log in"}
+              {isLoading ? (
+                <div className={styles.spinner}></div>
+              ) : (
+                "Log in"
+              )}
             </button>
           </form>
 

@@ -1,0 +1,109 @@
+.toastContainer {
+  position: fixed;
+  bottom: 24px;
+  right: 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  z-index: 9999;
+  pointer-events: none;
+  max-width: 360px;
+  width: 100%;
+}
+
+.toast {
+  pointer-events: auto;
+  background: white;
+  border: 1.5px solid var(--border);
+  border-radius: var(--radius);
+  padding: 14px 18px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  box-shadow: var(--shadow-md);
+  position: relative;
+  overflow: hidden;
+  transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+  animation: slideIn 0.35s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+.toastText {
+  font-size: var(--font-xs);
+  font-weight: 600;
+  color: var(--text-main);
+  line-height: 1.4;
+  flex: 1;
+}
+
+.toastClose {
+  background: transparent;
+  border: none;
+  color: var(--text-muted);
+  cursor: pointer;
+  padding: 4px;
+  border-radius: var(--radius-sm);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s ease;
+}
+
+.toastClose:hover {
+  background: var(--bg-hover);
+  color: var(--text-main);
+}
+
+/* Success Toast */
+.success {
+  border-left: 4.5px solid var(--accent-green);
+  background: linear-gradient(135deg, white 0%, rgba(16, 185, 129, 0.02) 100%);
+}
+
+.successIcon {
+  color: var(--accent-green);
+  flex-shrink: 0;
+}
+
+/* Error Toast */
+.error {
+  border-left: 4.5px solid var(--accent-red);
+  background: linear-gradient(135deg, white 0%, rgba(239, 68, 68, 0.02) 100%);
+}
+
+.errorIcon {
+  color: var(--accent-red);
+  flex-shrink: 0;
+}
+
+/* Info Toast */
+.info {
+  border-left: 4.5px solid var(--primary);
+  background: linear-gradient(135deg, white 0%, rgba(124, 111, 205, 0.02) 100%);
+}
+
+.infoIcon {
+  color: var(--primary);
+  flex-shrink: 0;
+}
+
+/* Warning Toast */
+.warning {
+  border-left: 4.5px solid var(--accent-orange);
+  background: linear-gradient(135deg, white 0%, rgba(245, 158, 11, 0.02) 100%);
+}
+
+.warningIcon {
+  color: var(--accent-orange);
+  flex-shrink: 0;
+}
+
+@keyframes slideIn {
+  from {
+    opacity: 0;
+    transform: translateY(24px) scale(0.9);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}

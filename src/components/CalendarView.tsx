@@ -1,6 +1,6 @@
 "use client";
 import styles from './CalendarView.module.css';
-import { Calendar as CalendarIcon, Clock, Users, Plus, ChevronLeft, ChevronRight, Video, ExternalLink } from 'lucide-react';
+import { Calendar as CalendarIcon, Clock, Users, Plus, ChevronLeft, ChevronRight, Video, ExternalLink, Sparkles } from 'lucide-react';
 import { useState, useEffect } from 'react';
 import { supabase } from '@/lib/supabase/client';
 
@@ -371,173 +371,174 @@ export default function CalendarView() {
       </div>
 
       {!isConnected ? (
-        <div className={styles.emptyStateContainer} style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: '16px' }}>
-          <CalendarIcon size={48} opacity={0.2} />
-          <h3 style={{ fontSize: '18px', fontWeight: 600 }}>Connect Google Calendar</h3>
-          <p style={{ color: 'var(--text-muted)', fontSize: '14px', maxWidth: '300px', textAlign: 'center' }}>
-            Sync your real events and manage your schedule directly inside Clearspace.
-          </p>
-          <button 
-            onClick={handleConnectGoogle}
-            style={{ padding: '8px 16px', background: 'var(--text-main)', color: 'var(--bg-main)', borderRadius: '6px', fontWeight: 500, fontSize: '14px', display: 'flex', alignItems: 'center', gap: '8px', cursor: 'pointer' }}
-          >
+        <div className={styles.emptyStateContainer}>
+          <div className={styles.emptyIllustrationIcon}>
+            <CalendarIcon size={36} color="var(--primary)" />
+          </div>
+          <h3>Connect Google Calendar</h3>
+          <p>Sync your real events and manage your schedule directly inside your Clearspace canvas.</p>
+          <button className={styles.connectBtn} onClick={handleConnectGoogle}>
             Connect Google Account
           </button>
         </div>
       ) : error ? (
-        <div className={styles.emptyStateContainer} style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: '16px' }}>
-          <CalendarIcon size={48} opacity={0.2} />
-          <h3 style={{ fontSize: '18px', fontWeight: 600 }}>Connection Issue</h3>
-          <p style={{ color: 'var(--text-muted)', fontSize: '14px', maxWidth: '350px', textAlign: 'center' }}>
-            {error}
-          </p>
-          <button 
-            onClick={handleDisconnectGoogle}
-            style={{ padding: '8px 16px', background: 'var(--text-main)', color: 'var(--bg-main)', borderRadius: '6px', fontWeight: 500, fontSize: '14px', cursor: 'pointer', border: 'none' }}
-          >
+        <div className={styles.emptyStateContainer}>
+          <div className={styles.emptyIllustrationIcon}>
+            <CalendarIcon size={36} color="var(--accent-orange)" />
+          </div>
+          <h3>Connection Issue</h3>
+          <p>{error}</p>
+          <button className={styles.connectBtn} onClick={handleDisconnectGoogle}>
             Sign Out & Reconnect
           </button>
         </div>
       ) : (
         <>
+          {events.length === 0 && (
+            <div className={styles.calendarScheduleClearAlert}>
+              <Sparkles size={16} color="var(--primary)" />
+              <span>Your schedule is fully organized! Click any day cell to add appointments or focus matrices.</span>
+            </div>
+          )}
+
           {view === 'Month' && (
-        <div className={styles.monthGrid}>
-          {['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'].map(day => (
-            <div key={day} className={styles.weekdayHeader}>{day}</div>
-          ))}
-          
-          {paddingDays.map((_, i) => (
-            <div key={`pad-${i}`} className={styles.dayCellEmpty} />
-          ))}
-          
-          {daysInMonth.map(date => {
-            const dateStr = formatDateStr(date);
-            const dayEvents = events.filter(e => e.date === dateStr);
-            const isToday = dateStr === formatDateStr(new Date());
-
-            return (
-              <div 
-                key={dateStr} 
-                className={`${styles.dayCell} ${isToday ? styles.todayCell : ''}`}
-                onDragOver={handleDragOver}
-                onDrop={(e) => handleDrop(e, dateStr)}
-                onClick={() => openNewEventModal(dateStr)}
-                style={{ cursor: 'pointer' }}
-              >
-                <div className={styles.dayNumber}>{date.getDate()}</div>
-                <div className={styles.dayEventsList}>
-                  {dayEvents.map(event => (
-                    <div 
-                      key={event.id}
-                      draggable
-                      onDragStart={(e) => handleDragStart(e, event.id)}
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        setSelectedEvent(event);
-                      }}
-                      className={`${styles.eventChip} ${styles[event.type] || styles.default}`}
-                      style={{ backgroundColor: event.type === 'meeting' ? 'rgba(35, 131, 226, 0.15)' : 'var(--bg-hover)' }}
-                    >
-                      {event.time && <span className={styles.eventChipTime}>{event.time}</span>}
-                      {event.title}
-                    </div>
-                  ))}
-                </div>
-              </div>
-            );
-          })}
-        </div>
-      )}
-
-      {view === 'Day' && (
-        <div className={styles.scrollWrapper}>
-          <div className={styles.dayViewGrid}>
-            <div className={styles.timeColumn}>
-              <div className={styles.timeSlotEmpty} />
-              {hours.map(hour => (
-                <div key={hour} className={styles.timeSlot}>{hour}</div>
+            <div className={styles.monthGrid}>
+              {['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'].map(day => (
+                <div key={day} className={styles.weekdayHeader}>{day}</div>
               ))}
-            </div>
-            <div 
-              className={styles.dayEventsColumn}
-              onDragOver={handleDragOver}
-              onDrop={(e) => handleDrop(e, formatDateStr(currentDate))}
-            >
-              <div className={styles.dayEventsContainer}>
-                 {events.filter(e => e.date === formatDateStr(currentDate)).map(event => (
-                   <div 
-                     key={event.id}
-                     draggable
-                     onDragStart={(e) => handleDragStart(e, event.id)}
-                     className={`${styles.eventCard} ${styles[event.type]}`}
-                   >
-                     <div className={styles.eventTitle}>{event.title}</div>
-                     <div className={styles.eventDetails}>
-                       {event.time && <span style={{ display: 'flex', alignItems: 'center', gap: '4px' }}><Clock size={12}/> {event.time}</span>}
-                     </div>
-                   </div>
-                 ))}
-              </div>
               
-              <div className={styles.gridLines}>
-                {hours.map(hour => (
-                  <div key={hour} className={styles.gridLine} />
-                ))}
-              </div>
-            </div>
-          </div>
-        </div>
-      )}
-      
-      {view === 'Week' && (
-        <div className={styles.scrollWrapper}>
-          <div className={styles.weekGrid}>
-            <div className={styles.timeColumn}>
-              <div className={styles.timeSlotEmpty} />
-              {hours.map(hour => (
-                <div key={hour} className={styles.timeSlot}>{hour}</div>
+              {paddingDays.map((_, i) => (
+                <div key={`pad-${i}`} className={styles.dayCellEmpty} />
               ))}
-            </div>
-            {weekDays.map(day => {
-              const dateStr = formatDateStr(day);
-              const dayEvents = events.filter(e => e.date === dateStr);
-              const isToday = dateStr === formatDateStr(new Date());
               
-              return (
-                <div key={dateStr} className={`${styles.dayColumn} ${isToday ? styles.todayColumn : ''}`}>
-                  <div className={styles.dayColumnHeader}>
-                    <div className={styles.dayColumnName}>{['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'][day.getDay()]}</div>
-                    <div className={`${styles.dayColumnNumber} ${isToday ? styles.todayNumber : ''}`}>{day.getDate()}</div>
-                  </div>
+              {daysInMonth.map(date => {
+                const dateStr = formatDateStr(date);
+                const dayEvents = events.filter(e => e.date === dateStr);
+                const isToday = dateStr === formatDateStr(new Date());
+
+                return (
                   <div 
-                    className={styles.dayColumnBody}
+                    key={dateStr} 
+                    className={`${styles.dayCell} ${isToday ? styles.todayCell : ''}`}
                     onDragOver={handleDragOver}
                     onDrop={(e) => handleDrop(e, dateStr)}
+                    onClick={() => openNewEventModal(dateStr)}
+                    style={{ cursor: 'pointer' }}
                   >
-                    {dayEvents.map(event => (
+                    <div className={styles.dayNumber}>{date.getDate()}</div>
+                    <div className={styles.dayEventsList}>
+                      {dayEvents.map(event => (
+                        <div 
+                          key={event.id}
+                          draggable
+                          onDragStart={(e) => handleDragStart(e, event.id)}
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            setSelectedEvent(event);
+                          }}
+                          className={`${styles.eventChip} ${styles[event.type] || styles.default}`}
+                          style={{ backgroundColor: event.type === 'meeting' ? 'rgba(35, 131, 226, 0.15)' : 'var(--bg-hover)' }}
+                        >
+                          {event.time && <span className={styles.eventChipTime}>{event.time}</span>}
+                          {event.title}
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          )}
+
+          {view === 'Day' && (
+            <div className={styles.scrollWrapper}>
+              <div className={styles.dayViewGrid}>
+                <div className={styles.timeColumn}>
+                  <div className={styles.timeSlotEmpty} />
+                  {hours.map(hour => (
+                    <div key={hour} className={styles.timeSlot}>{hour}</div>
+                  ))}
+                </div>
+                <div 
+                  className={styles.dayEventsColumn}
+                  onDragOver={handleDragOver}
+                  onDrop={(e) => handleDrop(e, formatDateStr(currentDate))}
+                >
+                  <div className={styles.dayEventsContainer}>
+                     {events.filter(e => e.date === formatDateStr(currentDate)).map(event => (
                        <div 
                          key={event.id}
                          draggable
                          onDragStart={(e) => handleDragStart(e, event.id)}
-                         className={`${styles.eventChip} ${styles[event.type]}`}
+                         className={`${styles.eventCard} ${styles[event.type]}`}
                        >
-                         {event.time && <span className={styles.eventChipTime}>{event.time}</span>}
-                         {event.title}
+                         <div className={styles.eventTitle}>{event.title}</div>
+                         <div className={styles.eventDetails}>
+                           {event.time && <span style={{ display: 'flex', alignItems: 'center', gap: '4px' }}><Clock size={12}/> {event.time}</span>}
+                         </div>
                        </div>
+                     ))}
+                  </div>
+                  
+                  <div className={styles.gridLines}>
+                    {hours.map(hour => (
+                      <div key={hour} className={styles.gridLine} />
                     ))}
-                    <div className={styles.gridLines}>
-                      {hours.map(hour => (
-                        <div key={hour} className={styles.gridLine} />
-                      ))}
-                    </div>
                   </div>
                 </div>
-              )
-            })}
-          </div>
-        </div>
-      )}
-      </>
+              </div>
+            </div>
+          )}
+          
+          {view === 'Week' && (
+            <div className={styles.scrollWrapper}>
+              <div className={styles.weekGrid}>
+                <div className={styles.timeColumn}>
+                  <div className={styles.timeSlotEmpty} />
+                  {hours.map(hour => (
+                    <div key={hour} className={styles.timeSlot}>{hour}</div>
+                  ))}
+                </div>
+                {weekDays.map(day => {
+                  const dateStr = formatDateStr(day);
+                  const dayEvents = events.filter(e => e.date === dateStr);
+                  const isToday = dateStr === formatDateStr(new Date());
+                  
+                  return (
+                    <div key={dateStr} className={`${styles.dayColumn} ${isToday ? styles.todayColumn : ''}`}>
+                      <div className={styles.dayColumnHeader}>
+                        <div className={styles.dayColumnName}>{['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'][day.getDay()]}</div>
+                        <div className={`${styles.dayColumnNumber} ${isToday ? styles.todayNumber : ''}`}>{day.getDate()}</div>
+                      </div>
+                      <div 
+                        className={styles.dayColumnBody}
+                        onDragOver={handleDragOver}
+                        onDrop={(e) => handleDrop(e, dateStr)}
+                      >
+                        {dayEvents.map(event => (
+                           <div 
+                             key={event.id}
+                             draggable
+                             onDragStart={(e) => handleDragStart(e, event.id)}
+                             className={`${styles.eventChip} ${styles[event.type]}`}
+                           >
+                             {event.time && <span className={styles.eventChipTime}>{event.time}</span>}
+                             {event.title}
+                           </div>
+                        ))}
+                        <div className={styles.gridLines}>
+                          {hours.map(hour => (
+                            <div key={hour} className={styles.gridLine} />
+                          ))}
+                        </div>
+                      </div>
+                    </div>
+                  )
+                })}
+              </div>
+            </div>
+          )}
+        </>
       )}
 
       {/* Event Details Modal */}

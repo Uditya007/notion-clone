@@ -1,7 +1,7 @@
 "use client";
 
 import styles from './Views.module.css';
-import { CheckSquare, Plus, Clock, Trash2 } from 'lucide-react';
+import { CheckSquare, Plus, Clock, Trash2, ShieldCheck, Smile, Gift } from 'lucide-react';
 import { useState, useEffect } from 'react';
 import { supabase } from '@/lib/supabase/client';
 
@@ -134,41 +134,58 @@ export default function TasksView() {
 
         <div className={styles.taskGroup}>
           <h3 className={styles.taskGroupTitle}>To Do</h3>
-          {incompleteTasks.map(task => (
-            <div key={task.id} className={styles.taskListItem}>
-              <button 
-                className={`${styles.checkbox} ${task.completed ? styles.checked : ''}`}
-                onClick={() => handleToggleTask(task.id, task.completed)}
-              />
-              <div className={styles.taskItemContent}>
-                <span className={styles.taskItemTitle}>{task.title}</span>
-                <span className={`${styles.taskItemDue} ${task.due === 'Overdue' ? styles.overdue : ''}`}>
-                  <Clock size={12} /> {task.due || 'No due date'}
-                </span>
+          {incompleteTasks.length === 0 ? (
+            <div className={styles.emptyIllustrationCard}>
+              <div className={styles.illustrationBadge}>
+                <ShieldCheck size={36} color="var(--primary)" />
               </div>
-              <button className={styles.deleteTaskBtn} onClick={() => handleDeleteTask(task.id)} style={{ background: 'none', border: 'none', color: 'var(--text-muted)', cursor: 'pointer', marginLeft: 'auto', display: 'flex', alignItems: 'center' }}>
-                <Trash2 size={14} />
-              </button>
+              <h4>All tasks completed!</h4>
+              <p>Enjoy your clear desk space. Any tasks you add or fetch will be logged right here.</p>
             </div>
-          ))}
+          ) : (
+            incompleteTasks.map(task => (
+              <div key={task.id} className={styles.taskListItem}>
+                <button 
+                  className={`${styles.checkbox} ${task.completed ? styles.checked : ''}`}
+                  onClick={() => handleToggleTask(task.id, task.completed)}
+                />
+                <div className={styles.taskItemContent}>
+                  <span className={styles.taskItemTitle}>{task.title}</span>
+                  <span className={`${styles.taskItemDue} ${task.due === 'Overdue' ? styles.overdue : ''}`}>
+                    <Clock size={12} /> {task.due || 'No due date'}
+                  </span>
+                </div>
+                <button className={styles.deleteTaskBtn} onClick={() => handleDeleteTask(task.id)} style={{ background: 'none', border: 'none', color: 'var(--text-muted)', cursor: 'pointer', marginLeft: 'auto', display: 'flex', alignItems: 'center' }}>
+                  <Trash2 size={14} />
+                </button>
+              </div>
+            ))
+          )}
         </div>
 
         <div className={styles.taskGroup}>
           <h3 className={styles.taskGroupTitle}>Completed</h3>
-          {completedTasks.map(task => (
-            <div key={task.id} className={`${styles.taskListItem} ${styles.taskCompleted}`}>
-              <button 
-                className={`${styles.checkbox} ${styles.checked}`}
-                onClick={() => handleToggleTask(task.id, task.completed)}
-              />
-              <div className={styles.taskItemContent}>
-                <span className={styles.taskItemTitle}>{task.title}</span>
-              </div>
-              <button className={styles.deleteTaskBtn} onClick={() => handleDeleteTask(task.id)} style={{ background: 'none', border: 'none', color: 'var(--text-muted)', cursor: 'pointer', marginLeft: 'auto', display: 'flex', alignItems: 'center' }}>
-                <Trash2 size={14} />
-              </button>
+          {completedTasks.length === 0 ? (
+            <div className={styles.emptyIllustrationCardMinimal}>
+              <Smile size={20} color="var(--text-faint)" />
+              <span>No completed tasks yet. Finish a task to see it celebrated here!</span>
             </div>
-          ))}
+          ) : (
+            completedTasks.map(task => (
+              <div key={task.id} className={`${styles.taskListItem} ${styles.taskCompleted}`}>
+                <button 
+                  className={`${styles.checkbox} ${styles.checked}`}
+                  onClick={() => handleToggleTask(task.id, task.completed)}
+                />
+                <div className={styles.taskItemContent}>
+                  <span className={styles.taskItemTitle}>{task.title}</span>
+                </div>
+                <button className={styles.deleteTaskBtn} onClick={() => handleDeleteTask(task.id)} style={{ background: 'none', border: 'none', color: 'var(--text-muted)', cursor: 'pointer', marginLeft: 'auto', display: 'flex', alignItems: 'center' }}>
+                  <Trash2 size={14} />
+                </button>
+              </div>
+            ))
+          )}
         </div>
       </div>
     </div>

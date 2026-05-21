@@ -1,6 +1,6 @@
 "use client";
 import styles from './InboxView.module.css';
-import { Mail, Pencil, CornerUpLeft, X } from 'lucide-react';
+import { Mail, Pencil, CornerUpLeft, X, Sparkles, Inbox } from 'lucide-react';
 import { useState, useEffect } from 'react';
 import { supabase } from '@/lib/supabase/client';
 
@@ -205,11 +205,15 @@ export default function InboxView() {
   if (!isConnected) {
     return (
       <div className={styles.container}>
-        <div className={styles.emptyState}>
-          <Mail size={48} opacity={0.2} />
-          <h3 style={{ fontSize: '18px', fontWeight: 600 }}>Connect Gmail</h3>
-          <p style={{ maxWidth: '300px', textAlign: 'center' }}>Sync your real inbox and manage emails inside Clearspace.</p>
-          <button className={styles.connectBtn} onClick={handleConnectGoogle}>Connect Google Account</button>
+        <div className={styles.fullScreenEmptyState}>
+          <div className={styles.emptyIllustrationIcon}>
+            <Mail size={44} color="var(--primary)" />
+          </div>
+          <h3>Connect Google Workspace</h3>
+          <p>Read your real emails, respond with automated AI drafts, and schedule focus timers all inside your Clearspace canvas.</p>
+          <button className={styles.connectBtn} onClick={handleConnectGoogle}>
+            Connect Google Account
+          </button>
         </div>
       </div>
     );
@@ -223,15 +227,19 @@ export default function InboxView() {
             <Pencil size={16} /> Compose
           </button>
           <div className={styles.filterTabs}>
-            <button className={`${styles.filterTab} ${styles.active}`}>All</button>
-            <button className={styles.filterTab}>Unread</button>
-            <button className={styles.filterTab}>Starred</button>
+            <button className={`${styles.filterTab} ${styles.active}`}>All messages</button>
           </div>
         </div>
         
         <div className={styles.emailList}>
           {isLoading && emails.length === 0 ? (
-            <div style={{ padding: '24px', textAlign: 'center', color: 'var(--text-muted)' }}>Loading emails...</div>
+            <div style={{ padding: '32px', textAlign: 'center', color: 'var(--text-muted)' }}>Loading emails...</div>
+          ) : emails.length === 0 ? (
+            <div className={styles.inboxEmptyState}>
+              <Inbox size={32} color="var(--text-faint)" />
+              <h4>Inbox fully organized!</h4>
+              <p>Outstanding tasks or notifications will appear neatly in this feed.</p>
+            </div>
           ) : (
             emails.map(email => {
               const fromName = email.from.split('<')[0].replace(/"/g, '').trim();
@@ -243,7 +251,7 @@ export default function InboxView() {
                   key={email.id} 
                   className={`${styles.emailItem} ${!email.isRead ? styles.unread : ''}`}
                   onClick={() => handleSelectEmail(email)}
-                  style={{ backgroundColor: selectedEmail?.id === email.id ? 'var(--bg-active)' : '' }}
+                  style={{ backgroundColor: selectedEmail?.id === email.id ? 'var(--primary-light)' : '' }}
                 >
                   <div className={styles.emailTop}>
                     <span className={styles.emailSender}>{fromName}</span>
@@ -260,9 +268,11 @@ export default function InboxView() {
 
       <div className={styles.rightPanel}>
         {!selectedEmail ? (
-          <div className={styles.emptyState}>
-            <Mail size={48} opacity={0.1} />
-            <p>Select an email to read</p>
+          <div className={styles.emptyDetailState}>
+            <div className={styles.emptyIllustrationIcon}>
+              <Mail size={32} color="var(--text-faint)" />
+            </div>
+            <p>Select a message from the list to view draft options, summaries, and threaded replies.</p>
           </div>
         ) : (
             <div className={styles.emailDetail}>

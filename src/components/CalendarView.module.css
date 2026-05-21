@@ -524,3 +524,79 @@
   }
 }
 
+.emptyStateContainer {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  padding: 48px;
+  background: white;
+  border-radius: var(--radius-lg);
+  border: 1.5px solid var(--border);
+  box-shadow: var(--shadow-sm);
+  max-width: 480px;
+  margin: 32px auto;
+  gap: 16px;
+  animation: fadeIn 0.4s ease-out;
+}
+
+.emptyStateContainer h3 {
+  font-size: 20px;
+  font-weight: 800;
+  color: var(--text-main);
+  margin: 0;
+  font-family: 'Outfit', sans-serif;
+}
+
+.emptyStateContainer p {
+  font-size: var(--font-xs);
+  color: var(--text-muted);
+  line-height: 1.6;
+  margin: 0;
+}
+
+.emptyIllustrationIcon {
+  width: 72px;
+  height: 72px;
+  border-radius: 50%;
+  background: var(--primary-light);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 8px;
+}
+
+.connectBtn {
+  padding: 8px 16px;
+  background: var(--text-main);
+  color: var(--bg-main);
+  border-radius: 6px;
+  font-weight: 500;
+  border: none;
+  cursor: pointer;
+  transition: opacity 0.2s;
+}
+
+.connectBtn:hover {
+  opacity: 0.9;
+}
+
+.calendarScheduleClearAlert {
+  background: linear-gradient(135deg, white 0%, rgba(124, 111, 205, 0.04) 100%);
+  border: 1.5px solid rgba(124, 111, 205, 0.25);
+  border-radius: var(--radius);
+  padding: 12px 18px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 24px;
+  color: var(--text-main);
+  font-size: var(--font-xs);
+  font-weight: 600;
+  box-shadow: var(--shadow-sm);
+  animation: slideUp 0.3s ease-out;
+}
+
+

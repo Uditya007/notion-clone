@@ -9,8 +9,8 @@ const inter = Inter({
 });
 
 export const metadata: Metadata = {
-  title: "Notion Clone",
-  description: "A comprehensive Notion-like productivity web app",
+  title: "Clearspace — Warm, AI-guided writing canvas",
+  description: "Clearspace blends the structured efficiency of Notion with the cozy, friendly intelligence of Google NotebookLM.",
 };
 
 export default function RootLayout({

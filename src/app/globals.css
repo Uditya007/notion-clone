@@ -1,25 +1,110 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=Outfit:wght@300;400;500;600;700;800&display=swap');
+
 :root {
-  --bg-main: #ffffff;
-  --bg-sidebar: #ffffff;
-  --bg-hover: #f9fafb;
-  --bg-active: #f3f4f6;
-  --text-main: #0f172a;
-  --text-muted: #64748b;
-  --border: #e2e8f0;
-  --primary: #3b82f6;
-  --primary-hover: #2563eb;
-  --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.02);
-  --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -1px rgba(0, 0, 0, 0.03);
-  --radius: 8px;
-  --sidebar-width: 280px;
+  /* Colors */
+  --bg-main: #fafaf9;          /* warm off-white, not harsh white */
+  --bg-sidebar: #f5f4f0;       /* warm parchment tone */
+  --bg-card: #ffffff;
+  --bg-hover: #f0ede8;         /* warm hover */
+  --bg-active: #e8e4dd;        /* warm active */
+  --bg-dark: #1a1714;          /* rich warm dark for accents */
+  --text-main: #1c1917;        /* warm near-black */
+  --text-muted: #78716c;       /* warm gray */
+  --text-faint: #a8a29e;       /* very muted */
+  --border: #e7e5e0;           /* warm border */
+  --border-strong: #d6d3cd;
+  --primary: #7c6fcd;          /* soft purple — NotebookLM vibe */
+  --primary-light: #ede9fe;    /* lavender tint */
+  --primary-glow: rgba(124, 111, 205, 0.15);
+  --accent-green: #10b981;     /* for success states */
+  --accent-orange: #f59e0b;    /* for warnings */
+  --accent-red: #ef4444;       /* for errors */
+  
+  /* Dimensions & Rounding */
+  --sidebar-width: 260px;
+  --radius-sm: 6px;
+  --radius: 10px;
+  --radius-lg: 16px;
+  --radius-xl: 24px;
+  
+  /* Shadows & Glows */
+  --shadow-sm: 0 1px 3px rgba(0,0,0,0.06), 0 1px 2px rgba(0,0,0,0.04);
+  --shadow-md: 0 4px 16px rgba(0,0,0,0.08), 0 2px 6px rgba(0,0,0,0.04);
+  --shadow-lg: 0 20px 40px rgba(0,0,0,0.12), 0 8px 16px rgba(0,0,0,0.06);
+  --shadow-glow: 0 0 0 3px var(--primary-glow);
+
+  /* Typography Scales */
+  --font-xs: 11px;
+  --font-sm: 13px;
+  --font-base: 14px;
+  --font-md: 15px;
+  --font-lg: 18px;
+  --font-xl: 22px;
+  --font-2xl: 28px;
+  --font-3xl: 36px;
+  --font-display: 48px;
 }
 
+/* Animations */
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(8px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes slideInLeft {
+  from { opacity: 0; transform: translateX(-16px); }
+  to { opacity: 1; transform: translateX(0); }
+}
+
+@keyframes slideInRight {
+  from { opacity: 0; transform: translateX(16px); }
+  to { opacity: 1; transform: translateX(0); }
+}
+
+@keyframes slideUp {
+  from { opacity: 0; transform: translateY(16px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.5; }
+}
+
+@keyframes shimmer {
+  0% { background-position: -200% center; }
+  100% { background-position: 200% center; }
+}
+
+@keyframes popIn {
+  0% { transform: scale(0.95); opacity: 0; }
+  60% { transform: scale(1.02); }
+  100% { transform: scale(1); opacity: 1; }
+}
+
+@keyframes glowPulse {
+  0%, 100% { box-shadow: 0 0 0 0 var(--primary-glow); }
+  50% { box-shadow: 0 0 0 6px transparent; }
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+@keyframes float {
+  0%, 100% { transform: translateY(0px); }
+  50% { transform: translateY(-6px); }
+}
+
+/* Global Reset */
 html, body {
   min-height: 100%;
   width: 100%;
   background-color: var(--bg-main);
   color: var(--text-main);
-  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, "Apple Color Emoji", Arial, sans-serif, "Segoe UI Emoji", "Segoe UI Symbol";
+  font-family: 'Inter', 'Outfit', 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
 }
 
 * {
@@ -31,6 +116,7 @@ html, body {
 a {
   color: inherit;
   text-decoration: none;
+  transition: all 0.2s ease;
 }
 
 button {
@@ -39,17 +125,20 @@ button {
   cursor: pointer;
   font: inherit;
   color: inherit;
+  transition: all 0.2s ease;
 }
 
 ul, ol {
   list-style: none;
 }
 
-/* Base Layout Classes */
+/* Base Layout Classes with premium NotebookLM feel */
 .app-container {
   display: flex;
   height: 100vh;
   width: 100vw;
+  overflow: hidden;
+  background-color: var(--bg-main);
 }
 
 .sidebar {
@@ -58,7 +147,7 @@ ul, ol {
   border-right: 1px solid var(--border);
   display: flex;
   flex-direction: column;
-  transition: width 0.3s ease;
+  transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
   position: relative;
   z-index: 10;
   flex-shrink: 0;
@@ -77,12 +166,13 @@ ul, ol {
   background-color: var(--bg-main);
   overflow-y: auto;
   position: relative;
+  transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 /* Custom Scrollbar */
 ::-webkit-scrollbar {
-  width: 8px;
-  height: 8px;
+  width: 6px;
+  height: 6px;
 }
 
 ::-webkit-scrollbar-track {
@@ -91,45 +181,77 @@ ul, ol {
 
 ::-webkit-scrollbar-thumb {
   background: var(--bg-hover);
-  border-radius: 4px;
+  border-radius: 99px;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: var(--text-muted);
+  background: var(--text-faint);
 }
 
-/* Tiptap Editor Styles */
+/* Tiptap Editor Styles overrides for premium notebook aesthetic */
 .tiptap-editor {
   outline: none;
   min-height: 400px;
-  font-size: 16px;
-  line-height: 1.6;
+  font-size: var(--font-md);
+  line-height: 1.7;
+  color: var(--text-main);
+  font-family: inherit;
+}
+
+.tiptap-editor h1,
+.tiptap-editor h2,
+.tiptap-editor h3 {
+  font-family: 'Outfit', 'Plus Jakarta Sans', inherit;
+  color: var(--bg-dark);
+  font-weight: 700;
+  letter-spacing: -0.02em;
 }
 
 .tiptap-editor h1 {
-  font-size: 2.5em;
-  margin-top: 1em;
+  font-size: 2.1em;
+  margin-top: 1.2em;
+  margin-bottom: 0.6em;
+  line-height: 1.25;
+}
+
+.tiptap-editor h2 {
+  font-size: 1.6em;
+  margin-top: 1.1em;
   margin-bottom: 0.5em;
-  font-weight: 700;
-  line-height: 1.2;
+  line-height: 1.3;
+}
+
+.tiptap-editor h3 {
+  font-size: 1.25em;
+  margin-top: 1em;
+  margin-bottom: 0.4em;
+  line-height: 1.4;
+}
+
+.tiptap-editor p {
+  margin-bottom: 0.8em;
 }
 
 /* Tiptap Task List Styles */
 ul[data-type="taskList"] {
   list-style: none;
   padding: 0;
+  margin: 0.6em 0;
 }
 
 ul[data-type="taskList"] li {
   display: flex;
   align-items: flex-start;
-  margin-bottom: 4px;
+  margin-bottom: 8px;
+  gap: 10px;
 }
 
 ul[data-type="taskList"] li > label {
   flex: 0 0 auto;
-  margin-right: 8px;
   user-select: none;
+  display: flex;
+  align-items: center;
+  margin-top: 3px;
 }
 
 ul[data-type="taskList"] li > div {
@@ -138,16 +260,23 @@ ul[data-type="taskList"] li > div {
 
 ul[data-type="taskList"] input[type="checkbox"] {
   cursor: pointer;
-  width: 16px;
-  height: 16px;
-  margin-top: 4px;
+  width: 18px;
+  height: 18px;
   accent-color: var(--primary);
+  border: 1.5px solid var(--border-strong);
+  border-radius: var(--radius-sm);
+  transition: all 0.2s ease;
+}
+
+ul[data-type="taskList"] input[type="checkbox"]:hover {
+  transform: scale(1.05);
 }
 
 .tiptap-editor p.is-editor-empty:first-child::before {
-  color: var(--text-muted);
+  color: var(--text-faint);
   content: attr(data-placeholder);
   float: left;
   height: 0;
   pointer-events: none;
+  font-style: italic;
 }

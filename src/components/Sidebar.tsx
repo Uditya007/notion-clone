@@ -16,7 +16,14 @@ import {
   Zap,
   Copy,
   Sparkles,
-  Download
+  Download,
+  Home,
+  LayoutDashboard,
+  Bell,
+  LogOut,
+  User,
+  MoreHorizontal,
+  GripVertical
 } from "lucide-react";
 import styles from "./Sidebar.module.css";
 import { useState, useEffect, useRef } from "react";
@@ -28,11 +35,14 @@ export default function Sidebar() {
   const [isCollapsed, setIsCollapsed] = useState(false);
   const [pagesList, setPagesList] = useState<any[]>([]);
   const [workspaceName, setWorkspaceName] = useState("My Workspace");
+  const [userProfile, setUserProfile] = useState<{ name: string; email: string }>({ name: "User", email: "user@clearspace.app" });
   const [isGoogleConnected, setIsGoogleConnected] = useState(false);
   const [isAIBuilderOpen, setIsAIBuilderOpen] = useState(false);
+  const [showProfileMenu, setShowProfileMenu] = useState(false);
   
   const { activePageId, setActivePage, setSearchOpen, setSettingsOpen, isAIPanelOpen, setAIPanelOpen } = useAppStore();
   const importFileInputRef = useRef<HTMLInputElement>(null);
+  const profileMenuRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     fetchPages();
@@ -49,6 +59,16 @@ export default function Sidebar() {
     return () => {
       supabase.removeChannel(channel);
     };
+  }, []);
+
+  useEffect(() => {
+    function handleClickOutside(event: MouseEvent) {
+      if (profileMenuRef.current && !profileMenuRef.current.contains(event.target as Node)) {
+        setShowProfileMenu(false);
+      }
+    }
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
 
   const fetchPages = async () => {
@@ -70,6 +90,12 @@ export default function Sidebar() {
         const data = await res.json();
         if (data?.workspace_name) {
           setWorkspaceName(data.workspace_name);
+        }
+        if (data?.full_name || data?.email) {
+          setUserProfile({
+            name: data.full_name || "Clearspace User",
+            email: data.email || "user@clearspace.app"
+          });
         }
       }
     } catch (err) {
@@ -139,7 +165,6 @@ export default function Sidebar() {
 
       if (res.ok) {
         const newPage = await res.json();
-        alert(`Successfully imported "${newPage.title}" into Cora!`);
         fetchPages();
         setActivePage(newPage.id);
       } else {
@@ -161,6 +186,11 @@ export default function Sidebar() {
     }
   };
 
+  const handleSignOut = async () => {
+    await supabase.auth.signOut();
+    window.location.href = "/login";
+  };
+
   const buildPageTree = () => {
     const pageMap = new Map();
     pagesList.forEach((p) => pageMap.set(p.id, { ...p, children: [] }));
@@ -179,42 +209,49 @@ export default function Sidebar() {
   };
 
   const pageTreeRoots = buildPageTree();
+  const favorites = pagesList.filter((p) => p.is_favorite);
+  const trashCount = pagesList.filter((p) => p.is_deleted).length;
 
   const PageTreeItem = ({ page, level = 0 }: { page: any, level?: number }) => {
     const [expanded, setExpanded] = useState(true);
     const isActive = activePageId === page.id;
 
     return (
-      <div className={styles.pageTreeWrapper} style={{ paddingLeft: level === 0 ? 0 : 16 }}>
+      <div className={styles.pageTreeWrapper} style={{ paddingLeft: level === 0 ? 0 : 12 }}>
         <div 
-          className={`${styles.pageItem} ${isActive ? styles.active : ''}`}
+          className={`${styles.pageItem} ${isActive ? styles.pageActive : ''}`}
           onClick={() => handlePageSelect(page.id)}
         >
+          {/* Drag Handle placeholder on hover */}
+          <div className={styles.dragHandle}>
+            <GripVertical size={12} />
+          </div>
+
           <div 
             className={styles.chevronWrapper} 
             onClick={(e) => { e.stopPropagation(); setExpanded(!expanded); }}
           >
             {page.children.length > 0 ? (
-              expanded ? <ChevronDown size={14} className={styles.chevron} /> : <ChevronRight size={14} className={styles.chevron} />
+              expanded ? <ChevronDown size={12} className={styles.chevron} /> : <ChevronRight size={12} className={styles.chevron} />
             ) : (
-              <div style={{ width: 14 }} />
+              <div style={{ width: 12 }} />
             )}
           </div>
-          <span>{page.icon}</span>
+          <span className={styles.pageIcon}>{page.icon || "📄"}</span>
           <span className={styles.pageTitle}>{page.title || "Untitled"}</span>
           
           <div className={styles.pageActions}>
-            <button className={styles.iconActionBtn} onClick={(e) => handleAddPage(e, page.id)}>
-              <Plus size={14} />
+            <button className={styles.iconActionBtn} onClick={(e) => handleAddPage(e, page.id)} title="Add sub-page">
+              <Plus size={12} />
             </button>
-            <button className={styles.iconActionBtn} onClick={(e) => handleDeletePage(e, page.id)}>
-              <Trash2 size={14} />
+            <button className={styles.iconActionBtn} onClick={(e) => handleDeletePage(e, page.id)} title="Delete page">
+              <Trash2 size={12} />
             </button>
           </div>
         </div>
 
         {expanded && page.children.length > 0 && (
-          <div className={styles.nestedPages}>
+          <div className={styles.nestedPages} style={{ borderLeft: "1px solid var(--border)", marginLeft: "18px" }}>
             {page.children.map((child: any) => (
               <PageTreeItem key={child.id} page={child} level={level + 1} />
             ))}
@@ -227,98 +264,149 @@ export default function Sidebar() {
   if (isCollapsed) {
     return (
       <div className={styles.collapsedSidebar}>
-        <button onClick={() => setIsCollapsed(false)} className={styles.expandBtn}>
-          <PanelLeft size={20} />
+        <button onClick={() => setIsCollapsed(false)} className={styles.expandBtn} title="Expand sidebar">
+          <PanelLeft size={18} />
         </button>
       </div>
     );
   }
 
-  const favorites = pagesList.filter((p) => p.is_favorite);
-
   return (
     <>
       <div className={styles.mobileOverlay} onClick={() => setIsCollapsed(true)} />
       <aside className={styles.sidebar}>
+        {/* WORKSPACE HEADER */}
         <div className={styles.header}>
-          <div className={styles.workspaceInfo}>
-            <div className={styles.workspaceIcon}>{workspaceName.charAt(0).toUpperCase()}</div>
-            <span className={styles.workspaceName}>{workspaceName}</span>
+          <div className={styles.workspaceInfo} onClick={() => setShowProfileMenu(!showProfileMenu)}>
+            <div className={styles.workspaceIcon}>
+              {workspaceName.charAt(0).toUpperCase()}
+            </div>
+            <div className={styles.workspaceTextContainer}>
+              <span className={styles.workspaceName}>{workspaceName}</span>
+              <span className={styles.workspaceSub}>Clearspace Workspace</span>
+            </div>
+            <ChevronDown size={14} className={styles.headerChevron} />
           </div>
-          <button onClick={() => setIsCollapsed(true)} className={styles.collapseBtn}>
-            <PanelLeftClose size={18} />
+
+          <button onClick={() => setIsCollapsed(true)} className={styles.collapseBtn} title="Collapse sidebar">
+            <PanelLeftClose size={16} />
           </button>
+
+          {/* Profile Menu Dropdown */}
+          {showProfileMenu && (
+            <div className={styles.profileMenu} ref={profileMenuRef}>
+              <div className={styles.profileMenuHeader}>
+                <span className={styles.profileMenuName}>{userProfile.name}</span>
+                <span className={styles.profileMenuEmail}>{userProfile.email}</span>
+              </div>
+              <div className={styles.profileMenuDivider}></div>
+              <button className={styles.profileMenuItem} onClick={() => { setSettingsOpen(true); setShowProfileMenu(false); }}>
+                <Settings size={14} /> Settings
+              </button>
+              <button className={styles.profileMenuItem} onClick={handleSignOut} style={{ color: "var(--accent-red)" }}>
+                <LogOut size={14} /> Sign out
+              </button>
+            </div>
+          )}
         </div>
 
-        <div className={styles.quickActions}>
-          <button className={styles.actionItem} onClick={() => setSearchOpen(true)}>
-            <Search size={16} />
-            <span>Search</span>
-            <kbd className={styles.shortcut}>⌘K</kbd>
-          </button>
-          <button className={`${styles.actionItem} ${isAIPanelOpen ? styles.actionItemActive : ''}`} onClick={() => {
-            setAIPanelOpen(!isAIPanelOpen);
-            if (window.innerWidth <= 768) setIsCollapsed(true);
-          }}>
+        {/* SEARCH ROUNDED INPUT */}
+        <div className={styles.searchContainer} onClick={() => setSearchOpen(true)}>
+          <div className={styles.searchBar}>
+            <Search size={14} />
+            <span>Search pages...</span>
+            <kbd className={styles.searchShortcut}>⌘K</kbd>
+          </div>
+        </div>
+
+        {/* QUICK ACTIONS ROW */}
+        <div className={styles.quickActionsRow}>
+          <button className={styles.rowBtn} onClick={() => setIsAIBuilderOpen(true)} title="✦ AI Builder">
             <Sparkles size={16} />
-            <span>Cora AI</span>
           </button>
-          <button className={styles.actionItem} onClick={() => setIsAIBuilderOpen(true)}>
-            <Sparkles size={16} style={{ color: '#a855f7' }} />
-            <span style={{ fontWeight: 600, color: 'var(--text-main)' }}>✦ AI Workspace Builder</span>
+          <button className={styles.rowBtn} onClick={() => handlePageSelect('home')} title="📊 Command Center">
+            <LayoutDashboard size={16} />
           </button>
-          
-          {/* Import file actions */}
-          <button className={styles.actionItem} onClick={() => importFileInputRef.current?.click()}>
-            <Download size={16} style={{ transform: 'rotate(180deg)', color: '#3b82f6' }} />
-            <span style={{ fontWeight: 600, color: 'var(--text-main)' }}>✦ Import Document</span>
+          <button className={styles.rowBtn} onClick={() => handlePageSelect('inbox')} title="🔔 Inbox">
+            <Bell size={16} />
           </button>
-          <input 
-            type="file" 
-            ref={importFileInputRef} 
-            onChange={handleImportFileChange}
-            accept=".md,.html,.htm"
-            style={{ display: 'none' }}
-          />
-
-          <button className={styles.actionItem} onClick={() => setSettingsOpen(true)}>
+          <button className={styles.rowBtn} onClick={() => setSettingsOpen(true)} title="⚙️ Settings">
             <Settings size={16} />
-            <span>Settings</span>
-          </button>
-          <button className={`${styles.actionItem} ${activePageId === 'inbox' ? styles.actionItemActive : ''}`} onClick={() => handlePageSelect('inbox')}>
-            <div style={{ position: 'relative', display: 'flex', alignItems: 'center' }}>
-              <Inbox size={16} />
-              <div style={{ position: 'absolute', bottom: -2, right: -2, width: 8, height: 8, borderRadius: '50%', backgroundColor: isGoogleConnected ? '#10b981' : '#a1a1aa', border: '2px solid var(--bg-sidebar)' }} />
-            </div>
-            <span>Inbox</span>
-          </button>
-          <button className={`${styles.actionItem} ${activePageId === 'tasks' ? styles.actionItemActive : ''}`} onClick={() => handlePageSelect('tasks')}>
-            <CheckSquare size={16} />
-            <span>My Tasks</span>
-          </button>
-          <button className={`${styles.actionItem} ${activePageId === 'calendar' ? styles.actionItemActive : ''}`} onClick={() => handlePageSelect('calendar')}>
-            <div style={{ position: 'relative', display: 'flex', alignItems: 'center' }}>
-              <Calendar size={16} />
-              <div style={{ position: 'absolute', bottom: -2, right: -2, width: 8, height: 8, borderRadius: '50%', backgroundColor: isGoogleConnected ? '#10b981' : '#a1a1aa', border: '2px solid var(--bg-sidebar)' }} />
-            </div>
-            <span>Google Calendar</span>
-          </button>
-          <button className={`${styles.actionItem} ${activePageId === 'automations' ? styles.actionItemActive : ''}`} onClick={() => handlePageSelect('automations')}>
-            <Zap size={16} />
-            <span>Automations</span>
-          </button>
-          <button className={`${styles.actionItem} ${activePageId === 'templates' ? styles.actionItemActive : ''}`} onClick={() => handlePageSelect('templates')}>
-            <Copy size={16} />
-            <span>Templates</span>
           </button>
         </div>
 
+        {/* NAVIGATION SECTION */}
+        <div className={styles.navigationSection}>
+          <span className={styles.sectionLabel}>Workspace</span>
+          <div className={styles.navGroup}>
+            <button 
+              className={`${styles.navItem} ${activePageId === 'home' ? styles.navActive : ''}`} 
+              onClick={() => handlePageSelect('home')}
+            >
+              <Home size={16} className={styles.navIconHome} />
+              <span>Home</span>
+            </button>
+
+            <button 
+              className={`${styles.navItem} ${activePageId === 'inbox' ? styles.navActive : ''}`} 
+              onClick={() => handlePageSelect('inbox')}
+            >
+              <Inbox size={16} className={styles.navIconInbox} />
+              <span>Inbox</span>
+            </button>
+
+            <button 
+              className={`${styles.navItem} ${activePageId === 'tasks' ? styles.navActive : ''}`} 
+              onClick={() => handlePageSelect('tasks')}
+            >
+              <CheckSquare size={16} className={styles.navIconTasks} />
+              <span>My Tasks</span>
+            </button>
+
+            <button 
+              className={`${styles.navItem} ${activePageId === 'calendar' ? styles.navActive : ''}`} 
+              onClick={() => handlePageSelect('calendar')}
+            >
+              <Calendar size={16} className={styles.navIconCalendar} />
+              <span>Calendar</span>
+            </button>
+
+            <button 
+              className={`${styles.navItem} ${activePageId === 'automations' ? styles.navActive : ''}`} 
+              onClick={() => handlePageSelect('automations')}
+            >
+              <Zap size={16} className={styles.navIconAutomations} />
+              <span>Agents</span>
+            </button>
+
+            <button 
+              className={`${styles.navItem} ${activePageId === 'templates' ? styles.navActive : ''}`} 
+              onClick={() => handlePageSelect('templates')}
+            >
+              <Copy size={16} className={styles.navIconTemplates} />
+              <span>Templates</span>
+            </button>
+
+            {/* Document Import trigger inside sidebar items */}
+            <button className={styles.navItem} onClick={() => importFileInputRef.current?.click()}>
+              <Download size={16} className={styles.navIconImport} style={{ transform: "rotate(180deg)" }} />
+              <span>Import Document</span>
+            </button>
+            <input 
+              type="file" 
+              ref={importFileInputRef} 
+              onChange={handleImportFileChange}
+              accept=".md,.html,.htm"
+              style={{ display: 'none' }}
+            />
+          </div>
+        </div>
+
+        {/* PAGES SCROLL AREA */}
         <div className={styles.scrollArea}>
           {favorites.length > 0 && (
             <div className={styles.pagesSection}>
-              <div className={styles.sectionHeader}>
-                <span>Favorites</span>
-              </div>
+              <span className={styles.sectionLabel}>Favorites ★</span>
               <div className={styles.pageTree}>
                 {favorites.map((page: any) => (
                   <PageTreeItem key={`fav-${page.id}`} page={{ ...page, children: [] }} />
@@ -328,25 +416,46 @@ export default function Sidebar() {
           )}
 
           <div className={styles.pagesSection}>
-            <div className={styles.sectionHeader}>
-              <span>Private</span>
-              <button className={styles.addPageBtn} onClick={(e) => handleAddPage(e, null)}>
-                <Plus size={16} />
+            <div className={styles.pagesSectionHeader}>
+              <span className={styles.sectionLabel}>Pages</span>
+              <button className={styles.addPageBtn} onClick={(e) => handleAddPage(e, null)} title="Create new page">
+                <Plus size={14} />
               </button>
             </div>
             
-            <div className={styles.pageTree}>
-              {pageTreeRoots.map((page: any) => (
-                <PageTreeItem key={page.id} page={page} />
-              ))}
-            </div>
+            {/* Page tree or beginner state if empty */}
+            {pagesList.length === 0 ? (
+              <div className={styles.beginnerHelper}>
+                <span className={styles.beginnerEmoji}>📝</span>
+                <p className={styles.beginnerText}>Your pages will appear here</p>
+                <button className={styles.beginnerAIBtn} onClick={() => setIsAIBuilderOpen(true)}>
+                  ✦ Create with AI
+                </button>
+                <button className={styles.beginnerBlankBtn} onClick={(e) => handleAddPage(e, null)}>
+                  📄 Blank page
+                </button>
+              </div>
+            ) : (
+              <div className={styles.pageTree}>
+                {pageTreeRoots.map((page: any) => (
+                  <PageTreeItem key={page.id} page={page} />
+                ))}
+              </div>
+            )}
           </div>
         </div>
 
+        {/* BOTTOM TRASH */}
         <div className={styles.footer}>
-          <button className={`${styles.actionItem} ${activePageId === 'trash' ? styles.actionItemActive : ''}`} onClick={() => handlePageSelect('trash')}>
-            <Trash2 size={16} />
+          <button 
+            className={`${styles.navItem} ${activePageId === 'trash' ? styles.navActive : ''}`} 
+            onClick={() => handlePageSelect('trash')}
+          >
+            <Trash2 size={16} className={styles.navIconTrash} />
             <span>Trash</span>
+            {trashCount > 0 && (
+              <span className={styles.trashBadge}>{trashCount}</span>
+            )}
           </button>
         </div>
       </aside>

@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState, useEffect, useRef } from 'react';
-import { Sparkles, Play, Pause, RotateCcw, CheckSquare, Plus, FileText, ArrowRight, Activity, Terminal, Calendar, Inbox } from 'lucide-react';
+import { Sparkles, Play, Pause, RotateCcw, CheckSquare, Plus, FileText, ArrowRight, Activity, Terminal, Calendar, Inbox, CheckCircle2 } from 'lucide-react';
 import styles from './CommandCenter.module.css';
 import { useAppStore } from '@/store/useAppStore';
 
@@ -11,6 +11,7 @@ export default function CommandCenter() {
   const [commandInput, setCommandInput] = useState('');
   const [isProcessingCommand, setIsProcessingCommand] = useState(false);
   const [googleConnected, setGoogleConnected] = useState(false);
+  const [isCreatingBlank, setIsCreatingBlank] = useState(false);
 
   // Pomodoro Focus Timer State
   const [timeLeft, setTimeLeft] = useState(25 * 60);
@@ -92,14 +93,10 @@ export default function CommandCenter() {
 
   const handleCommandSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    const query = commandInput.trim();
-    if (!query) return;
-
+    const query = commandInput.trim() || "Build workspace: General Operations Hub";
     setIsProcessingCommand(true);
-    setCommandInput('');
 
     try {
-      // 1. Task Creation Command
       if (query.toLowerCase().startsWith('create task:') || query.toLowerCase().startsWith('add task:')) {
         const title = query.split(':')[1]?.trim();
         if (!title) throw new Error("Please specify task title");
@@ -113,14 +110,15 @@ export default function CommandCenter() {
         if (res.ok) {
           alert(`✦ Task created: "${title}"`);
           fetchTasks();
+          setCommandInput('');
         } else {
           throw new Error("Failed to create task");
         }
-      }
-      // 2. Workspace Builder Command
-      else if (query.toLowerCase().startsWith('build workspace:') || query.toLowerCase().startsWith('create workspace:')) {
-        const desc = query.split(':')[1]?.trim();
-        if (!desc) throw new Error("Please describe the workspace");
+      } else {
+        // Workspace Builder Command
+        const desc = query.toLowerCase().startsWith('build workspace:') || query.toLowerCase().startsWith('create workspace:')
+          ? query.split(':')[1]?.trim()
+          : query;
 
         alert("✦ AI Workspace Builder initiated. Spawning your new environment, please wait...");
         const res = await fetch('/api/workspace-builder', {
@@ -137,15 +135,29 @@ export default function CommandCenter() {
           throw new Error(data.error || "Failed to generate workspace");
         }
       }
-      // 3. Fallback General AI query
-      else {
-        setAIPanelOpen(true);
-        alert(`✦ Directing query to Clearspace AI Panel: "${query}"`);
-      }
     } catch (err: any) {
       alert(`Command Error: ${err.message}`);
     } finally {
       setIsProcessingCommand(false);
+    }
+  };
+
+  const handleCreateBlankPage = async () => {
+    setIsCreatingBlank(true);
+    try {
+      const res = await fetch('/api/pages', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ title: 'Welcome Document', type: 'editor', content: '<p>Start writing here...</p>', icon: '📄' })
+      });
+      if (res.ok) {
+        const newPage = await res.json();
+        setActivePage(newPage.id);
+      }
+    } catch (err) {
+      console.error(err);
+    } finally {
+      setIsCreatingBlank(false);
     }
   };
 
@@ -173,6 +185,50 @@ export default function CommandCenter() {
     .slice(0, 3);
 
   const displayedMatrixTasks = [...highPriorityTasks, ...mediumPriorityTasks].slice(0, 4);
+
+  // If there are zero pages, show the beautiful Welcome Onboarding screen
+  if (pages.length === 0) {
+    return (
+      <div className={styles.welcomeContainer}>
+        <div className={styles.welcomeContent}>
+          <div className={styles.welcomeEmoji}>🌱</div>
+          <h1 className={styles.welcomeTitle}>Welcome to Clearspace</h1>
+          <p className={styles.welcomeSubtitle}>
+            Your premium, AI-guided writing canvas. Clearspace blends the clean hierarchy of Notion with the cozy, responsive intelligence of NotebookLM. Let's create something wonderful.
+          </p>
+          
+          <div className={styles.welcomeFeatures}>
+            <div className={`${styles.featureCard} ${styles.aiCard}`} onClick={() => handleCommandSubmit({ preventDefault: () => {} } as any)}>
+              <span className={styles.featureIcon}>✦</span>
+              <h3>Build with AI</h3>
+              <p>Tell Cora what you are working on, and she will generate a complete customized workspace of wikis, files, and trackers.</p>
+              <button className={styles.featureBtn} onClick={(e) => { e.stopPropagation(); handleCommandSubmit({ preventDefault: () => {} } as any); }}>
+                Spawning AI ➔
+              </button>
+            </div>
+
+            <div className={styles.featureCard} onClick={handleCreateBlankPage}>
+              <span className={styles.featureIcon}>📄</span>
+              <h3>Start blank</h3>
+              <p>Begin with a clean canvas. Perfect for drafting quick thoughts, operational wikis, or custom checklists.</p>
+              <button className={styles.featureBtn} disabled={isCreatingBlank}>
+                {isCreatingBlank ? 'Creating...' : 'Create blank page ➔'}
+              </button>
+            </div>
+
+            <div className={styles.featureCard} onClick={() => setActivePage('templates')}>
+              <span className={styles.featureIcon}>🎨</span>
+              <h3>Use template</h3>
+              <p>Explore our library of designer setups built for sprints, CRM databases, or weekly reviews.</p>
+              <button className={styles.featureBtn}>
+                Browse library ➔
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className={styles.dashboard}>
@@ -205,7 +261,7 @@ export default function CommandCenter() {
       {/* AI Command Console */}
       <div className={styles.aiCommandBar}>
         <form onSubmit={handleCommandSubmit} className={styles.aiInputWrapper}>
-          <Terminal size={18} style={{ color: '#a855f7' }} />
+          <Terminal size={18} style={{ color: 'var(--primary)' }} />
           <input
             className={styles.aiInput}
             placeholder={isProcessingCommand ? "✦ AI Executing command..." : "Enter workspace command (e.g., 'Create task: Call Rahul' or 'Build workspace: Hiring board')..."}
@@ -230,7 +286,7 @@ export default function CommandCenter() {
         <div className={`${styles.widget} ${styles.col4}`}>
           <div className={styles.widgetHeader}>
             <span className={styles.widgetTitle}>Focus Mode Clock</span>
-            <Activity size={16} style={{ color: '#a855f7' }} />
+            <Activity size={16} style={{ color: 'var(--primary)' }} />
           </div>
           <div className={styles.pomodoroBody}>
             <div className={styles.timeDisplay}>{formatTime(timeLeft)}</div>
@@ -254,7 +310,7 @@ export default function CommandCenter() {
         <div className={`${styles.widget} ${styles.col8}`}>
           <div className={styles.widgetHeader}>
             <span className={styles.widgetTitle}>Priority Matrix Radar</span>
-            <CheckSquare size={16} style={{ color: '#a855f7' }} />
+            <CheckSquare size={16} style={{ color: 'var(--primary)' }} />
           </div>
           <div className={styles.taskMatrix}>
             {displayedMatrixTasks.length === 0 ? (
@@ -281,7 +337,7 @@ export default function CommandCenter() {
         <div className={`${styles.widget} ${styles.col6}`}>
           <div className={styles.widgetHeader}>
             <span className={styles.widgetTitle}>Recently Updated Pages</span>
-            <FileText size={16} style={{ color: '#a855f7' }} />
+            <FileText size={16} style={{ color: 'var(--primary)' }} />
           </div>
           <div className={styles.recentGrid}>
             {recentPages.map((p) => (
@@ -300,7 +356,7 @@ export default function CommandCenter() {
         <div className={`${styles.widget} ${styles.col6}`}>
           <div className={styles.widgetHeader}>
             <span className={styles.widgetTitle}>Google Ecosystem Link</span>
-            <Activity size={16} style={{ color: '#a855f7' }} />
+            <Activity size={16} style={{ color: 'var(--primary)' }} />
           </div>
           <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
             <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '12px', background: 'var(--bg-main)', border: '1px solid var(--border)', borderRadius: '10px' }}>

@@ -10,7 +10,7 @@ import Underline from '@tiptap/extension-underline'
 import GlobalDragHandle from 'tiptap-extension-global-drag-handle'
 import styles from "./Editor.module.css";
 import { useEffect, useState, useRef } from "react";
-import { MoreHorizontal, Star, Clock, Sparkles, Check, X, LayoutGrid, FileText, Trash2, Image as ImageIcon } from "lucide-react";
+import { MoreHorizontal, Star, Clock, Sparkles, Check, X, LayoutGrid, FileText, Trash2, Image as ImageIcon, CheckCircle, AlertCircle, Info, Smile } from "lucide-react";
 import { useAppStore } from "@/store/useAppStore";
 import KanbanBoard from "./KanbanBoard";
 import CalendarView from "./CalendarView";
@@ -31,17 +31,17 @@ import { supabase } from "@/lib/supabase/client";
 
 const SLASH_COMMANDS = [
   { title: 'Text', icon: '📝', action: (editor: any) => editor.chain().focus().clearNodes().run() },
-  { title: 'Heading 1', icon: '#', action: (editor: any) => editor.chain().focus().clearNodes().toggleHeading({ level: 1 }).run() },
-  { title: 'Heading 2', icon: '##', action: (editor: any) => editor.chain().focus().clearNodes().toggleHeading({ level: 2 }).run() },
-  { title: 'Heading 3', icon: '###', action: (editor: any) => editor.chain().focus().clearNodes().toggleHeading({ level: 3 }).run() },
+  { title: 'Heading 1', icon: 'H1', action: (editor: any) => editor.chain().focus().clearNodes().toggleHeading({ level: 1 }).run() },
+  { title: 'Heading 2', icon: 'H2', action: (editor: any) => editor.chain().focus().clearNodes().toggleHeading({ level: 2 }).run() },
+  { title: 'Heading 3', icon: 'H3', action: (editor: any) => editor.chain().focus().clearNodes().toggleHeading({ level: 3 }).run() },
   { title: 'Bullet List', icon: '•', action: (editor: any) => editor.chain().focus().clearNodes().toggleBulletList().run() },
   { title: 'Numbered List', icon: '1.', action: (editor: any) => editor.chain().focus().clearNodes().toggleOrderedList().run() },
-  { title: 'To-do', icon: '☑', action: (editor: any) => editor.chain().focus().clearNodes().toggleTaskList().run() },
+  { title: 'To-do list', icon: '☑', action: (editor: any) => editor.chain().focus().clearNodes().toggleTaskList().run() },
   { title: 'Quote', icon: '"', action: (editor: any) => editor.chain().focus().clearNodes().toggleBlockquote().run() },
-  { title: 'Code Block', icon: '<>', action: (editor: any) => editor.chain().focus().clearNodes().toggleCodeBlock().run() },
+  { title: 'Code block', icon: '<>', action: (editor: any) => editor.chain().focus().clearNodes().toggleCodeBlock().run() },
   { title: 'Divider', icon: '—', action: (editor: any) => editor.chain().focus().clearNodes().setHorizontalRule().run() },
-  { title: 'Database', icon: '🗄', action: () => {} },
-  { title: 'Ask AI', icon: '✨', action: () => {} },
+  { title: 'Database grid', icon: '🗄', action: () => {} },
+  { title: 'Ask AI Builder', icon: '✨', action: () => {} },
 ];
 
 const getUserColor = (id: string) => {
@@ -59,6 +59,7 @@ export default function Editor() {
   const [activePage, setActivePageData] = useState<any>(null);
   const [workspaceName, setWorkspaceName] = useState("My Workspace");
   const [hasDatabase, setHasDatabase] = useState(false);
+  const [showTooltip, setShowTooltip] = useState(false);
   
   const [currentUser, setCurrentUser] = useState<any>(null);
   const [onlineUsersList, setOnlineUsersList] = useState<any[]>([]);
@@ -172,6 +173,11 @@ export default function Editor() {
         });
       }
     });
+
+    const isTipDismissed = localStorage.getItem("clearspace_editor_tip_dismissed");
+    if (!isTipDismissed) {
+      setShowTooltip(true);
+    }
   }, []);
 
   useEffect(() => {
@@ -184,7 +190,6 @@ export default function Editor() {
         .on('presence', { event: 'sync' }, () => {
           const state = channel.presenceState();
           const list = Object.values(state).flat().map((p: any) => p.user).filter(Boolean);
-          // Deduplicate by user.id
           const uniqueList = list.filter((item, index, self) => 
             index === self.findIndex((t) => t.id === item.id)
           );
@@ -270,7 +275,6 @@ export default function Editor() {
     }
   };
 
-
   const editor = useEditor({
     extensions: [
       StarterKit,
@@ -282,7 +286,7 @@ export default function Editor() {
         scrollTreshold: 100,
       }),
       Placeholder.configure({
-        placeholder: "Type '/' for commands or start writing...",
+        placeholder: "Press '/' for formatting commands or invoke AI writer...",
       })
     ],
     content: activePage?.content || '',
@@ -347,9 +351,9 @@ export default function Editor() {
           
           editor.commands.deleteRange({ from: state.selection.from - 1, to: state.selection.from });
           
-          if (cmd.title === 'Ask AI') {
+          if (cmd.title === 'Ask AI Builder') {
             setShowAiMenu(true);
-          } else if (cmd.title === 'Database') {
+          } else if (cmd.title === 'Database grid') {
             setHasDatabase(true);
           } else {
             cmd.action(editor);
@@ -405,6 +409,11 @@ export default function Editor() {
     setShowAiMenu(false);
   };
 
+  const dismissTooltip = () => {
+    localStorage.setItem("clearspace_editor_tip_dismissed", "true");
+    setShowTooltip(false);
+  };
+
   if (!isMounted) return null;
   if (activePageId === 'calendar') return <CalendarView />;
   if (activePageId === 'inbox') return <InboxView />;
@@ -419,6 +428,7 @@ export default function Editor() {
 
   return (
     <div className={styles.editorContainer}>
+      {/* HEADER SECTION */}
       <header className={styles.header}>
         <div className={styles.breadcrumbs}>
           <span className={styles.breadcrumbItem}>{workspaceName}</span>
@@ -439,16 +449,22 @@ export default function Editor() {
               </div>
             ))}
           </div>
-          <div className={styles.saveIndicator}>
-            {saveStatus === 'saving' ? 'Saving...' : 'Saved'}
+          
+          {/* Pulse Autosaved Label */}
+          <div className={styles.saveStatusWrapper}>
+            <div className={`${styles.saveDot} ${saveStatus === 'saved' ? styles.dotSaved : styles.dotSaving}`}></div>
+            <span className={styles.saveText}>
+              {saveStatus === 'saving' ? 'Saving...' : 'Autosaved'}
+            </span>
           </div>
+
           <button 
             className={styles.shareHeaderBtn} 
             onClick={() => setShowExportModal(true)}
             style={{ 
-              background: 'linear-gradient(135deg, rgba(59, 130, 246, 0.1) 0%, rgba(37, 99, 235, 0.1) 100%)', 
-              border: '1px solid rgba(59, 130, 246, 0.2)',
-              color: '#3b82f6',
+              background: 'linear-gradient(135deg, rgba(124, 111, 205, 0.1) 0%, rgba(99, 102, 241, 0.1) 100%)', 
+              border: '1px solid var(--primary-light)',
+              color: 'var(--primary)',
               marginRight: '6px'
             }}
           >
@@ -489,7 +505,7 @@ export default function Editor() {
             onClick={() => updatePageAttribute({ is_favorite: !activePage.is_favorite })}
             title="Toggle Favorite"
           >
-            <Star size={18} fill={activePage.is_favorite ? "currentColor" : "none"} />
+            <Star size={18} fill={activePage.is_favorite ? "var(--accent-orange)" : "none"} color={activePage.is_favorite ? "var(--accent-orange)" : "currentColor"} />
           </button>
           <button 
             className={styles.iconBtn} 
@@ -506,240 +522,266 @@ export default function Editor() {
         </div>
       </header>
 
+      {/* EDITOR CORE LAYOUT */}
       <div className={styles.editorLayoutWrapper}>
         <div className={styles.scrollableContent}>
           <input 
             type="file" 
-        ref={fileInputRef} 
-        onChange={handleUploadCover} 
-        style={{ display: 'none' }} 
-        accept="image/jpeg,image/png,image/webp" 
-      />
+            ref={fileInputRef} 
+            onChange={handleUploadCover} 
+            style={{ display: 'none' }} 
+            accept="image/jpeg,image/png,image/webp" 
+          />
 
-      {activePage.cover_image && (
-        <div className={styles.coverImage}>
-          <img src={activePage.cover_image} alt="Cover" />
-          <div className={styles.coverControls}>
-             <button className={styles.coverBtn} onClick={changeCoverImage}>Change cover</button>
-             <button className={styles.coverBtn} onClick={() => fileInputRef.current?.click()}>Upload cover</button>
-             <button className={styles.coverBtn} onClick={() => updatePageAttribute({ cover_image: null })}>Remove</button>
-          </div>
-        </div>
-      )}
-
-      <div className={`${styles.contentWrapper} ${!activePage.cover_image ? styles.noCoverContent : ''}`}>
-        {!activePage.cover_image && (
-          <div className={styles.addCoverWrapper} style={{ display: 'flex', gap: '8px' }}>
-             <button className={styles.addCoverBtn} onClick={changeCoverImage}>
-               <ImageIcon size={14} /> Add cover
-             </button>
-             <button className={styles.addCoverBtn} onClick={() => fileInputRef.current?.click()}>
-               <ImageIcon size={14} /> Upload custom cover
-             </button>
-          </div>
-        )}
-
-        <div className={`${styles.pageIconWrapper} ${activePage.cover_image ? styles.hasCover : ''}`}>
-           <input 
-             className={styles.pageIconInput || styles.iconInput} 
-             value={activePage.icon || "📄"} 
-             onChange={(e) => updatePageAttribute({ icon: e.target.value })}
-             maxLength={2}
-           />
-        </div>
-
-        <input 
-          className={styles.titleInput}
-          value={activePage.title || ""}
-          onChange={(e) => updatePageAttribute({ title: e.target.value })}
-          placeholder="Untitled"
-        />
-
-        {onlineUsersList.length > 1 && (
-          <div className={styles.collaboratorActiveBanner}>
-            <span className={styles.pulsingLight} />
-            <span>
-              {onlineUsersList
-                .filter(u => u.id !== currentUser?.id)
-                .map(u => u.name)
-                .join(', ')}{' '}
-              {onlineUsersList.filter(u => u.id !== currentUser?.id).length === 1 ? 'is' : 'are'}{' '}
-              viewing and editing this document in real-time.
-            </span>
-          </div>
-        )}
-        
-        <div className={styles.viewToggles}>
-          <button 
-            className={`${styles.viewToggleBtn} ${activePage.type === 'editor' ? styles.activeView : ''}`}
-            onClick={() => updatePageAttribute({ type: 'editor' })}
-          >
-            <FileText size={14} /> Document
-          </button>
-          <button 
-            className={`${styles.viewToggleBtn} ${activePage.type === 'board' ? styles.activeView : ''}`}
-            onClick={() => updatePageAttribute({ type: 'board' })}
-          >
-            <LayoutGrid size={14} /> Board
-          </button>
-        </div>
-
-        <div className={styles.editorMain}>
-          {activePage.type === 'board' ? (
-            <KanbanBoard 
-              pageId={activePageId!} 
-              initialContent={activePage?.content || ''} 
-              onUpdateContent={(newContent) => updatePageAttribute({ content: newContent })} 
-            />
+          {activePage.cover_image ? (
+            <div className={styles.coverImage}>
+              <img src={activePage.cover_image} alt="Cover" />
+              <div className={styles.coverControls}>
+                 <button className={styles.coverBtn} onClick={changeCoverImage}>Change cover</button>
+                 <button className={styles.coverBtn} onClick={() => fileInputRef.current?.click()}>Upload custom</button>
+                 <button className={styles.coverBtn} onClick={() => updatePageAttribute({ cover_image: null })} style={{ color: "var(--accent-red)" }}>Remove</button>
+              </div>
+            </div>
           ) : (
-            <>
-              {editor && (
-                <FloatingMenu 
-                  editor={editor}
-                  shouldShow={({ state }) => {
-                    const { $anchor } = state.selection;
-                    return $anchor.parent.isTextblock && $anchor.parent.textContent === '/';
-                  }}
-                >
-                  <div className={styles.slashMenu}>
-                    {SLASH_COMMANDS.map((cmd, i) => (
-                      <button 
-                        key={cmd.title}
-                        className={`${styles.slashMenuItem} ${i === slashIndex ? styles.slashMenuItemActive : ''}`}
-                        onClick={() => {
-                          editor.commands.deleteRange({ from: editor.state.selection.from - 1, to: editor.state.selection.from });
-                          if (cmd.title === 'Ask AI') {
-                            setShowAiMenu(true);
-                          } else if (cmd.title === 'Database') {
-                            setHasDatabase(true);
-                          } else {
-                            cmd.action(editor);
-                          }
-                        }}
-                      >
-                        <span className={styles.slashMenuIcon}>{cmd.icon}</span>
-                        {cmd.title}
-                      </button>
-                    ))}
-                  </div>
-                </FloatingMenu>
-              )}
+            <div className={styles.coverPlaceholderZone}>
+              <div className={styles.addCoverWrapper}>
+                 <button className={styles.addCoverBtn} onClick={changeCoverImage}>
+                   <ImageIcon size={14} /> Add cover image
+                 </button>
+                 <button className={styles.addCoverBtn} onClick={() => fileInputRef.current?.click()}>
+                   <ImageIcon size={14} /> Upload custom
+                 </button>
+              </div>
+            </div>
+          )}
 
-              {editor && (
-                <BubbleMenu editor={editor}>
-                  <div className={styles.bubbleMenu}>
-                    <button 
-                      className={`${styles.bubbleBtn} ${editor.isActive('bold') ? styles.bubbleBtnActive : ''}`}
-                      onClick={() => editor.chain().focus().toggleBold().run()}
-                      style={{ fontWeight: 'bold' }}
-                    >
-                      B
-                    </button>
-                    <button 
-                      className={`${styles.bubbleBtn} ${editor.isActive('italic') ? styles.bubbleBtnActive : ''}`}
-                      onClick={() => editor.chain().focus().toggleItalic().run()}
-                      style={{ fontStyle: 'italic' }}
-                    >
-                      i
-                    </button>
-                    <button 
-                      className={`${styles.bubbleBtn} ${editor.isActive('strike') ? styles.bubbleBtnActive : ''}`}
-                      onClick={() => editor.chain().focus().toggleStrike().run()}
-                      style={{ textDecoration: 'line-through' }}
-                    >
-                      S
-                    </button>
-                    <button 
-                      className={`${styles.bubbleBtn} ${editor.isActive('code') ? styles.bubbleBtnActive : ''}`}
-                      onClick={() => editor.chain().focus().toggleCode().run()}
-                      style={{ fontFamily: 'monospace' }}
-                    >
-                      {'<>'}
-                    </button>
-                    <button 
-                      className={`${styles.bubbleBtn} ${editor.isActive('heading', { level: 1 }) ? styles.bubbleBtnActive : ''}`}
-                      onClick={() => editor.chain().focus().toggleHeading({ level: 1 }).run()}
-                      style={{ fontWeight: 'bold' }}
-                    >
-                      H1
-                    </button>
-                    <button 
-                      className={`${styles.bubbleBtn} ${editor.isActive('heading', { level: 2 }) ? styles.bubbleBtnActive : ''}`}
-                      onClick={() => editor.chain().focus().toggleHeading({ level: 2 }).run()}
-                      style={{ fontWeight: 'bold' }}
-                    >
-                      H2
-                    </button>
-                    <div className={styles.bubbleDivider} />
-                    <button 
-                      className={`${styles.bubbleBtn} ${styles.aiBubbleBtn}`}
-                      onClick={() => setShowAiMenu(true)}
-                    >
-                      <Sparkles size={14} /> Ask AI
-                    </button>
-                  </div>
-                </BubbleMenu>
-              )}
+          <div className={`${styles.contentWrapper} ${!activePage.cover_image ? styles.noCoverContent : ''}`}>
+            {/* FLOATING EMOJI SELECTOR */}
+            <div className={`${styles.pageIconWrapper} ${activePage.cover_image ? styles.hasCover : ''}`}>
+               <input 
+                 className={styles.iconInput} 
+                 value={activePage.icon || "📄"} 
+                 onChange={(e) => updatePageAttribute({ icon: e.target.value })}
+                 maxLength={2}
+                 title="Click to edit emoji"
+               />
+            </div>
 
-              {showAiMenu && (
-                <div className={styles.aiPopup}>
-                  <form onSubmit={handleAiSubmit} className={styles.aiForm}>
-                    <Sparkles size={16} className={styles.aiIcon} />
-                    <input 
-                      autoFocus
-                      className={styles.aiInput}
-                      value={input}
-                      onChange={handleInputChange}
-                      placeholder="Ask AI to write anything..."
-                      disabled={isLoading}
-                    />
-                  </form>
-                  
-                  {!completion && !isLoading && (
-                    <div className={styles.aiOptionsMenu}>
-                      <button className={styles.aiOptionBtn} onClick={() => handleAiAction('improve')}>Improve writing</button>
-                      <button className={styles.aiOptionBtn} onClick={() => handleAiAction('fix_grammar')}>Fix grammar</button>
-                      <button className={styles.aiOptionBtn} onClick={() => handleAiAction('summarize')}>Summarize</button>
-                      <button className={styles.aiOptionBtn} onClick={() => handleAiAction('longer')}>Make longer</button>
-                      <button className={styles.aiOptionBtn} onClick={() => handleAiAction('shorter')}>Make shorter</button>
-                      <button className={styles.aiOptionBtn} onClick={() => handleAiAction('tone_professional')}>Professional tone</button>
-                      <button className={styles.aiOptionBtn} onClick={() => handleAiAction('tone_casual')}>Casual tone</button>
-                      <button className={styles.aiOptionBtn} onClick={() => handleAiAction('translate')}>Translate to French</button>
-                    </div>
+            {/* Untitled Header Outline */}
+            <input 
+              className={styles.titleInput}
+              value={activePage.title || ""}
+              onChange={(e) => updatePageAttribute({ title: e.target.value })}
+              placeholder="Untitled document"
+            />
+
+            {onlineUsersList.length > 1 && (
+              <div className={styles.collaboratorActiveBanner}>
+                <span className={styles.pulsingLight} />
+                <span>
+                  {onlineUsersList
+                    .filter(u => u.id !== currentUser?.id)
+                    .map(u => u.name)
+                    .join(', ')}{' '}
+                  {onlineUsersList.filter(u => u.id !== currentUser?.id).length === 1 ? 'is' : 'are'}{' '}
+                  viewing and editing this document in real-time.
+                </span>
+              </div>
+            )}
+            
+            <div className={styles.viewToggles}>
+              <button 
+                className={`${styles.viewToggleBtn} ${activePage.type === 'editor' ? styles.activeView : ''}`}
+                onClick={() => updatePageAttribute({ type: 'editor' })}
+              >
+                <FileText size={14} /> Document view
+              </button>
+              <button 
+                className={`${styles.viewToggleBtn} ${activePage.type === 'board' ? styles.activeView : ''}`}
+                onClick={() => updatePageAttribute({ type: 'board' })}
+              >
+                <LayoutGrid size={14} /> Kanban board
+              </button>
+            </div>
+
+            <div className={styles.editorMain}>
+              {activePage.type === 'board' ? (
+                <KanbanBoard 
+                  pageId={activePageId!} 
+                  initialContent={activePage?.content || ''} 
+                  onUpdateContent={(newContent) => updatePageAttribute({ content: newContent })} 
+                />
+              ) : (
+                <>
+                  {editor && (
+                    <FloatingMenu 
+                      editor={editor}
+                      shouldShow={({ state }) => {
+                        const { $anchor } = state.selection;
+                        return $anchor.parent.isTextblock && $anchor.parent.textContent === '/';
+                      }}
+                    >
+                      <div className={styles.slashMenu}>
+                        {SLASH_COMMANDS.map((cmd, i) => (
+                          <button 
+                            key={cmd.title}
+                            className={`${styles.slashMenuItem} ${i === slashIndex ? styles.slashMenuItemActive : ''}`}
+                            onClick={() => {
+                              editor.commands.deleteRange({ from: editor.state.selection.from - 1, to: editor.state.selection.from });
+                              if (cmd.title === 'Ask AI Builder') {
+                                setShowAiMenu(true);
+                              } else if (cmd.title === 'Database grid') {
+                                setHasDatabase(true);
+                              } else {
+                                cmd.action(editor);
+                              }
+                            }}
+                          >
+                            <span className={styles.slashMenuIcon}>{cmd.icon}</span>
+                            {cmd.title}
+                          </button>
+                        ))}
+                      </div>
+                    </FloatingMenu>
                   )}
 
-                  {(completion || isLoading) && (
-                    <div className={styles.aiResult}>
-                      <div className={styles.aiText}>
-                        {completion}
-                        {isLoading && <span className={styles.cursor}></span>}
+                  {editor && (
+                    <BubbleMenu editor={editor}>
+                      <div className={styles.bubbleMenu}>
+                        <button 
+                          className={`${styles.bubbleBtn} ${editor.isActive('bold') ? styles.bubbleBtnActive : ''}`}
+                          onClick={() => editor.chain().focus().toggleBold().run()}
+                          style={{ fontWeight: 'bold' }}
+                          title="Bold text"
+                        >
+                          B
+                        </button>
+                        <button 
+                          className={`${styles.bubbleBtn} ${editor.isActive('italic') ? styles.bubbleBtnActive : ''}`}
+                          onClick={() => editor.chain().focus().toggleItalic().run()}
+                          style={{ fontStyle: 'italic' }}
+                          title="Italic text"
+                        >
+                          i
+                        </button>
+                        <button 
+                          className={`${styles.bubbleBtn} ${editor.isActive('strike') ? styles.bubbleBtnActive : ''}`}
+                          onClick={() => editor.chain().focus().toggleStrike().run()}
+                          style={{ textDecoration: 'line-through' }}
+                          title="Strikethrough"
+                        >
+                          S
+                        </button>
+                        <button 
+                          className={`${styles.bubbleBtn} ${editor.isActive('code') ? styles.bubbleBtnActive : ''}`}
+                          onClick={() => editor.chain().focus().toggleCode().run()}
+                          style={{ fontFamily: 'monospace' }}
+                          title="Inline code"
+                        >
+                          {'<>'}
+                        </button>
+                        <button 
+                          className={`${styles.bubbleBtn} ${editor.isActive('heading', { level: 1 }) ? styles.bubbleBtnActive : ''}`}
+                          onClick={() => editor.chain().focus().toggleHeading({ level: 1 }).run()}
+                          style={{ fontWeight: 'bold' }}
+                          title="Heading 1"
+                        >
+                          H1
+                        </button>
+                        <button 
+                          className={`${styles.bubbleBtn} ${editor.isActive('heading', { level: 2 }) ? styles.bubbleBtnActive : ''}`}
+                          onClick={() => editor.chain().focus().toggleHeading({ level: 2 }).run()}
+                          style={{ fontWeight: 'bold' }}
+                          title="Heading 2"
+                        >
+                          H2
+                        </button>
+                        <div className={styles.bubbleDivider} />
+                        <button 
+                          className={`${styles.bubbleBtn} ${styles.aiBubbleBtn}`}
+                          onClick={() => setShowAiMenu(true)}
+                        >
+                          <Sparkles size={14} /> Ask AI
+                        </button>
                       </div>
-                      {!isLoading && (
-                        <div className={styles.aiActions}>
-                          <button className={styles.aiActionBtn} onClick={insertAiContent}>
-                            <Check size={14} /> Insert
-                          </button>
-                          <button className={`${styles.aiActionBtn} ${styles.aiActionBtnDanger}`} onClick={discardAiContent}>
-                            <X size={14} /> Discard
-                          </button>
+                    </BubbleMenu>
+                  )}
+
+                  {/* AI STREAM DIALOG POPUP */}
+                  {showAiMenu && (
+                    <div className={styles.aiPopup}>
+                      <form onSubmit={handleAiSubmit} className={styles.aiForm}>
+                        <Sparkles size={16} className={styles.aiIcon} />
+                        <input 
+                          autoFocus
+                          className={styles.aiInput}
+                          value={input}
+                          onChange={handleInputChange}
+                          placeholder="Ask AI to write, generate, or summarize anything..."
+                          disabled={isLoading}
+                        />
+                      </form>
+                      
+                      {!completion && !isLoading && (
+                        <div className={styles.aiOptionsMenu}>
+                          <button className={styles.aiOptionBtn} onClick={() => handleAiAction('improve')}>🪄 Improve writing</button>
+                          <button className={styles.aiOptionBtn} onClick={() => handleAiAction('fix_grammar')}>✅ Fix spelling & grammar</button>
+                          <button className={styles.aiOptionBtn} onClick={() => handleAiAction('summarize')}>📋 Summarize details</button>
+                          <button className={styles.aiOptionBtn} onClick={() => handleAiAction('longer')}>✍️ Expand content (make longer)</button>
+                          <button className={styles.aiOptionBtn} onClick={() => handleAiAction('shorter')}>✂️ Shorten text (make shorter)</button>
+                          <button className={styles.aiOptionBtn} onClick={() => handleAiAction('tone_professional')}>💼 Professional tone</button>
+                          <button className={styles.aiOptionBtn} onClick={() => handleAiAction('tone_casual')}>💬 Casual tone</button>
+                        </div>
+                      )}
+
+                      {(completion || isLoading) && (
+                        <div className={styles.aiResult}>
+                          <div className={styles.aiText}>
+                            {completion}
+                            {isLoading && <span className={styles.cursor}>|</span>}
+                          </div>
+                          {!isLoading && (
+                            <div className={styles.aiActions}>
+                              <button className={styles.aiActionBtn} onClick={insertAiContent}>
+                                <Check size={14} /> Insert into page
+                              </button>
+                              <button className={`${styles.aiActionBtn} ${styles.aiActionBtnDanger}`} onClick={discardAiContent}>
+                                <X size={14} /> Discard response
+                              </button>
+                            </div>
+                          )}
                         </div>
                       )}
                     </div>
                   )}
-                </div>
-              )}
 
-              <EditorContent editor={editor} />
-              
-              {hasDatabase && (
-                <DatabaseView dbId={activePageId!} />
+                  <EditorContent editor={editor} />
+                  
+                  {hasDatabase && (
+                    <DatabaseView dbId={activePageId!} />
+                  )}
+                </>
               )}
-            </>
-          )}
-        </div> {/* closes editorMain */}
-      </div> {/* closes contentWrapper */}
-    </div> {/* closes scrollableContent */}
+            </div>
+          </div>
+        </div>
 
+        {/* ONBOARDING USER GUIDE TOOLTIP */}
+        {showTooltip && (
+          <div className={styles.beginnerOnboardingTooltip}>
+            <div className={styles.tooltipHeader}>
+              <Info size={16} color="var(--primary)" />
+              <span className={styles.tooltipTitle}>Quick Editor Tip</span>
+              <button className={styles.tooltipClose} onClick={dismissTooltip}>✕</button>
+            </div>
+            <p className={styles.tooltipDesc}>
+              Press <kbd className={styles.tooltipKbd}>/</kbd> anywhere on a blank line to insert database tables, headings, ordered lists, or command the AI Assistant!
+            </p>
+            <button className={styles.tooltipDismissBtn} onClick={dismissTooltip}>Got it, thanks!</button>
+          </div>
+        )}
+
+        {/* HISTORY FLYOUT PANEL */}
         {showHistoryPanel && (
           <div className={styles.historySidebar}>
             <div className={styles.historyHeader}>
@@ -774,13 +816,14 @@ export default function Editor() {
           </div>
         )}
 
+        {/* ANALYTICS PANEL */}
         {showAnalyticsPanel && (
           <AnalyticsPanel 
             pageId={activePageId!} 
             onClose={() => setShowAnalyticsPanel(false)}
           />
         )}
-    </div> {/* closes editorLayoutWrapper */}
+      </div>
       
       {showShareModal && <ShareModal onClose={() => setShowShareModal(false)} />}
       {showExportModal && (

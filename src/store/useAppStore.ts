@@ -64,6 +64,15 @@ export type Conversation = {
   updatedAt: string;
 };
 
+export type ToastType = 'success' | 'error' | 'info' | 'warning';
+
+export type Toast = {
+  id: string;
+  message: string;
+  type: ToastType;
+  duration?: number;
+};
+
 type AppState = {
   activePageId: string | null;
   activeConversationId: string | null;
@@ -73,6 +82,11 @@ type AppState = {
   isSettingsOpen: boolean;
   isAIPanelOpen: boolean;
   sidebarCollapsed: boolean;
+  
+  // Toasts
+  toasts: Toast[];
+  addToast: (message: string, type: ToastType, duration?: number) => void;
+  removeToast: (id: string) => void;
   
   // Actions
   setActivePage: (id: string | null) => void;
@@ -90,6 +104,17 @@ export const useAppStore = create<AppState>((set) => ({
   isSettingsOpen: false,
   isAIPanelOpen: false,
   sidebarCollapsed: false,
+  toasts: [],
+  
+  addToast: (message, type, duration = 3000) => {
+    const id = Math.random().toString(36).substr(2, 9);
+    set((state) => ({ toasts: [...state.toasts, { id, message, type, duration }] }));
+    setTimeout(() => {
+      set((state) => ({ toasts: state.toasts.filter(t => t.id !== id) }));
+    }, duration);
+  },
+  
+  removeToast: (id) => set((state) => ({ toasts: state.toasts.filter(t => t.id !== id) })),
   
   setActivePage: (id) => set({ activePageId: id, activeConversationId: null, isSearchOpen: false }),
   setSearchOpen: (isOpen) => set({ isSearchOpen: isOpen }),

@@ -395,9 +395,60 @@
   background: rgba(255, 77, 77, 0.1);
 }
 
-.taskCompleted .taskItemTitle {
-  text-decoration: line-through;
+.emptyIllustrationCard {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  padding: 36px 24px;
+  background: white;
+  border: 1.5px dashed var(--border);
+  border-radius: var(--radius-lg);
+  margin-top: 12px;
+  box-shadow: var(--shadow-sm);
+  animation: popIn 0.3s ease-out;
+}
+
+.illustrationBadge {
+  width: 64px;
+  height: 64px;
+  border-radius: 50%;
+  background: var(--primary-light);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 16px;
+}
+
+.emptyIllustrationCard h4 {
+  font-size: var(--font-base);
+  font-weight: 800;
+  color: var(--text-main);
+  margin: 0 0 8px 0;
+  font-family: 'Outfit', sans-serif;
+}
+
+.emptyIllustrationCard p {
+  font-size: var(--font-xs);
   color: var(--text-muted);
+  line-height: 1.6;
+  max-width: 320px;
+  margin: 0;
+}
+
+.emptyIllustrationCardMinimal {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 16px;
+  background: var(--bg-hover);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  color: var(--text-muted);
+  font-size: var(--font-xs);
+  font-weight: 500;
+  margin-top: 12px;
 }
 
 /* Automations View */
