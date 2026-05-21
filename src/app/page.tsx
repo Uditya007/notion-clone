@@ -112,6 +112,7 @@ function PixelBot({ p, w = 64, h = 78 }: { p: BotPalette; w?: number; h?: number
   );
 }
 
+
 const BOTS: Array<{ p: BotPalette; label: string; delay: string }> = [
   {
     p: { m:'#6366F1', t:'#A5B4FC', s:'#4338CA', d:'#3730A3',
@@ -139,6 +140,134 @@ const BOTS: Array<{ p: BotPalette; label: string; delay: string }> = [
     label: "🚀 Let's go!", delay: '1.8s',
   },
 ];
+
+/* ─────────────────────────────────────────
+   PIXEL 3D NOTEPAD – reusable custom SVG
+───────────────────────────────────────── */
+type NotepadPalette = {
+  coverMain: string;
+  coverTop: string;
+  coverSide: string;
+  coverShadow: string;
+  pageMain: string;
+  pageSide: string;
+  lineColor: string;
+  accentColor: string;
+};
+
+function PixelNotepad({ p, w = 64, h = 72 }: { p: NotepadPalette; w?: number; h?: number }) {
+  return (
+    <svg width={w} height={h} viewBox="0 0 160 180" fill="none"
+         xmlns="http://www.w3.org/2000/svg" className={styles.pixelBot}>
+      {/* Back Cover Top */}
+      <polygon points="24,34 134,34 140,28 30,28" fill={p.coverTop} />
+      {/* Back Cover Front */}
+      <rect x="24" y="34" width="110" height="130" fill={p.coverMain} />
+      {/* Back Cover Side */}
+      <polygon points="134,34 134,164 140,158 140,28" fill={p.coverSide} />
+      {/* Back Cover Shadow */}
+      <rect x="24" y="164" width="116" height="4" fill={p.coverShadow} />
+
+      {/* Pages Front */}
+      <rect x="34" y="44" width="90" height="110" fill={p.pageMain} />
+      {/* Pages Side Thickness */}
+      <polygon points="124,44 124,154 128,150 128,40" fill={p.pageSide} />
+
+      {/* Lines on page */}
+      <rect x="42" y="58" width="74" height="2" fill={p.lineColor} />
+      <rect x="42" y="72" width="74" height="2" fill={p.lineColor} />
+      <rect x="42" y="86" width="74" height="2" fill={p.lineColor} />
+      <rect x="42" y="100" width="74" height="2" fill={p.lineColor} />
+      <rect x="42" y="114" width="74" height="2" fill={p.lineColor} />
+      <rect x="42" y="128" width="74" height="2" fill={p.lineColor} />
+      <rect x="42" y="142" width="74" height="2" fill={p.lineColor} />
+
+      {/* Checkbox 1 (checked) */}
+      <rect x="44" y="68" width="8" height="8" fill={p.accentColor} />
+      <rect x="56" y="71" width="46" height="4" fill="#94A3B8" opacity="0.6" />
+
+      {/* Checkbox 2 (unchecked) */}
+      <rect x="44" y="96" width="8" height="8" fill="#D1D5DB" />
+      <rect x="46" y="98" width="4" height="4" fill={p.pageMain} />
+      <rect x="56" y="99" width="36" height="4" fill="#94A3B8" opacity="0.6" />
+
+      {/* Pixel Heart drawing */}
+      <rect x="104" y="120" width="4" height="4" fill="#EF4444" />
+      <rect x="112" y="120" width="4" height="4" fill="#EF4444" />
+      <rect x="100" y="124" width="20" height="4" fill="#EF4444" />
+      <rect x="104" y="128" width="12" height="4" fill="#BE123C" />
+      <rect x="108" y="132" width="4" height="4" fill="#BE123C" />
+
+      {/* Spiral Bindings */}
+      <rect x="16" y="50" width="20" height="6" fill="#64748B" />
+      <rect x="16" y="50" width="6" height="6" fill="#94A3B8" />
+      <rect x="30" y="50" width="6" height="6" fill="#475569" />
+
+      <rect x="16" y="70" width="20" height="6" fill="#64748B" />
+      <rect x="16" y="70" width="6" height="6" fill="#94A3B8" />
+      <rect x="30" y="70" width="6" height="6" fill="#475569" />
+
+      <rect x="16" y="90" width="20" height="6" fill="#64748B" />
+      <rect x="16" y="90" width="6" height="6" fill="#94A3B8" />
+      <rect x="30" y="90" width="6" height="6" fill="#475569" />
+
+      <rect x="16" y="110" width="20" height="6" fill="#64748B" />
+      <rect x="16" y="110" width="6" height="6" fill="#94A3B8" />
+      <rect x="30" y="110" width="6" height="6" fill="#475569" />
+
+      <rect x="16" y="130" width="20" height="6" fill="#64748B" />
+      <rect x="16" y="130" width="6" height="6" fill="#94A3B8" />
+      <rect x="30" y="130" width="6" height="6" fill="#475569" />
+
+      <rect x="16" y="150" width="20" height="6" fill="#64748B" />
+      <rect x="16" y="150" width="6" height="6" fill="#94A3B8" />
+      <rect x="30" y="150" width="6" height="6" fill="#475569" />
+    </svg>
+  );
+}
+
+const NOTEPADS: NotepadPalette[] = [
+  {
+    coverMain: '#4F46E5', coverTop: '#818CF8', coverSide: '#3730A3', coverShadow: '#312E81',
+    pageMain: '#FFFFFF', pageSide: '#E2E8F0', lineColor: '#BFDBFE', accentColor: '#10B981'
+  },
+  {
+    coverMain: '#F59E0B', coverTop: '#FCD34D', coverSide: '#B45309', coverShadow: '#78350F',
+    pageMain: '#FFFBEB', pageSide: '#FEF3C7', lineColor: '#FDE68A', accentColor: '#EF4444'
+  },
+  {
+    coverMain: '#EC4899', coverTop: '#F472B6', coverSide: '#BE185D', coverShadow: '#9D174D',
+    pageMain: '#FDF2F8', pageSide: '#FCE7F3', lineColor: '#F9A8D4', accentColor: '#06B6D4'
+  }
+];
+
+type FloatingItemType = {
+  id: string;
+  type: 'bot' | 'notepad';
+  index: number;
+  label?: string;
+  top: string;
+  left?: string;
+  right?: string;
+  scale: number;
+  delay: string;
+  duration: string;
+};
+
+const FLOATING_ITEMS: FloatingItemType[] = [
+  // Bots
+  { id: 'fb0', type: 'bot', index: 0, label: 'Thinking... 🤔', top: '15%', left: '4%', scale: 0.9, delay: '0s', duration: '6.5s' },
+  { id: 'fb1', type: 'bot', index: 1, label: 'On it! ⚡', top: '22%', right: '4%', scale: 0.85, delay: '0.4s', duration: '7.2s' },
+  { id: 'fb2', type: 'bot', index: 2, label: '✨ Ready!', top: '48%', left: '3%', scale: 0.8, delay: '0.8s', duration: '6.8s' },
+  { id: 'fb3', type: 'bot', index: 3, label: 'Done! 🎯', top: '56%', right: '4%', scale: 0.85, delay: '1.2s', duration: '8.4s' },
+  { id: 'fb4', type: 'bot', index: 4, label: "🚀 Let's go!", top: '82%', left: '5%', scale: 0.8, delay: '1.6s', duration: '7.8s' },
+
+  // Notepads
+  { id: 'fn0', type: 'notepad', index: 0, label: 'Checklist! ✅', top: '28%', left: '8%', scale: 0.8, delay: '0.6s', duration: '8.2s' },
+  { id: 'fn1', type: 'notepad', index: 1, label: 'Draft ideas 💡', top: '35%', right: '9%', scale: 0.75, delay: '1.4s', duration: '9.5s' },
+  { id: 'fn2', type: 'notepad', index: 2, label: 'To-do list 📋', top: '68%', right: '6%', scale: 0.8, delay: '2.0s', duration: '7.9s' }
+];
+
 
 export default function LandingPage() {
   const router = useRouter();
@@ -212,6 +341,39 @@ export default function LandingPage() {
 
   return (
     <div className={styles.container}>
+      {/* FLOATING INTERACTIVE BACKGROUND ELEMENTS (3D Pixel Bots & Notepads) */}
+      <div className={styles.floatingContainer} aria-hidden="true">
+        {FLOATING_ITEMS.map((item) => (
+          <div
+            key={item.id}
+            className={styles.floatingItem}
+            style={{
+              top: item.top,
+              left: item.left,
+              right: item.right,
+              '--scale': item.scale,
+            } as React.CSSProperties}
+          >
+            <div
+              className={styles.floatingInner}
+              style={{
+                animationDelay: item.delay,
+                animationDuration: item.duration,
+              }}
+            >
+              {item.type === 'bot' ? (
+                <PixelBot p={BOTS[item.index].p} />
+              ) : (
+                <PixelNotepad p={NOTEPADS[item.index]} />
+              )}
+              {item.label && (
+                <div className={styles.botTag}>{item.label}</div>
+              )}
+            </div>
+          </div>
+        ))}
+      </div>
+
       {/* NAVBAR */}
       <nav className={styles.navbar}>
         <div className={styles.logoArea}>
@@ -257,19 +419,6 @@ export default function LandingPage() {
           Cora is an AI-powered workspace for notes, tasks, and databases. No clutter. No learning curve.
         </p>
 
-        {/* 5 PIXEL 3D BOTS – above CTA, each a different colour */}
-        <div className={styles.pixelBotsRow} aria-hidden="true">
-          {BOTS.map((bot, i) => (
-            <div
-              key={i}
-              className={styles.botWrapper}
-              style={{ '--bob-delay': bot.delay } as React.CSSProperties}
-            >
-              <PixelBot p={bot.p} />
-              <div className={styles.botTag}>{bot.label}</div>
-            </div>
-          ))}
-        </div>
 
         <div className={styles.heroButtons}>
           <Link href="/signup" className={styles.heroPrimaryBtn}>
