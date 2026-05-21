@@ -247,6 +247,22 @@ function translateBlockToken(token: any): TiptapNode | null {
   }
 }
 
+function preprocessMarkdown(md: string): string {
+  if (!md) return md;
+
+  let processed = md;
+  // Heading tags: replace " ###" with "\n###"
+  processed = processed.replace(/(?<!\n)\s+(?=#{1,6}\s)/g, '\n');
+
+  // List tags: replace " * " or " - " with "\n* " or "\n- "
+  processed = processed.replace(/(?<!\n)\s+(?=[-|\*]\s)/g, '\n');
+
+  // Numbered list tags: replace " \d+." with "\n\d+."
+  processed = processed.replace(/(?<!\n)\s+(?=\d+\.\s)/g, '\n');
+
+  return processed;
+}
+
 /**
  * Parses raw markdown and converts it into a TipTap-compatible JSON document object structure.
  * @param markdown The raw markdown content string to convert.
@@ -259,8 +275,10 @@ export function markdownToTiptap(markdown: string): object {
     };
   }
 
+  const preprocessed = preprocessMarkdown(markdown);
+
   // Parse markdown into tokens using the marked lexer
-  const tokens = marked.lexer(markdown);
+  const tokens = marked.lexer(preprocessed);
   const docContent: TiptapNode[] = [];
 
   for (const token of tokens) {

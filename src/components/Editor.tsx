@@ -508,6 +508,25 @@ export default function Editor() {
     try {
       const parsed = JSON.parse(content);
       if (parsed && typeof parsed === 'object' && parsed.type === 'doc') {
+        // DETECT IF IT IS A WRAPPED SINGLE PARAGRAPH OF RAW MARKDOWN
+        if (parsed.content && parsed.content.length === 1 && parsed.content[0].type === 'paragraph') {
+          const firstNode = parsed.content[0];
+          if (firstNode.content && firstNode.content.length === 1 && firstNode.content[0].type === 'text') {
+            const textVal = firstNode.content[0].text || '';
+            // Match #, ##, ###, * or - list, or numbered list elements
+            const isRawMarkdownWrapped = /(?:#|##|###|- |\* |\d+\. |\[[ x]\]|\*\*|_|`)/m.test(textVal);
+            if (isRawMarkdownWrapped) {
+              const tiptapJson = markdownToTiptap(textVal);
+              editor.commands.setContent(tiptapJson);
+              const pageId = activePageIdRef.current;
+              if (pageId) {
+                triggerDebouncedSave(pageId, JSON.stringify(tiptapJson));
+              }
+              return;
+            }
+          }
+        }
+
         const currentJSON = editor.getJSON();
         if (JSON.stringify(currentJSON) !== JSON.stringify(parsed)) {
           editor.commands.setContent(parsed);

@@ -9,11 +9,23 @@ export function fixPageContent(content: string): string {
     return content;
   }
 
-  // 1. If it's already a valid TipTap JSON string, return as-is
+  // 1. Check if it's already a valid TipTap JSON string
   try {
     const parsed = JSON.parse(content);
     if (parsed && typeof parsed === 'object' && parsed.type === 'doc') {
-      return content;
+      // DETECT IF IT IS A WRAPPED SINGLE PARAGRAPH OF RAW MARKDOWN
+      if (parsed.content && parsed.content.length === 1 && parsed.content[0].type === 'paragraph') {
+        const firstNode = parsed.content[0];
+        if (firstNode.content && firstNode.content.length === 1 && firstNode.content[0].type === 'text') {
+          const textVal = firstNode.content[0].text || '';
+          const isRawMarkdownWrapped = /(?:#|##|###|- |\* |\d+\. |\[[ x]\]|\*\*|_|`)/m.test(textVal);
+          if (isRawMarkdownWrapped) {
+            const tiptapJson = markdownToTiptap(textVal);
+            return JSON.stringify(tiptapJson);
+          }
+        }
+      }
+      return content; // Already a valid multi-node or non-markdown JSON document
     }
   } catch {}
 
