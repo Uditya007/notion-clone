@@ -112,99 +112,6 @@ export default function LandingPage() {
       {/* HERO SECTION */}
       <section className={styles.hero}>
 
-        {/* CARTOON BOT SLIDING ANIMATION */}
-        <div className={styles.botTrack} aria-hidden="true">
-          <div className={styles.botSlider}>
-            {/* Bot 1 */}
-            <div className={styles.botUnit}>
-              <svg width="72" height="88" viewBox="0 0 72 88" fill="none" xmlns="http://www.w3.org/2000/svg" className={styles.botSvg}>
-                {/* Antenna */}
-                <rect x="34" y="0" width="4" height="12" rx="2" fill="currentColor" opacity="0.3"/>
-                <circle cx="36" cy="0" r="4" fill="currentColor" opacity="0.5"/>
-                {/* Head */}
-                <rect x="8" y="12" width="56" height="40" rx="12" fill="currentColor" opacity="0.12"/>
-                <rect x="10" y="14" width="52" height="36" rx="10" fill="currentColor" opacity="0.08"/>
-                {/* Eyes */}
-                <rect x="18" y="24" width="14" height="10" rx="5" fill="currentColor" opacity="0.35"/>
-                <rect x="40" y="24" width="14" height="10" rx="5" fill="currentColor" opacity="0.35"/>
-                <circle cx="25" cy="29" r="3" fill="currentColor" opacity="0.7"/>
-                <circle cx="47" cy="29" r="3" fill="currentColor" opacity="0.7"/>
-                <circle cx="26" cy="28" r="1" fill="white" opacity="0.9"/>
-                <circle cx="48" cy="28" r="1" fill="white" opacity="0.9"/>
-                {/* Smile */}
-                <path d="M24 38 Q36 46 48 38" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" fill="none" opacity="0.4"/>
-                {/* Ear bolts */}
-                <rect x="2" y="26" width="8" height="14" rx="4" fill="currentColor" opacity="0.2"/>
-                <rect x="62" y="26" width="8" height="14" rx="4" fill="currentColor" opacity="0.2"/>
-                {/* Body */}
-                <rect x="14" y="54" width="44" height="28" rx="10" fill="currentColor" opacity="0.1"/>
-                {/* Chest light */}
-                <circle cx="36" cy="65" r="5" fill="currentColor" opacity="0.25"/>
-                <circle cx="36" cy="65" r="2.5" fill="currentColor" opacity="0.45"/>
-                {/* Arms */}
-                <rect x="0" y="56" width="12" height="22" rx="6" fill="currentColor" opacity="0.12"/>
-                <rect x="60" y="56" width="12" height="22" rx="6" fill="currentColor" opacity="0.12"/>
-                {/* Legs */}
-                <rect x="18" y="80" width="12" height="8" rx="4" fill="currentColor" opacity="0.15"/>
-                <rect x="42" y="80" width="12" height="8" rx="4" fill="currentColor" opacity="0.15"/>
-              </svg>
-              <div className={styles.botBubble}>Thinking...</div>
-            </div>
-
-            {/* Bot 2 - slightly different */}
-            <div className={`${styles.botUnit} ${styles.botUnit2}`}>
-              <svg width="60" height="76" viewBox="0 0 72 88" fill="none" xmlns="http://www.w3.org/2000/svg" className={`${styles.botSvg} ${styles.botSvg2}`}>
-                <rect x="34" y="0" width="4" height="12" rx="2" fill="currentColor" opacity="0.25"/>
-                <circle cx="36" cy="0" r="4" fill="currentColor" opacity="0.4"/>
-                <rect x="8" y="12" width="56" height="40" rx="12" fill="currentColor" opacity="0.1"/>
-                <rect x="18" y="22" width="14" height="12" rx="6" fill="currentColor" opacity="0.3"/>
-                <rect x="40" y="22" width="14" height="12" rx="6" fill="currentColor" opacity="0.3"/>
-                <circle cx="25" cy="28" r="4" fill="currentColor" opacity="0.6"/>
-                <circle cx="47" cy="28" r="4" fill="currentColor" opacity="0.6"/>
-                <circle cx="26" cy="27" r="1.5" fill="white" opacity="0.9"/>
-                <circle cx="48" cy="27" r="1.5" fill="white" opacity="0.9"/>
-                <path d="M22 40 Q36 48 50 40" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" fill="none" opacity="0.35"/>
-                <rect x="2" y="24" width="8" height="16" rx="4" fill="currentColor" opacity="0.18"/>
-                <rect x="62" y="24" width="8" height="16" rx="4" fill="currentColor" opacity="0.18"/>
-                <rect x="14" y="54" width="44" height="28" rx="10" fill="currentColor" opacity="0.08"/>
-                <circle cx="36" cy="65" r="6" fill="currentColor" opacity="0.2"/>
-                <rect x="0" y="56" width="12" height="22" rx="6" fill="currentColor" opacity="0.1"/>
-                <rect x="60" y="56" width="12" height="22" rx="6" fill="currentColor" opacity="0.1"/>
-                <rect x="18" y="80" width="12" height="8" rx="4" fill="currentColor" opacity="0.12"/>
-                <rect x="42" y="80" width="12" height="8" rx="4" fill="currentColor" opacity="0.12"/>
-              </svg>
-              <div className={`${styles.botBubble} ${styles.botBubble2}`}>On it! ⚡</div>
-            </div>
-
-            {/* Bot 3 */}
-            <div className={`${styles.botUnit} ${styles.botUnit3}`}>
-              <svg width="80" height="96" viewBox="0 0 72 88" fill="none" xmlns="http://www.w3.org/2000/svg" className={`${styles.botSvg} ${styles.botSvg3}`}>
-                <rect x="32" y="0" width="4" height="14" rx="2" fill="currentColor" opacity="0.28"/>
-                <rect x="38" y="2" width="3" height="10" rx="1.5" fill="currentColor" opacity="0.2"/>
-                <circle cx="34" cy="0" r="5" fill="currentColor" opacity="0.45"/>
-                <rect x="6" y="14" width="60" height="42" rx="14" fill="currentColor" opacity="0.11"/>
-                <rect x="16" y="23" width="16" height="12" rx="6" fill="currentColor" opacity="0.3"/>
-                <rect x="40" y="23" width="16" height="12" rx="6" fill="currentColor" opacity="0.3"/>
-                <circle cx="24" cy="29" r="4" fill="currentColor" opacity="0.65"/>
-                <circle cx="48" cy="29" r="4" fill="currentColor" opacity="0.65"/>
-                <circle cx="25" cy="28" r="1.5" fill="white" opacity="0.95"/>
-                <circle cx="49" cy="28" r="1.5" fill="white" opacity="0.95"/>
-                <path d="M20 40 Q36 50 52 40" stroke="currentColor" strokeWidth="3" strokeLinecap="round" fill="none" opacity="0.38"/>
-                <rect x="0" y="25" width="8" height="18" rx="4" fill="currentColor" opacity="0.2"/>
-                <rect x="64" y="25" width="8" height="18" rx="4" fill="currentColor" opacity="0.2"/>
-                <rect x="12" y="58" width="48" height="24" rx="10" fill="currentColor" opacity="0.09"/>
-                <circle cx="36" cy="67" r="7" fill="currentColor" opacity="0.22"/>
-                <circle cx="36" cy="67" r="3" fill="currentColor" opacity="0.4"/>
-                <rect x="0" y="60" width="10" height="20" rx="5" fill="currentColor" opacity="0.12"/>
-                <rect x="62" y="60" width="10" height="20" rx="5" fill="currentColor" opacity="0.12"/>
-                <rect x="16" y="80" width="14" height="8" rx="4" fill="currentColor" opacity="0.14"/>
-                <rect x="42" y="80" width="14" height="8" rx="4" fill="currentColor" opacity="0.14"/>
-              </svg>
-              <div className={`${styles.botBubble} ${styles.botBubble3}`}>✨ Ready!</div>
-            </div>
-          </div>
-        </div>
-
         <div className={styles.pillBadge}>
           <span>Now in public beta</span>
         </div>
@@ -217,7 +124,141 @@ export default function LandingPage() {
         <p className={styles.heroSubtext}>
           Cora is an AI-powered workspace for notes, tasks, and databases. No clutter. No learning curve.
         </p>
-        
+
+        {/* PIXEL 3D ISOMETRIC BOT — above CTA */}
+        <div className={styles.pixelBotWrap} aria-hidden="true">
+          <svg
+            width="170"
+            height="210"
+            viewBox="0 0 170 210"
+            fill="none"
+            xmlns="http://www.w3.org/2000/svg"
+            className={styles.pixelBot}
+          >
+            {/* ── ANTENNA BALL ── */}
+            {/* top face */}
+            <polygon points="62,4 98,4 104,0 68,0" fill="#FDE68A"/>
+            {/* front face */}
+            <rect x="62" y="4" width="36" height="12" fill="#F59E0B"/>
+            {/* right face */}
+            <polygon points="98,4 98,16 104,12 104,0" fill="#B45309"/>
+            {/* glint */}
+            <rect x="64" y="6" width="10" height="6" fill="#FEF9C3"/>
+
+            {/* ── ANTENNA POST ── */}
+            <polygon points="76,16 90,16 96,12 82,12" fill="#A5B4FC"/>
+            <rect x="76" y="16" width="14" height="24" fill="#6366F1"/>
+            <polygon points="90,16 90,40 96,36 96,12" fill="#4338CA"/>
+
+            {/* ── HEAD BLOCK ── */}
+            {/* top face (lightest) */}
+            <polygon points="18,40 142,40 148,35 24,35" fill="#A5B4FC"/>
+            {/* front face */}
+            <rect x="18" y="40" width="124" height="72" fill="#6366F1"/>
+            {/* right face (darkest) */}
+            <polygon points="142,40 142,112 148,107 148,35" fill="#4338CA"/>
+            {/* bottom shadow */}
+            <rect x="18" y="112" width="130" height="4" fill="#3730A3"/>
+
+            {/* ── EAR BOLTS LEFT ── */}
+            <polygon points="2,60 18,60 18,56 2,56" fill="#818CF8"/>
+            <rect x="2" y="60" width="16" height="20" fill="#6366F1"/>
+            <rect x="18" y="56" width="6" height="24" fill="#4338CA"/>
+            <rect x="5" y="63" width="8" height="8" fill="#818CF8"/>
+
+            {/* ── EAR BOLTS RIGHT (on right face) ── */}
+            <rect x="142" y="60" width="6" height="20" fill="#4338CA"/>
+            <rect x="143" y="63" width="4" height="8" fill="#4F46E5"/>
+
+            {/* ── EYE SOCKETS ── */}
+            <rect x="30" y="52" width="40" height="30" fill="#1E1B4B"/>
+            <rect x="88" y="52" width="40" height="30" fill="#1E1B4B"/>
+
+            {/* ── LEFT EYE ── */}
+            <rect x="32" y="54" width="36" height="26" fill="#075985"/>
+            <rect x="34" y="56" width="32" height="22" fill="#0369A1"/>
+            <rect x="36" y="58" width="28" height="18" fill="#0EA5E9" className={styles.eyePixel}/>
+            <rect x="38" y="60" width="20" height="12" fill="#38BDF8"/>
+            {/* highlight */}
+            <rect x="34" y="56" width="14" height="8" fill="#BAE6FD"/>
+            <rect x="34" y="56" width="6" height="4" fill="#E0F2FE"/>
+
+            {/* ── RIGHT EYE ── */}
+            <rect x="90" y="54" width="36" height="26" fill="#075985"/>
+            <rect x="92" y="56" width="32" height="22" fill="#0369A1"/>
+            <rect x="94" y="58" width="28" height="18" fill="#0EA5E9" className={styles.eyePixel}/>
+            <rect x="96" y="60" width="20" height="12" fill="#38BDF8"/>
+            <rect x="92" y="56" width="14" height="8" fill="#BAE6FD"/>
+            <rect x="92" y="56" width="6" height="4" fill="#E0F2FE"/>
+
+            {/* ── MOUTH PIXEL GRID ── */}
+            <rect x="44" y="96" width="78" height="10" fill="#1E1B4B"/>
+            <rect x="46" y="98" width="12" height="6" fill="#38BDF8"/>
+            <rect x="62" y="98" width="12" height="6" fill="#38BDF8"/>
+            <rect x="78" y="98" width="12" height="6" fill="#38BDF8"/>
+            <rect x="94" y="98" width="12" height="6" fill="#38BDF8"/>
+            <rect x="110" y="98" width="10" height="6" fill="#38BDF8"/>
+
+            {/* ── NECK ── */}
+            <polygon points="56,116 114,116 120,111 62,111" fill="#818CF8"/>
+            <rect x="56" y="116" width="58" height="14" fill="#6366F1"/>
+            <polygon points="114,116 114,130 120,125 120,111" fill="#4338CA"/>
+
+            {/* ── BODY BLOCK ── */}
+            {/* top face */}
+            <polygon points="12,146 148,146 154,141 18,141" fill="#818CF8"/>
+            {/* front face */}
+            <rect x="12" y="146" width="136" height="62" fill="#6366F1"/>
+            {/* right face */}
+            <polygon points="148,146 148,208 154,203 154,141" fill="#4338CA"/>
+            {/* bottom shadow */}
+            <rect x="12" y="208" width="142" height="4" fill="#3730A3"/>
+
+            {/* ── CHEST DISPLAY ── */}
+            <rect x="26" y="156" width="110" height="48" fill="#1E1B4B"/>
+            <rect x="29" y="159" width="104" height="42" fill="#0F0F3D"/>
+            {/* row 1 */}
+            <rect x="31" y="161" width="14" height="10" fill="#38BDF8" className={styles.screenPixel}/>
+            <rect x="49" y="161" width="14" height="10" fill="#818CF8"/>
+            <rect x="67" y="161" width="14" height="10" fill="#38BDF8" className={styles.screenPixel}/>
+            <rect x="85" y="161" width="14" height="10" fill="#F472B6"/>
+            <rect x="103" y="161" width="14" height="10" fill="#38BDF8" className={styles.screenPixel}/>
+            <rect x="121" y="161" width="10" height="10" fill="#818CF8"/>
+            {/* row 2 */}
+            <rect x="31" y="175" width="14" height="10" fill="#4F46E5"/>
+            <rect x="49" y="175" width="14" height="10" fill="#38BDF8" className={styles.screenPixel}/>
+            <rect x="67" y="175" width="14" height="10" fill="#818CF8"/>
+            <rect x="85" y="175" width="14" height="10" fill="#38BDF8" className={styles.screenPixel}/>
+            <rect x="103" y="175" width="14" height="10" fill="#F472B6"/>
+            <rect x="121" y="175" width="10" height="10" fill="#38BDF8" className={styles.screenPixel}/>
+            {/* row 3 */}
+            <rect x="31" y="189" width="14" height="10" fill="#38BDF8" className={styles.screenPixel}/>
+            <rect x="49" y="189" width="14" height="10" fill="#F472B6"/>
+            <rect x="67" y="189" width="14" height="10" fill="#38BDF8" className={styles.screenPixel}/>
+            <rect x="85" y="189" width="14" height="10" fill="#4F46E5"/>
+            <rect x="103" y="189" width="14" height="10" fill="#818CF8"/>
+            <rect x="121" y="189" width="10" height="10" fill="#38BDF8" className={styles.screenPixel}/>
+
+            {/* ── LEFT ARM ── */}
+            <polygon points="0,149 12,149 18,144 6,144" fill="#818CF8"/>
+            <rect x="0" y="149" width="12" height="50" fill="#6366F1"/>
+            <polygon points="12,149 12,199 18,194 18,144" fill="#4338CA"/>
+
+            {/* ── RIGHT ARM ── */}
+            <polygon points="148,149 160,149 166,144 154,144" fill="#818CF8"/>
+            <rect x="148" y="149" width="12" height="50" fill="#4F46E5"/>
+            <polygon points="160,149 160,199 166,194 166,144" fill="#3730A3"/>
+
+            {/* ── PIXEL SHADOW UNDER FEET ── */}
+            <ellipse cx="83" cy="212" rx="50" ry="5" fill="#6366F1" opacity="0.18"/>
+          </svg>
+
+          {/* Speech bubble */}
+          <div className={styles.pixelBubble}>
+            <span>I got this! ⚡</span>
+          </div>
+        </div>
+
         <div className={styles.heroButtons}>
           <Link href="/signup" className={styles.heroPrimaryBtn}>
             Start for free <ArrowRight size={16} />
