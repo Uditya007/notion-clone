@@ -12,9 +12,28 @@ const supabaseAdmin = createClient(
 );
 
 export async function POST(req: Request) {
+  let isTwilio = false;
   try {
-    const body = await req.json();
-    const { message, from } = body;
+    const contentType = req.headers.get('content-type') || '';
+    isTwilio = contentType.includes('application/x-www-form-urlencoded');
+
+    let message = '';
+    let from = '';
+
+    try {
+      if (isTwilio) {
+        const formData = await req.formData();
+        message = formData.get('Body') as string || '';
+        from = formData.get('From') as string || '';
+      } else {
+        const body = await req.json();
+        message = body.message || body.Body || '';
+        from = body.from || body.From || '';
+      }
+    } catch (parseErr: any) {
+      console.error("[WhatsApp Webhook] Body parsing error:", parseErr);
+      return NextResponse.json({ error: 'Failed to parse request body: ' + parseErr.message }, { status: 400 });
+    }
 
     if (!message || typeof message !== 'string') {
       return NextResponse.json({ error: 'Message text is required' }, { status: 400 });
@@ -132,6 +151,10 @@ export async function POST(req: Request) {
       }
     }
 
+    let replyText = '';
+    let createdTask = null;
+    let createdPage = null;
+
     // 3. Perform database operations based on parsed intent
     if (parsed.type === 'task') {
       // Create supabase task
@@ -159,14 +182,12 @@ export async function POST(req: Request) {
 
       if (taskErr) throw taskErr;
 
+      createdTask = taskData;
       const timeString = new Date(parsed.date).toLocaleDateString('default', {
         month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit'
       });
 
-      return NextResponse.json({
-        reply: `✅ *Task Scheduled!* \n\nI have successfully scheduled the task: *"${parsed.title}"* for you in Clearspace.\n📅 *Due Date:* ${timeString}\n\nType another message to schedule more tasks or meetings!`,
-        task: taskData
-      });
+      replyText = `✅ *Task Scheduled!* \n\nI have successfully scheduled the task: *"${parsed.title}"* for you in Clearspace.\n📅 *Due Date:* ${timeString}\n\nType another message to schedule more tasks or meetings!`;
     } 
     else if (parsed.type === 'meeting') {
       // Create a gorgeous Meeting workspace document page
@@ -205,18 +226,48 @@ export async function POST(req: Request) {
 
       if (pageErr) throw pageErr;
 
+      createdPage = pageData;
+      replyText = `🎙️ *Meeting Scheduled!* \n\nI have successfully scheduled your meeting: *"${parsed.title}"*.\n📅 *Time:* ${formattedTime}\n📄 *Workspace Note created:* "Meeting: ${parsed.title}" with default agenda!\n\nI've generated a Notion-style briefing page for you in your workspace.`;
+    } else {
+      replyText = `Sorry, I couldn't resolve if that was a task or a meeting. Try sending something like: \n- *"Schedule task: submit monthly invoice tomorrow by 5pm"* \n- *"Schedule meeting: project planning tomorrow at 3pm"*`;
+    }
+
+    if (isTwilio) {
+      // Return standard TwiML XML back to Twilio
+      const twiml = `<?xml version="1.0" encoding="UTF-8"?>
+<Response>
+  <Message>${replyText.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')}</Message>
+</Response>`.trim();
+
+      return new NextResponse(twiml, {
+        headers: {
+          'Content-Type': 'text/xml'
+        }
+      });
+    } else {
+      // Return standard JSON to the simulator
       return NextResponse.json({
-        reply: `🎙️ *Meeting Scheduled!* \n\nI have successfully scheduled your meeting: *"${parsed.title}"*.\n📅 *Time:* ${formattedTime}\n📄 *Workspace Note created:* "Meeting: ${parsed.title}" with default agenda!\n\nI've generated a Notion-style briefing page for you in your workspace.`,
-        page: pageData
+        reply: replyText,
+        task: createdTask,
+        page: createdPage
       });
     }
 
-    return NextResponse.json({
-      reply: `Sorry, I couldn't resolve if that was a task or a meeting. Try sending something like: \n- *"Schedule task: submit monthly invoice tomorrow by 5pm"* \n- *"Schedule meeting: project planning tomorrow at 3pm"*`
-    });
-
   } catch (error: any) {
     console.error("[WhatsApp Webhook] Handler error:", error);
+    
+    if (isTwilio) {
+      const errorTwiml = `<?xml version="1.0" encoding="UTF-8"?>
+<Response>
+  <Message>⚠️ *Clearspace Scheduler Error:* ${error.message || 'An unknown internal error occurred.'}</Message>
+</Response>`;
+      return new NextResponse(errorTwiml, {
+        headers: {
+          'Content-Type': 'text/xml'
+        }
+      });
+    }
+
     return NextResponse.json({ error: error.message || 'Internal Server Error' }, { status: 500 });
   }
 }
