@@ -283,7 +283,7 @@
   border-radius: 0 var(--radius-sm) var(--radius-sm) 0;
 }
 
-.navIconHome, .navIconInbox, .navIconTasks, .navIconCalendar, .navIconAutomations, .navIconTemplates, .navIconImport, .navIconTrash {
+.navIconHome, .navIconInbox, .navIconAI, .navIconTasks, .navIconCalendar, .navIconAutomations, .navIconTemplates, .navIconImport, .navIconTrash {
   color: inherit;
   width: 15px;
   height: 15px;

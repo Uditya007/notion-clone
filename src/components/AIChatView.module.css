@@ -264,3 +264,51 @@
   }
 }
 
+/* Premium Model Selector styles */
+.modelSelectorContainer {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: var(--bg-hover);
+  border: 1px solid var(--border);
+  padding: 6px 12px;
+  border-radius: 8px;
+  color: var(--text-main);
+  transition: all 0.2s ease-in-out;
+  margin-left: auto;
+  box-shadow: var(--shadow-sm);
+}
+
+.modelSelectorContainer:hover {
+  border-color: var(--primary);
+  background: var(--bg-active);
+  box-shadow: 0 0 8px rgba(139, 92, 246, 0.1);
+}
+
+.modelSelectorIcon {
+  color: #eab308;
+  animation: pulse 2s infinite ease-in-out;
+}
+
+.modelSelect {
+  background: transparent;
+  border: none;
+  color: var(--text-main);
+  font-size: 13px;
+  font-weight: 500;
+  outline: none;
+  cursor: pointer;
+  padding-right: 4px;
+}
+
+.modelSelect option {
+  background: var(--bg-sidebar);
+  color: var(--text-main);
+}
+
+@keyframes pulse {
+  0% { transform: scale(1); opacity: 0.9; }
+  50% { transform: scale(1.05); opacity: 1; }
+  100% { transform: scale(1); opacity: 0.9; }
+}
+

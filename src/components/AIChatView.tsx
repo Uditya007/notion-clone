@@ -8,7 +8,7 @@ import { useCompletion } from '@ai-sdk/react';
 import { supabase } from '@/lib/supabase/client';
 
 export default function AIChatView() {
-  const { activeConversationId, setActiveConversation, aiModel } = useAppStore();
+  const { activeConversationId, setActiveConversation, aiModel, setAIModel, addToast } = useAppStore();
   const [messages, setMessages] = useState<any[]>([]);
   const [convTitle, setConvTitle] = useState('New Chat');
   const messagesEndRef = useRef<HTMLDivElement>(null);
@@ -174,6 +174,30 @@ export default function AIChatView() {
           onChange={(e) => setConvTitle(e.target.value)}
           readOnly
         />
+        
+        {/* Dynamic Model Selector directly inside AI Chat View */}
+        <div className={styles.modelSelectorContainer}>
+          <Sparkles size={13} className={styles.modelSelectorIcon} />
+          <select 
+            className={styles.modelSelect}
+            value={aiModel}
+            onChange={(e) => {
+              setAIModel(e.target.value);
+              const modelLabels: Record<string, string> = {
+                'gemini-2.5-flash': 'Gemini 2.5 Flash',
+                'gemini-2.5-pro': 'Gemini 2.5 Pro',
+                'gemini-1.5-flash': 'Gemini 1.5 Flash',
+                'gemini-1.5-pro': 'Gemini 1.5 Pro'
+              };
+              addToast(`✦ Model switched to ${modelLabels[e.target.value] || e.target.value}`, "success");
+            }}
+          >
+            <option value="gemini-2.5-flash">Gemini 2.5 Flash (Fast)</option>
+            <option value="gemini-2.5-pro">Gemini 2.5 Pro (Smart)</option>
+            <option value="gemini-1.5-flash">Gemini 1.5 Flash</option>
+            <option value="gemini-1.5-pro">Gemini 1.5 Pro</option>
+          </select>
+        </div>
       </div>
 
       <div className={styles.messages}>

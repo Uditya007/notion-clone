@@ -44,7 +44,7 @@ export default function Sidebar() {
   const [alerts, setAlerts] = useState<any>({ overdue: [], dueToday: [], dueTomorrow: [], totalAlerts: 0 });
   const [showNotifications, setShowNotifications] = useState(false);
   
-  const { activePageId, setActivePage, setSearchOpen, setSettingsOpen, addToast } = useAppStore();
+  const { activePageId, setActivePage, setSearchOpen, setSettingsOpen, addToast, isAIPanelOpen, setAIPanelOpen, activeConversationId, setActiveConversation } = useAppStore();
   const importFileInputRef = useRef<HTMLInputElement>(null);
   const profileMenuRef = useRef<HTMLDivElement>(null);
   const notificationsRef = useRef<HTMLDivElement>(null);
@@ -515,6 +515,48 @@ export default function Sidebar() {
             >
               <Inbox size={15} className={styles.navIconInbox} />
               <span>Inbox</span>
+            </button>
+
+            <button 
+              className={`${styles.navItem} ${activeConversationId ? styles.navActive : ''}`} 
+              onClick={async () => {
+                // Open the history panel
+                setAIPanelOpen(true);
+                
+                // If not already in a chat, let's load/create one
+                if (!activeConversationId) {
+                  try {
+                    const res = await fetch('/api/conversations');
+                    if (res.ok) {
+                      const data = await res.json();
+                      if (data && data.length > 0) {
+                        // Sort by updated_at or updatedAt desc
+                        const sorted = data.sort((a: any, b: any) => {
+                          const dateA = new Date(a.updated_at || a.updatedAt || 0).getTime();
+                          const dateB = new Date(b.updated_at || b.updatedAt || 0).getTime();
+                          return dateB - dateA;
+                        });
+                        setActiveConversation(sorted[0].id);
+                      } else {
+                        // Create a new conversation if none exist
+                        const createRes = await fetch('/api/conversations', { method: 'POST' });
+                        if (createRes.ok) {
+                          const newConv = await createRes.json();
+                          setActiveConversation(newConv.id);
+                        }
+                      }
+                    }
+                  } catch (err) {
+                    console.error('Error auto-opening/creating conversation:', err);
+                  }
+                } else {
+                  // If we are already in a chat, clicking AI Chat can toggle the history panel drawer
+                  setAIPanelOpen(!isAIPanelOpen);
+                }
+              }}
+            >
+              <Sparkles size={15} className={styles.navIconAI} style={{ color: '#eab308' }} />
+              <span>AI Chat</span>
             </button>
 
             <button 
