@@ -34,7 +34,8 @@ export async function POST(request: Request) {
       parent_id: body.parentId || null,
       icon: body.icon || '📄',
       type: body.type || 'editor',
-    });
+      content: body.content || '',
+    } as any);
 
     return NextResponse.json(newPage);
   } catch (error: any) {

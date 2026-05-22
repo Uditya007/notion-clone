@@ -85,18 +85,30 @@ export async function POST(req: Request) {
   const now = new Date();
   systemPrompt += `\n\nCurrent Time Context:\n- The current date/time is: ${now.toString()}\n- The current UTC ISO string is: ${now.toISOString()}\n- Format dates relative to this time.`;
 
-  systemPrompt += `\n\nTask & Event Creation Capabilities:
-If the user asks you to create a task, todo, reminder, or schedule a meeting, you MUST execute the action by appending a special, machine-readable command tag at the very end of your response text.
-Guidelines:
-1. For creating a Task (Todo):
-   Format: [CREATE_TASK: Title | Due date/text]
-   Example: "I've added the task for you! [CREATE_TASK: Finish math assignment | Today]"
-2. For scheduling a Meeting or Event:
-   Format: [CREATE_EVENT: Event Title | Start DateTime (ISO 8601 string) | End DateTime (ISO 8601 string)]
-   IMPORTANT: Always construct valid ISO 8601 datetime strings in local or UTC timezone (e.g. 2026-05-21T16:00:00+05:30) for the Start and End times. Make meetings 1 hour long by default if not specified.
-   Example: "Meeting scheduled! [CREATE_EVENT: Project Review | 2026-05-21T14:00:00+05:30 | 2026-05-21T15:00:00+05:30]"
+  systemPrompt += `\n\nInteractive Agent Action Capabilities (Workspace Tools):
+If the user asks you to perform an action, create a document, task, calendar event, or send an email, you MUST execute the action by appending the corresponding special, machine-readable command tag at the very end of your response text.
 
-Always be extremely polite and helpful. If you execute a task or event command, explain briefly to the user that you did so.`;
+Supported Action Commands:
+1. Creating a Task (Todo Item):
+   Format: [CREATE_TASK: Title | Due date/text]
+   Example: "I've added that task! [CREATE_TASK: Review marketing slides | Tomorrow]"
+
+2. Scheduling a Calendar Meeting or Event:
+   Format: [CREATE_EVENT: Event Title | Start DateTime (ISO 8601 string) | End DateTime (ISO 8601 string)]
+   IMPORTANT: Construct valid ISO 8601 datetime strings in local or UTC timezone (e.g. 2026-05-22T14:00:00+05:30) for the Start and End times. Make meetings 1 hour long by default.
+   Example: "Meeting scheduled! [CREATE_EVENT: Team Sync | 2026-05-22T14:00:00+05:30 | 2026-05-22T15:00:00+05:30]"
+
+3. Creating a Document Page (Note/SOP):
+   Format: [CREATE_PAGE: Title | HTML Content]
+   IMPORTANT: Generate premium, rich HTML content containing headings, paragraphs, and lists to create a high-fidelity workspace note.
+   Example: "I have created the document for you! [CREATE_PAGE: SOP Guidelines | <h1>Standard Operating Procedures</h1><p>Here are the core rules...</p>]"
+
+4. Sending a Gmail Email:
+   Format: [SEND_EMAIL: Recipient Email | Subject Line | Body Text]
+   IMPORTANT: Always extract the exact recipient email. If the user refers to themselves, send it to user@cora.app.
+   Example: "Email sent! [SEND_EMAIL: user@cora.app | Status Update | Hi, here is your project status update.]"
+
+Always explain clearly and politely in your text response what action(s) you are taking. You can append multiple command tags at the end of your response if the user requests multiple actions in a single message.`;
 
   try {
     const google = createGoogleGenerativeAI({

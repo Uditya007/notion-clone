@@ -8,7 +8,7 @@ import { useCompletion } from '@ai-sdk/react';
 import { supabase } from '@/lib/supabase/client';
 
 export default function AIChatView() {
-  const { activeConversationId, setActiveConversation, aiModel, setAIModel, addToast } = useAppStore();
+  const { activeConversationId, setActiveConversation, aiModel, setAIModel, addToast, setActivePage } = useAppStore();
   const [messages, setMessages] = useState<any[]>([]);
   const [convTitle, setConvTitle] = useState('New Chat');
   const messagesEndRef = useRef<HTMLDivElement>(null);
@@ -55,28 +55,32 @@ export default function AIChatView() {
     api: '/api/generate',
     streamProtocol: 'text',
     onFinish: async (prompt, result) => {
-      const taskMatch = result.match(/\[CREATE_TASK:\s*(.*?)\s*\|\s*(.*?)\s*\]/);
-      if (taskMatch) {
-        const title = taskMatch[1];
+      // 1. Process Task creation
+      const taskMatches = [...result.matchAll(/\[CREATE_TASK:\s*(.*?)\s*\|\s*(.*?)\s*\]/g)];
+      for (const match of taskMatches) {
+        const title = match[1];
         try {
-          await fetch('/api/tasks', {
+          const res = await fetch('/api/tasks', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ title }),
           });
+          if (res.ok) {
+            addToast(`✦ Task created: "${title}"`, "success");
+          }
         } catch (e) {
           console.error("Error creating AI task:", e);
         }
       }
 
-      const eventMatch = result.match(/\[CREATE_EVENT:\s*(.*?)\s*\|\s*(.*?)\s*\|\s*(.*?)\s*\]/);
-      if (eventMatch) {
-        const title = eventMatch[1];
-        const start = eventMatch[2];
-        const end = eventMatch[3];
-        
+      // 2. Process Calendar Event creation
+      const eventMatches = [...result.matchAll(/\[CREATE_EVENT:\s*(.*?)\s*\|\s*(.*?)\s*\|\s*(.*?)\s*\]/g)];
+      for (const match of eventMatches) {
+        const title = match[1];
+        const start = match[2];
+        const end = match[3];
         try {
-          await fetch('/api/google/calendar', {
+          const res = await fetch('/api/google/calendar', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({
@@ -85,12 +89,67 @@ export default function AIChatView() {
               end: { dateTime: end },
             }),
           });
+          if (res.ok) {
+            addToast(`✦ Event scheduled: "${title}"`, "success");
+          }
         } catch (e) {
           console.error("Error creating AI Google Calendar event:", e);
         }
       }
 
-      const cleanContent = result.replace(/\[CREATE_TASK:.*?\]/g, '').replace(/\[CREATE_EVENT:.*?\]/g, '').trim();
+      // 3. Process Page creation
+      const pageMatches = [...result.matchAll(/\[CREATE_PAGE:\s*([\s\S]*?)\s*\|\s*([\s\S]*?)\s*\]/g)];
+      for (const match of pageMatches) {
+        const title = match[1];
+        const content = match[2];
+        try {
+          const res = await fetch('/api/pages', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ title, content }),
+          });
+          if (res.ok) {
+            const newPage = await res.json();
+            addToast(`✦ Note created: "${title}"! Redirecting...`, "success");
+            setTimeout(() => {
+              setActivePage(newPage.id);
+            }, 1000);
+          }
+        } catch (e) {
+          console.error("Error creating AI page:", e);
+        }
+      }
+
+      // 4. Process Gmail Send
+      const emailMatches = [...result.matchAll(/\[SEND_EMAIL:\s*([\s\S]*?)\s*\|\s*([\s\S]*?)\s*\|\s*([\s\S]*?)\s*\]/g)];
+      for (const match of emailMatches) {
+        const to = match[1];
+        const subject = match[2];
+        const body = match[3];
+        try {
+          const res = await fetch('/api/gmail/send', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ to, subject, body }),
+          });
+          if (res.ok) {
+            addToast(`✦ Email successfully sent to ${to}`, "success");
+          } else {
+            addToast(`Could not send email to ${to}. Please check your Google Connection in Settings.`, "warning");
+          }
+        } catch (e) {
+          console.error("Error sending AI email:", e);
+          addToast(`Error trying to send email to ${to}`, "error");
+        }
+      }
+
+      // Clean all tags from content before saving message to DB
+      const cleanContent = result
+        .replace(/\[CREATE_TASK:[\s\S]*?\]/g, '')
+        .replace(/\[CREATE_EVENT:[\s\S]*?\]/g, '')
+        .replace(/\[CREATE_PAGE:[\s\S]*?\]/g, '')
+        .replace(/\[SEND_EMAIL:[\s\S]*?\]/g, '')
+        .trim();
 
       if (activeConversationId) {
         try {
@@ -156,7 +215,12 @@ export default function AIChatView() {
   };
 
   const renderMarkdown = (text: string) => {
-    let cleanText = text.replace(/\[CREATE_TASK:.*?\]/g, '').replace(/\[CREATE_EVENT:.*?\]/g, '').trim();
+    let cleanText = text
+      .replace(/\[CREATE_TASK:[\s\S]*?\]/g, '')
+      .replace(/\[CREATE_EVENT:[\s\S]*?\]/g, '')
+      .replace(/\[CREATE_PAGE:[\s\S]*?\]/g, '')
+      .replace(/\[SEND_EMAIL:[\s\S]*?\]/g, '')
+      .trim();
     let html = cleanText.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
     html = html.replace(/```([\s\S]*?)```/g, '<pre><code>$1</code></pre>');
     return <div dangerouslySetInnerHTML={{ __html: html }} />;
