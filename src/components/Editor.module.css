@@ -811,13 +811,31 @@
 }
 
 /* MOBILE RESPONSIVE OVERRIDES */
+.mobileMenuBtn {
+  display: none;
+}
+
 @media (max-width: 768px) {
+  .mobileMenuBtn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 36px;
+    height: 36px;
+    border-radius: var(--radius-sm);
+    color: var(--gray-600);
+    cursor: pointer;
+    margin-right: 8px;
+    touch-action: manipulation;
+  }
+
   .header {
-    padding: 0 16px 0 64px; /* Space for mobile expand button */
+    padding: 0 12px;
+    height: 48px;
   }
 
   .breadcrumbs {
-    display: none;
+    display: none; /* Hide breadcrumbs on very small headers to avoid actions cramp */
   }
 
   .saveText {
@@ -829,26 +847,45 @@
   }
 
   .shareHeaderBtn {
-    padding: 4px 8px;
+    padding: 6px 10px;
     font-size: 11px;
+    min-height: 36px;
   }
 
   .contentWrapper {
-    padding: 0 20px 60px;
+    padding: 24px 16px 80px;
   }
 
   .titleInput {
-    font-size: 32px;
+    font-size: 28px !important; /* Force title to 28px */
+    font-weight: 700;
+    margin-bottom: 16px;
+    line-height: 1.25;
   }
 
   .coverImage {
     height: 120px;
   }
 
+  /* Make view toggles (page toolbar headers) scrollable horizontally */
   .viewToggles {
+    display: flex;
     overflow-x: auto;
     white-space: nowrap;
     padding-bottom: 8px;
+    margin-bottom: 16px;
+    gap: 4px;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .viewToggles::-webkit-scrollbar {
+    display: none !important;
+  }
+
+  .viewToggleBtn {
+    flex-shrink: 0;
+    min-height: 36px;
+    padding: 4px 10px;
   }
 
   .presenceAvatars {
@@ -860,5 +897,37 @@
     left: 16px;
     right: 16px;
     bottom: 16px;
+  }
+
+  /* Bubble Menu scrollable formatting bar */
+  .bubbleMenu {
+    max-width: 90vw !important;
+    overflow-x: auto;
+    white-space: nowrap;
+    -webkit-overflow-scrolling: touch;
+    gap: 2px;
+    padding: 4px 6px;
+  }
+
+  .bubbleMenu::-webkit-scrollbar {
+    display: none !important;
+  }
+
+  .bubbleBtn {
+    min-height: 32px;
+    min-width: 32px;
+    padding: 0 4px;
+  }
+
+  /* Slash commands and AI popup formatting */
+  .slashMenu {
+    width: 250px !important;
+    max-height: 220px;
+    z-index: 1000;
+  }
+
+  .aiPopup {
+    width: 100% !important;
+    margin-bottom: 16px;
   }
 }

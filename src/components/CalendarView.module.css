@@ -558,28 +558,74 @@
 
   .headerControls {
     width: 100%;
-    justify-content: space-between;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    align-items: stretch;
+  }
+
+  .viewToggles {
+    display: flex;
+    width: 100%;
+  }
+
+  .viewToggleBtn {
+    flex: 1;
+    min-height: 44px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 14px;
+  }
+
+  .primaryBtn {
+    width: 100%;
+    min-height: 44px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 14.5px;
   }
 
   .calendarToolbar {
     flex-direction: column;
     align-items: flex-start;
     gap: 16px;
+    width: 100%;
   }
 
   .dateNav {
     width: 100%;
     justify-content: space-between;
+    align-items: center;
+  }
+
+  .navBtn {
+    min-height: 44px;
+    min-width: 44px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .todayBtn {
+    min-height: 44px;
+    padding: 0 16px;
+    font-size: 14px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
   }
 
   .currentMonthLabel {
-    font-size: 15px !important;
+    font-size: 16px !important;
     margin-left: 4px !important;
   }
 
   .integrationNotice {
     width: 100%;
     justify-content: center;
+    min-height: 44px;
   }
 
   /* Month Grid Adjustments */
@@ -588,30 +634,31 @@
   }
 
   .weekdayHeader {
-    padding: 6px 2px !important;
+    padding: 8px 2px !important;
     font-size: 10px !important;
   }
 
   .dayCell {
-    min-height: 70px !important;
-    padding: 2px !important;
+    min-height: 80px !important;
+    padding: 4px !important;
   }
 
   .dayCellEmpty {
-    min-height: 70px !important;
+    min-height: 80px !important;
   }
 
   .dayNumber {
-    font-size: 10px !important;
-    margin-bottom: 2px !important;
-    width: 18px !important;
-    height: 18px !important;
+    font-size: 11px !important;
+    margin-bottom: 4px !important;
+    width: 20px !important;
+    height: 20px !important;
   }
 
   .eventChip {
-    font-size: 8px !important;
-    padding: 1px 2px !important;
+    font-size: 9px !important;
+    padding: 2px 4px !important;
     border-left-width: 2px !important;
+    min-height: 18px;
   }
 
   .eventChipTime {
@@ -625,9 +672,52 @@
   .weekGrid {
     overflow-x: auto;
     width: 100%;
+    scrollbar-width: none;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .weekGrid::-webkit-scrollbar {
+    display: none;
+  }
+
+  .timeColumn {
+    width: 50px !important;
   }
 
   .dayColumn {
-    min-width: 80px !important;
+    min-width: 90px !important;
+  }
+
+  .dayColumnHeader {
+    height: 50px !important;
+  }
+
+  .dayColumnNumber {
+    width: 26px !important;
+    height: 26px !important;
+    font-size: 14px !important;
+  }
+
+  .emptyStateContainer {
+    padding: 24px 16px;
+    margin: 16px auto;
+    max-width: 100%;
+  }
+
+  .connectBtn {
+    min-height: 44px;
+    width: 100%;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 14.5px;
+  }
+
+  .calendarScheduleClearAlert {
+    padding: 12px;
+    font-size: 12px;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 8px;
   }
 }

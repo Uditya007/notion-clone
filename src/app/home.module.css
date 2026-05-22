@@ -765,27 +765,130 @@
 
 @media (max-width: 768px) {
   .navbar {
-    padding: 16px 24px;
+    padding: 14px 20px;
   }
+
   .navLinks {
-    display: none;
+    display: none; /* Hide default desktop nav menu links */
   }
+
+  /* Shrink display typography on mobile viewports */
   .heroTitle {
-    font-size: 48px;
+    font-size: 44px !important;
+    line-height: 1.15;
+    letter-spacing: -0.04em;
+    margin-bottom: 20px;
   }
-  .featuresSection, .howItWorksSection, .finalCta, .footer {
-    padding: 60px 24px;
+
+  .heroSubtext {
+    font-size: 15px;
+    margin-bottom: 28px;
+    padding: 0 8px;
   }
-  .stepsContainer {
-    grid-template-columns: 1fr;
-    gap: 36px;
+
+  /* Stack buttons full-width */
+  .heroButtons {
+    flex-direction: column;
+    width: 100%;
+    gap: 12px;
+    padding: 0 16px;
   }
+
+  .heroPrimaryBtn,
+  .heroSecondaryBtn {
+    width: 100%;
+    justify-content: center;
+    min-height: 48px;
+  }
+
+  /* Mockup scaling for smaller bounds */
+  .mockupWrapper {
+    padding: 0 16px;
+    margin-top: 40px;
+  }
+
+  .fakeSidebar {
+    display: none; /* Sidebar occupies too much horizontal space on mobile mockup */
+  }
+
+  .fakeEditor {
+    padding: 24px;
+  }
+
+  /* Sections scaling and grid collapse */
+  .featuresSection, 
+  .howItWorksSection, 
+  .finalCta, 
+  .footer {
+    padding: 56px 20px;
+  }
+
+  .sectionTitle {
+    font-size: 30px;
+  }
+
   .featureRow {
     flex-direction: column;
     align-items: flex-start;
     gap: 8px;
+    padding: 20px 0;
   }
+
   .featureDesc {
     text-align: left;
+    max-width: 100%;
+  }
+
+  .howItWorksTitle {
+    font-size: 30px;
+    margin-bottom: 40px;
+  }
+
+  .stepsContainer {
+    grid-template-columns: 1fr;
+    gap: 32px;
+  }
+
+  /* CTA responsive tweaks */
+  .finalCtaTitle {
+    font-size: 32px;
+    line-height: 1.2;
+  }
+
+  .finalCtaBtn {
+    width: 100%;
+    max-width: 320px;
+    min-height: 48px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  /* Stack Footer */
+  .footer {
+    flex-direction: column;
+    align-items: center;
+    gap: 24px;
+    text-align: center;
+  }
+
+  .footerLeft {
+    align-items: center;
+  }
+
+  .footerLinks {
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 16px;
+  }
+}
+
+@media (max-width: 480px) {
+  .heroTitle {
+    font-size: 36px !important;
+  }
+
+  .finalCtaTitle {
+    font-size: 28px;
   }
 }

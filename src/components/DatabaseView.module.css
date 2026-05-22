@@ -327,34 +327,180 @@
     flex-direction: column;
     align-items: flex-start;
     gap: 12px !important;
+    width: 100%;
   }
 
   .viewTabs {
     width: 100%;
     overflow-x: auto;
     white-space: nowrap;
+    gap: 8px;
     padding-bottom: 4px;
+    scrollbar-width: none;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .viewTabs::-webkit-scrollbar {
+    display: none;
   }
 
   .tabBtn {
-    padding: 6px 10px !important;
-    font-size: 13px !important;
+    padding: 8px 16px !important;
+    font-size: 14px !important;
+    min-height: 44px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
   }
 
   .controls {
     width: 100%;
-    justify-content: space-between;
+    justify-content: flex-start;
+    gap: 8px;
+    flex-wrap: wrap;
   }
 
   .controlBtn {
-    padding: 4px 8px !important;
-    font-size: 12px !important;
+    padding: 8px 12px !important;
+    font-size: 13px !important;
+    min-height: 44px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .primaryBtn {
+    min-height: 44px;
+    padding: 8px 16px;
+    font-size: 13.5px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  /* Table Cell Touch Target & Zoom Fixes */
+  .cellInput {
+    font-size: 16px !important; /* Prevent iOS input zoom */
+    padding: 10px 12px;
+  }
+
+  .td {
+    height: 44px; /* Ensure 44px minimum target */
+  }
+
+  .openBtn {
+    opacity: 1 !important; /* Keep visible on mobile for tap ease */
+    padding: 6px 10px;
+    font-size: 12px;
+    min-height: 32px;
+  }
+
+  .newRowBtn {
+    min-height: 44px;
+    display: flex;
+    align-items: center;
+    padding: 12px;
   }
 
   /* Board view adjustments */
-  .boardColumn {
-    flex: 0 0 240px !important; /* Slightly narrower columns on mobile */
+  .boardWrapper {
+    scrollbar-width: none;
+    -webkit-overflow-scrolling: touch;
   }
+
+  .boardWrapper::-webkit-scrollbar {
+    display: none;
+  }
+
+  .boardColumn {
+    flex: 0 0 260px !important; /* Narrower columns on mobile */
+  }
+
+  .addCardBtn {
+    min-height: 44px;
+    display: flex;
+    align-items: center;
+  }
+
+  /* Dropdown Menu (bottom drawer on mobile) */
+  .dropdownMenu {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    top: auto;
+    width: 100%;
+    margin-top: 0;
+    border-radius: var(--radius-lg) var(--radius-lg) 0 0;
+    box-shadow: 0 -4px 20px rgba(0,0,0,0.2);
+    z-index: 1000;
+    animation: slideUp 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+    padding: 16px;
+  }
+
+  .dropdownItem {
+    min-height: 44px;
+    font-size: 14.5px;
+    padding: 10px 12px;
+  }
+
+  /* Automations Modal (full-screen mobile) */
+  .modalOverlay {
+    align-items: flex-end;
+  }
+
+  .modal {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    width: 100vw;
+    height: 100vh;
+    max-width: 100vw;
+    max-height: 100vh;
+    border-radius: 0;
+    border: none;
+    padding: 20px;
+    z-index: 1001;
+    animation: slideUp 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .selectField, .inputField {
+    font-size: 16px !important; /* iOS zoom prevention */
+    min-height: 44px;
+    padding: 10px 12px;
+  }
+
+  .ruleItem {
+    padding: 14px;
+    min-height: 44px;
+  }
+
+  .ruleDeleteBtn {
+    min-height: 44px;
+    min-width: 44px;
+    justify-content: center;
+  }
+
+  .modalFooter {
+    padding-top: 12px;
+  }
+
+  .modalFooter button {
+    min-height: 44px;
+    flex: 1;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+  }
+}
+
+@keyframes slideUp {
+  from { transform: translateY(100%); }
+  to { transform: translateY(0); }
 }
 
 /* Automations Modal Styles */

@@ -33,6 +33,8 @@ import AIBuilder from "./AIBuilder";
 
 export default function Sidebar() {
   const [isCollapsed, setIsCollapsed] = useState(false);
+  const [isMobileOpen, setIsMobileOpen] = useState(false);
+  const [isClient, setIsClient] = useState(false);
   const [pagesList, setPagesList] = useState<any[]>([]);
   const [workspaceName, setWorkspaceName] = useState("My Workspace");
   const [userProfile, setUserProfile] = useState<{ name: string; email: string }>({ name: "User", email: "user@cora.app" });
@@ -43,6 +45,17 @@ export default function Sidebar() {
   // Notification Alert States
   const [alerts, setAlerts] = useState<any>({ overdue: [], dueToday: [], dueTomorrow: [], totalAlerts: 0 });
   const [showNotifications, setShowNotifications] = useState(false);
+
+  useEffect(() => {
+    setIsClient(true);
+    const handleOpenSidebar = () => {
+      setIsMobileOpen(true);
+    };
+    window.addEventListener("openSidebar", handleOpenSidebar);
+    return () => {
+      window.removeEventListener("openSidebar", handleOpenSidebar);
+    };
+  }, []);
   
   const { activePageId, setActivePage, setSearchOpen, setSettingsOpen, addToast, isAIPanelOpen, setAIPanelOpen, activeConversationId, setActiveConversation } = useAppStore();
   const importFileInputRef = useRef<HTMLInputElement>(null);
@@ -268,6 +281,7 @@ export default function Sidebar() {
 
   const handlePageSelect = (pageId: string) => {
     setActivePage(pageId);
+    setIsMobileOpen(false);
     if (window.innerWidth <= 768) {
       setIsCollapsed(true);
     }
@@ -348,7 +362,7 @@ export default function Sidebar() {
     );
   };
 
-  if (isCollapsed) {
+  if (isCollapsed && (!isClient || (typeof window !== "undefined" && window.innerWidth > 768))) {
     return (
       <div className={styles.collapsedSidebar}>
         <button onClick={() => setIsCollapsed(false)} className={styles.expandBtn} title="Expand sidebar">
@@ -360,8 +374,11 @@ export default function Sidebar() {
 
   return (
     <>
-      <div className={styles.mobileOverlay} onClick={() => setIsCollapsed(true)} />
-      <aside className={styles.sidebar}>
+      <div 
+        className={`${styles.mobileOverlay} ${isMobileOpen ? styles.mobileOverlayVisible : ""}`} 
+        onClick={() => setIsMobileOpen(false)} 
+      />
+      <aside className={`${styles.sidebar} ${isMobileOpen ? styles.sidebarOpen : ""}`}>
         {/* WORKSPACE HEADER */}
         <div className={styles.header}>
           <div className={styles.workspaceInfo} onClick={() => setShowProfileMenu(!showProfileMenu)}>
@@ -374,7 +391,7 @@ export default function Sidebar() {
             <ChevronDown size={14} className={styles.headerChevron} />
           </div>
 
-          <button onClick={() => setIsCollapsed(true)} className={styles.collapseBtn} title="Collapse sidebar">
+          <button onClick={() => { setIsCollapsed(true); setIsMobileOpen(false); }} className={styles.collapseBtn} title="Collapse sidebar">
             <PanelLeftClose size={16} />
           </button>
 

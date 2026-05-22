@@ -24,7 +24,7 @@ import ExportModal from "./ExportModal";
 import CommandCenter from "./CommandCenter";
 import AudioRecorder from "./AudioRecorder";
 import AnalyticsPanel from "./AnalyticsPanel";
-import { Mic, BarChart2 } from "lucide-react";
+import { Mic, BarChart2, Menu } from "lucide-react";
 import { useCompletion } from '@ai-sdk/react';
 import DatabaseView from "./DatabaseView";
 import { supabase } from "@/lib/supabase/client";
@@ -620,6 +620,13 @@ export default function Editor() {
     <div className={styles.editorContainer}>
       {/* HEADER SECTION */}
       <header className={styles.header}>
+        <button 
+          className={styles.mobileMenuBtn}
+          onClick={() => window.dispatchEvent(new CustomEvent('openSidebar'))}
+          title="Open Pages"
+        >
+          <Menu size={18} />
+        </button>
         <div className={styles.breadcrumbs}>
           <span className={styles.breadcrumbItem}>{workspaceName}</span>
           <span className={styles.separator}>/</span>

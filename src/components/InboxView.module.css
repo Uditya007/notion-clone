@@ -340,9 +340,15 @@
 
 /* Mobile responsive styles */
 @media (max-width: 768px) {
+  .container {
+    height: calc(100vh - 64px) !important; /* Adjust for MobileNav height */
+    overflow: hidden;
+  }
+
   .leftPanel {
     width: 100% !important;
     border-right: none;
+    height: 100% !important;
   }
 
   .rightPanel {
@@ -357,16 +363,116 @@
   .hasSelectedEmail .rightPanel {
     display: flex !important;
     width: 100% !important;
+    height: 100% !important;
+    position: absolute;
+    top: 0;
+    left: 0;
+    z-index: 10;
+  }
+
+  /* FAB for compose button on mobile inbox list */
+  .composeBtn {
+    position: fixed !important;
+    bottom: 84px !important; /* Position above MobileNav bottom bar */
+    right: 20px !important;
+    width: 56px !important;
+    height: 56px !important;
+    border-radius: 50% !important;
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.25) !important;
+    padding: 0 !important;
+    z-index: 90 !important;
+    font-size: 0 !important; /* Hide text label "Compose" */
+    justify-content: center !important;
+    background: var(--primary) !important;
+    color: white !important;
+    border: none !important;
+    transition: transform 0.2s ease, box-shadow 0.2s ease !important;
+  }
+
+  .composeBtn:active {
+    transform: scale(0.95);
+  }
+
+  .composeBtn svg {
+    width: 22px !important;
+    height: 22px !important;
+    margin: 0 !important;
+  }
+
+  /* When an email is selected, hide the FAB compose button */
+  .hasSelectedEmail .composeBtn {
+    display: none !important;
   }
 
   .mobileBackBtn {
     display: flex !important;
+    align-items: center;
+    gap: 6px;
+    height: 44px; /* Apple target size */
+    font-family: 'Outfit', sans-serif;
   }
 
   .composeModal {
-    width: calc(100% - 32px) !important;
-    right: 16px !important;
-    bottom: 16px !important;
+    position: fixed !important;
+    top: 0 !important;
+    left: 0 !important;
+    width: 100% !important;
+    height: 100% !important;
+    border-radius: 0 !important;
+    box-shadow: none !important;
+    z-index: 2000 !important; /* Overlap MobileNav and top menus */
+    background: var(--bg-main) !important;
+    display: flex !important;
+    flex-direction: column !important;
+    animation: slideUp 0.3s cubic-bezier(0.16, 1, 0.3, 1) !important;
+  }
+
+  @keyframes slideUp {
+    from {
+      transform: translateY(100%);
+    }
+    to {
+      transform: translateY(0);
+    }
+  }
+
+  .composeHeader {
+    padding: 16px !important;
+    height: 60px !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: space-between !important;
+    border-bottom: 1px solid var(--border) !important;
+    background: var(--bg-sidebar) !important;
+  }
+
+  .composeInput {
+    padding: 14px 16px !important;
+    font-size: 16px !important; /* Enforce 16px to prevent iOS auto-zoom */
+    border-bottom: 1px solid var(--border) !important;
+    min-height: 48px !important;
+  }
+
+  .composeBody {
+    flex: 1 !important;
+    padding: 16px !important;
+    font-size: 16px !important; /* Enforce 16px to prevent iOS auto-zoom */
+    min-height: unset !important;
+  }
+
+  .composeFooter {
+    padding: 16px !important;
+    border-top: 1px solid var(--border) !important;
+    background: var(--bg-sidebar) !important;
+    padding-bottom: calc(16px + env(safe-area-inset-bottom)) !important;
+  }
+
+  .sendBtn {
+    width: 100% !important;
+    height: 48px !important;
+    border-radius: 24px !important;
+    font-size: 16px !important;
+    font-weight: 600 !important;
   }
 
   .detailHeader {
@@ -376,14 +482,51 @@
   .detailSubject {
     font-size: 18px !important;
     margin-bottom: 8px !important;
+    line-height: 1.4;
+  }
+
+  .detailMeta {
+    display: flex !important;
+    justify-content: space-between !important;
+    align-items: flex-start !important;
+    flex-wrap: wrap !important;
+    gap: 8px !important;
+  }
+
+  .detailSender {
+    font-size: 13px !important;
+    word-break: break-all !important;
+  }
+
+  .detailTime {
+    font-size: 11px !important;
+    color: var(--text-muted) !important;
   }
 
   .detailBody {
     padding: 16px !important;
+    overflow-x: auto !important;
+    -webkit-overflow-scrolling: touch !important;
   }
 
   .replyArea {
     padding: 12px 16px !important;
+    padding-bottom: calc(12px + env(safe-area-inset-bottom)) !important;
+  }
+
+  .replyCollapsed {
+    height: 44px !important; /* Apple target size */
+    font-size: 14px !important;
+  }
+
+  .replyExpanded {
+    padding: 12px !important;
+    gap: 8px !important;
+  }
+
+  .replyExpanded textarea {
+    font-size: 16px !important; /* iOS auto-zoom prevention */
+    min-height: 100px !important;
   }
 }
 

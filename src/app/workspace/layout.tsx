@@ -1,5 +1,6 @@
 import Sidebar from "@/components/Sidebar";
 import AIChatPanel from "@/components/AIChatPanel";
+import MobileNav from "@/components/MobileNav";
 import { createClient } from "@/lib/supabase/server";
 import { redirect } from "next/navigation";
 
@@ -22,6 +23,7 @@ export default async function WorkspaceLayout({
       <main className="main-content">
         {children}
       </main>
+      <MobileNav />
     </div>
   );
 }

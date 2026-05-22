@@ -573,24 +573,21 @@
     z-index: 1000;
     box-shadow: var(--shadow-lg);
     background-color: var(--white);
-    width: 260px !important;
+    width: 280px !important;
+    transform: translateX(-100%);
+    transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+  }
+
+  .sidebarOpen {
+    transform: translateX(0) !important;
   }
 
   .collapsedSidebar {
-    position: fixed;
-    top: 10px;
-    left: 10px;
-    width: 36px !important;
-    height: 36px !important;
-    z-index: 999;
+    display: none !important;
   }
 
   .expandBtn {
-    border-radius: 50%;
-    border: 1px solid var(--border);
-    width: 36px;
-    height: 36px;
-    padding: 0;
+    display: none !important;
   }
 
   .mobileOverlay {
@@ -604,7 +601,28 @@
     backdrop-filter: blur(4px);
     -webkit-backdrop-filter: blur(4px);
     z-index: 999;
-    animation: fadeInFast 0.2s ease;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.3s ease;
+  }
+
+  .mobileOverlayVisible {
+    opacity: 1 !important;
+    pointer-events: auto !important;
+  }
+
+  .navItem {
+    min-height: 44px !important;
+    padding: 0 16px !important;
+  }
+
+  .pageItem {
+    min-height: 44px !important;
+    padding: 0 12px !important;
+  }
+
+  .userRow {
+    min-height: 48px !important;
   }
 }
 

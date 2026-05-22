@@ -845,20 +845,123 @@
 
   /* Tasks View mobile tweaks */
   .taskListContainer {
-    gap: 20px !important;
+    gap: 24px !important;
   }
 
   .taskGroupTitle {
-    margin-bottom: 8px !important;
+    margin-bottom: 12px !important;
     font-size: 13px !important;
+    letter-spacing: 0.05em !important;
+    text-transform: uppercase !important;
   }
 
   .taskListItem {
-    padding: 10px 0 !important;
+    padding: 14px 12px !important;
+    border-radius: 12px !important;
+    background: var(--bg-card) !important;
+    margin-bottom: 10px !important;
+    border: 1.5px solid var(--border) !important;
+    box-shadow: var(--shadow-sm) !important;
+    gap: 12px !important;
+    transition: transform 0.2s ease, background-color 0.2s ease !important;
+    position: relative !important;
+  }
+
+  .taskListItem:active {
+    background: var(--bg-hover) !important;
+    transform: scale(0.99);
+  }
+
+  .checkbox {
+    width: 24px !important;
+    height: 24px !important;
+    border-radius: 6px !important;
+    border-width: 2px !important;
+    transition: background-color 0.15s ease, border-color 0.15s ease, transform 0.1s ease !important;
+  }
+
+  .checkbox:active {
+    transform: scale(0.9) !important;
+  }
+
+  .checkbox.checked::after {
+    left: 7px !important;
+    top: 3px !important;
+    width: 6px !important;
+    height: 11px !important;
+  }
+
+  .taskItemContent {
+    flex-direction: column !important;
+    align-items: flex-start !important;
+    gap: 8px !important;
   }
 
   .taskItemTitle {
+    font-size: 15px !important;
+    font-weight: 600 !important;
+    line-height: 1.4 !important;
+    word-break: break-word !important;
+  }
+
+  .taskCompleted .taskItemTitle {
+    font-weight: 500 !important;
+  }
+
+  .taskDateContainer {
+    width: 100% !important;
+  }
+
+  .taskItemDue {
+    padding: 6px 12px !important;
     font-size: 13px !important;
+    height: 32px !important;
+    display: inline-flex !important;
+    align-items: center !important;
+    gap: 6px !important;
+    border-radius: 6px !important;
+  }
+
+  .deleteTaskBtn {
+    width: 44px !important;
+    height: 44px !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    margin-right: -8px !important;
+    border-radius: 50% !important;
+    transition: background-color 0.15s ease !important;
+  }
+
+  .deleteTaskBtn:active {
+    background: rgba(255, 77, 77, 0.1) !important;
+  }
+
+  .deleteTaskBtn svg {
+    width: 18px !important;
+    height: 18px !important;
+    color: var(--text-muted) !important;
+  }
+
+  .addTaskLargeBtn {
+    height: 48px !important;
+    font-size: 15px !important;
+    border-radius: 10px !important;
+    padding: 12px 16px !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    font-weight: 600 !important;
+  }
+
+  .addTaskInputWrapper {
+    height: 48px !important;
+    padding: 8px 16px !important;
+    border-radius: 10px !important;
+  }
+
+  .addTaskInput {
+    font-size: 16px !important; /* iOS auto-zoom prevention */
   }
 
   /* Automations View mobile tweaks */

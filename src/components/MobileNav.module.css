@@ -1,0 +1,280 @@
+/* src/components/MobileNav.module.css */
+
+/* Hide by default on desktop, show only on mobile */
+.mobileNavContainer {
+  display: none;
+}
+
+@media (max-width: 768px) {
+  .mobileNavContainer {
+    display: block;
+  }
+
+  /* Fixed Bottom Bar */
+  .bottomBar {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    height: calc(56px + env(safe-area-inset-bottom, 0px));
+    padding-bottom: env(safe-area-inset-bottom, 0px);
+    background: rgba(255, 255, 255, 0.85);
+    backdrop-filter: blur(16px) saturate(180%);
+    -webkit-backdrop-filter: blur(16px) saturate(180%);
+    border-top: 1px solid rgba(0, 0, 0, 0.08);
+    display: grid;
+    grid-template-columns: repeat(5, 1fr);
+    align-items: center;
+    z-index: 500;
+    box-shadow: 0 -4px 20px rgba(0, 0, 0, 0.03);
+    transition: transform 0.3s ease;
+  }
+
+  /* Dark mode compatibility */
+  :global(.dark-mode) .bottomBar {
+    background: rgba(18, 18, 18, 0.85);
+    border-top-color: rgba(255, 255, 255, 0.08);
+    box-shadow: 0 -4px 20px rgba(0, 0, 0, 0.2);
+  }
+
+  /* Navigation tab items */
+  .navTab {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    height: 100%;
+    background: none;
+    border: none;
+    padding: 4px 0;
+    color: #64748b;
+    font-size: 11px;
+    font-weight: 500;
+    cursor: pointer;
+    position: relative;
+    transition: color 0.2s ease, transform 0.1s ease;
+    touch-action: manipulation;
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  .navTab:active {
+    transform: scale(0.95);
+  }
+
+  .navTabActive {
+    color: #0f172a;
+  }
+
+  :global(.dark-mode) .navTabActive {
+    color: #f1f5f9;
+  }
+
+  .tabIcon {
+    width: 20px;
+    height: 20px;
+    margin-bottom: 3px;
+    transition: transform 0.2s ease;
+  }
+
+  .navTabActive .tabIcon {
+    transform: translateY(-1px);
+    color: inherit;
+  }
+
+  /* Sparkles/AI special style tab */
+  .aiTab {
+    color: #eab308 !important;
+  }
+
+  .aiTabActive .tabIcon {
+    filter: drop-shadow(0 0 4px rgba(234, 179, 8, 0.4));
+    animation: pulseSparkle 2s infinite ease-in-out;
+  }
+
+  @keyframes pulseSparkle {
+    0%, 100% {
+      transform: scale(1) translateY(-1px);
+    }
+    50% {
+      transform: scale(1.15) translateY(-2px);
+    }
+  }
+
+  /* Active line indicator at the bottom */
+  .activeIndicator {
+    position: absolute;
+    bottom: calc(env(safe-area-inset-bottom, 0px) + 2px);
+    width: 4px;
+    height: 4px;
+    border-radius: 50%;
+    background-color: #0f172a;
+    transition: all 0.2s ease;
+  }
+
+  :global(.dark-mode) .activeIndicator {
+    background-color: #f1f5f9;
+  }
+
+  .aiTab .activeIndicator {
+    background-color: #eab308;
+  }
+
+  /* --- Bottom Sheet Modal Styles --- */
+  .backdrop {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.4);
+    backdrop-filter: blur(4px);
+    -webkit-backdrop-filter: blur(4px);
+    z-index: 999;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+  }
+
+  .backdropVisible {
+    opacity: 1;
+    pointer-events: auto;
+  }
+
+  .bottomSheet {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    background: #ffffff;
+    border-radius: 20px 20px 0 0;
+    z-index: 1000;
+    transform: translateY(100%);
+    transition: transform 0.35s cubic-bezier(0.16, 1, 0.3, 1);
+    max-height: 85vh;
+    overflow-y: auto;
+    padding: 16px 20px calc(24px + env(safe-area-inset-bottom, 0px));
+    box-shadow: 0 -10px 30px rgba(0, 0, 0, 0.08);
+  }
+
+  :global(.dark-mode) .bottomSheet {
+    background: #1e1e1e;
+    box-shadow: 0 -10px 30px rgba(0, 0, 0, 0.35);
+  }
+
+  .bottomSheetVisible {
+    transform: translateY(0);
+  }
+
+  /* Sheet Drag Handle bar */
+  .dragHandle {
+    width: 36px;
+    height: 4px;
+    border-radius: 2px;
+    background: #e2e8f0;
+    margin: 0 auto 20px auto;
+  }
+
+  :global(.dark-mode) .dragHandle {
+    background: #334155;
+  }
+
+  .sheetHeader {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+  }
+
+  .sheetTitle {
+    font-size: 17px;
+    font-weight: 600;
+    color: #0f172a;
+    letter-spacing: -0.3px;
+  }
+
+  :global(.dark-mode) .sheetTitle {
+    color: #f1f5f9;
+  }
+
+  .closeBtn {
+    background: #f1f5f9;
+    border: none;
+    border-radius: 50%;
+    width: 28px;
+    height: 28px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #64748b;
+    cursor: pointer;
+  }
+
+  :global(.dark-mode) .closeBtn {
+    background: #2d2d2d;
+    color: #94a3b8;
+  }
+
+  /* Option items list grid */
+  .menuGrid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 16px;
+  }
+
+  .gridItem {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 14px 8px;
+    background: #f8fafc;
+    border: 1px solid #f1f5f9;
+    border-radius: 12px;
+    color: #475569;
+    font-size: 12px;
+    font-weight: 500;
+    transition: background-color 0.2s ease, transform 0.1s ease;
+    cursor: pointer;
+    touch-action: manipulation;
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  :global(.dark-mode) .gridItem {
+    background: #262626;
+    border-color: #2d2d2d;
+    color: #cbd5e1;
+  }
+
+  .gridItem:active {
+    background: #f1f5f9;
+    transform: scale(0.96);
+  }
+
+  :global(.dark-mode) .gridItem:active {
+    background: #2d2d2d;
+  }
+
+  .gridItemIcon {
+    width: 22px;
+    height: 22px;
+    margin-bottom: 8px;
+    color: #64748b;
+  }
+
+  :global(.dark-mode) .gridItemIcon {
+    color: #94a3b8;
+  }
+
+  .gridItemActive {
+    background: #f1f5f9;
+    border-color: #cbd5e1;
+    color: #0f172a;
+    font-weight: 600;
+  }
+
+  :global(.dark-mode) .gridItemActive {
+    background: #2d2d2d;
+    border-color: #3f3f46;
+    color: #f1f5f9;
+  }
+}

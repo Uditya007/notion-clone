@@ -343,6 +343,7 @@
 @media (max-width: 768px) {
   .container {
     flex-direction: column;
+    height: 100vh;
   }
 
   .leftPanel {
@@ -351,14 +352,23 @@
 
   .rightPanel {
     flex: 1;
-    padding: 32px 24px;
+    padding: 40px 20px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .formWrapper {
+    max-width: 100%;
+    width: 100%;
   }
 
   .mobileLogo {
     display: flex;
     align-items: center;
+    justify-content: center;
     gap: 8px;
-    margin-bottom: 32px;
+    margin-bottom: 24px;
   }
 
   .mobileLogo .logoSvg {
@@ -367,5 +377,34 @@
 
   .mobileLogo .logoText {
     color: var(--black);
+    font-size: 20px;
+  }
+
+  .heading {
+    font-size: 24px;
+    text-align: center;
+  }
+
+  .subtext {
+    text-align: center;
+    margin-bottom: 20px;
+  }
+
+  /* Optimize interactive touch dimensions */
+  .input {
+    min-height: 44px !important;
+    padding: 12px !important;
+    font-size: 16px !important; /* prevent iOS auto-zoom */
+  }
+
+  .submitBtn {
+    min-height: 44px !important;
+    font-size: 15px;
+  }
+
+  .togglePassword {
+    height: 44px;
+    width: 44px;
+    right: 0;
   }
 }

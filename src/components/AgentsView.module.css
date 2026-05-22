@@ -1977,8 +1977,8 @@
 
 @media (max-width: 768px) {
   .container {
-    padding: 20px;
-    gap: 20px;
+    padding: 16px;
+    gap: 16px;
   }
   
   .headerTitleRow {
@@ -2003,5 +2003,115 @@
   
   .triggerCardsGrid {
     grid-template-columns: 1fr;
+  }
+
+  .tabsRow {
+    flex-direction: row;
+    overflow-x: auto;
+    white-space: nowrap;
+    gap: 8px;
+    width: 100%;
+    scrollbar-width: none;
+    -webkit-overflow-scrolling: touch;
+    border-bottom: 1px solid var(--border);
+    padding-bottom: 2px;
+  }
+
+  .tabsRow::-webkit-scrollbar {
+    display: none;
+  }
+
+  .tabBtn {
+    padding: 8px 16px;
+    white-space: nowrap;
+    width: auto;
+    flex-shrink: 0;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 44px;
+    font-size: 14px;
+  }
+
+  /* Builder Modal (full-screen mobile) */
+  .builderModal {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    width: 100vw;
+    height: 100vh;
+    max-width: 100vw;
+    max-height: 100vh;
+    border-radius: 0;
+    border: none;
+    margin: 0;
+    z-index: 1001;
+    display: flex;
+    flex-direction: column;
+    animation: slideUp 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+  }
+
+  /* Enforce touch friendly interactive targets */
+  .builderInput, .builderInputSmall {
+    font-size: 16px !important; /* Prevent iOS zoom */
+    min-height: 44px;
+    padding: 10px 12px;
+  }
+
+  .runNowBtn, 
+  .createAgentBtn, 
+  .createFirstAgentBtn, 
+  .installAgentBtn, 
+  .panelRunBtn, 
+  .openCreatedPageBtn, 
+  .secondaryPanelBtn, 
+  .continueBtn, 
+  .backBtn, 
+  .submitBuilderBtn {
+    min-height: 44px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 10px 16px;
+    font-size: 14px;
+    border-radius: var(--radius-sm);
+  }
+
+  .panelCloseBtn, .modalCloseBtn {
+    min-height: 44px;
+    min-width: 44px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  /* Two Column layouts collapsing to single column */
+  .twoColumnGrid {
+    grid-template-columns: 1fr !important;
+  }
+
+  /* Touch optimizations for radios and lists */
+  .radioOption {
+    padding: 12px;
+    min-height: 44px;
+  }
+
+  /* Expand table cards on mobile to stack */
+  .tableRow {
+    flex-direction: column;
+    align-items: stretch;
+    padding: 16px;
+    gap: 10px;
+    border-bottom: 1.5px solid var(--border-light);
+  }
+
+  .tableAgentInfo {
+    width: 100%;
+  }
+
+  .tableStatusContainer {
+    justify-content: flex-start;
   }
 }
