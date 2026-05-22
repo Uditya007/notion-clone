@@ -805,6 +805,15 @@ export default function Sidebar() {
                   <span>Templates</span>
                 </button>
 
+                <button 
+                  className={`${styles.navItem} ${activePageId === 'whatsapp' ? styles.navActive : ''}`} 
+                  onClick={() => handlePageSelect('whatsapp')}
+                >
+                  <MessageSquare size={15} className={styles.navIconWhatsApp} style={{ color: '#25D366' }} />
+                  <span>WhatsApp</span>
+                </button>
+
+
                 {/* Document Import trigger inside sidebar items */}
                 <button className={styles.navItem} onClick={() => importFileInputRef.current?.click()}>
                   <Download size={15} className={styles.navIconImport} style={{ transform: "rotate(180deg)" }} />

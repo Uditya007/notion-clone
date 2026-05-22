@@ -14,7 +14,8 @@ import {
   Trash2, 
   Inbox, 
   Copy,
-  X
+  X,
+  MessageSquare
 } from "lucide-react";
 import { useAppStore } from "@/store/useAppStore";
 import styles from "./MobileNav.module.css";
@@ -184,6 +185,15 @@ export default function MobileNav() {
             <Copy className={styles.gridItemIcon} />
             <span>Templates</span>
           </button>
+
+          <button 
+            className={`${styles.gridItem} ${activePageId === "whatsapp" ? styles.gridItemActive : ""}`}
+            onClick={() => setActivePage("whatsapp")}
+          >
+            <MessageSquare className={styles.gridItemIcon} style={{ color: '#25D366' }} />
+            <span>WhatsApp</span>
+          </button>
+
 
           <button 
             className={styles.gridItem}

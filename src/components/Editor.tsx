@@ -10,7 +10,7 @@ import Underline from '@tiptap/extension-underline'
 import GlobalDragHandle from 'tiptap-extension-global-drag-handle'
 import styles from "./Editor.module.css";
 import { useEffect, useState, useRef } from "react";
-import { MoreHorizontal, Star, Clock, Sparkles, Check, X, LayoutGrid, FileText, Trash2, Image as ImageIcon, CheckCircle, AlertCircle, Info, Smile } from "lucide-react";
+import { MoreHorizontal, Star, Clock, Sparkles, Check, X, LayoutGrid, FileText, Trash2, Image as ImageIcon, CheckCircle, AlertCircle, Info, Smile, Calendar, UserPlus, ChevronLeft, ChevronRight, Globe, Bell, CornerDownLeft, ThumbsUp, ThumbsDown, Zap } from "lucide-react";
 import { useAppStore } from "@/store/useAppStore";
 import KanbanBoard from "./KanbanBoard";
 import CalendarView from "./CalendarView";
@@ -21,6 +21,7 @@ import TemplatesView from "./TemplatesView";
 import ShareModal from "./ShareModal";
 import TrashView from "./TrashView";
 import ExportModal from "./ExportModal";
+import WhatsAppView from "./WhatsAppView";
 import CommandCenter from "./CommandCenter";
 import AudioRecorder from "./AudioRecorder";
 import AnalyticsPanel from "./AnalyticsPanel";
@@ -181,7 +182,7 @@ const getUserColor = (id: string) => {
 
 export default function Editor() {
   const [isMounted, setIsMounted] = useState(false);
-  const { activePageId, setActivePage, aiModel } = useAppStore();
+  const { activePageId, setActivePage, aiModel, addToast } = useAppStore();
   const [activePage, setActivePageData] = useState<any>(null);
   const [workspaceName, setWorkspaceName] = useState("My Workspace");
   const [hasDatabase, setHasDatabase] = useState(false);
@@ -249,6 +250,430 @@ export default function Editor() {
   const [showAnalyticsPanel, setShowAnalyticsPanel] = useState(false);
   const [saveStatus, setSaveStatus] = useState<'saved' | 'saving'>('saved');
   const [slashIndex, setSlashIndex] = useState(0);
+
+  // --- Notion-style Mentions, Dates & Assistant States ---
+  const [atMenuOpen, setAtMenuOpen] = useState(false);
+  const [atQuery, setAtQuery] = useState("");
+  const [atMenuCoords, setAtMenuCoords] = useState({ top: 0, left: 0 });
+  const [atMenuIndex, setAtMenuIndex] = useState(0);
+  const [workspacePages, setWorkspacePages] = useState<any[]>([]);
+
+  const [datePickerOpen, setDatePickerOpen] = useState(false);
+  const [datePickerCoords, setDatePickerCoords] = useState({ top: 0, left: 0 });
+  const [selectedDatePillElement, setSelectedDatePillElement] = useState<HTMLElement | null>(null);
+  const [datePickerDate, setDatePickerDate] = useState<Date>(new Date());
+  const [datePickerIncludeTime, setDatePickerIncludeTime] = useState(true);
+  const [datePickerEndDate, setDatePickerEndDate] = useState<Date | null>(null);
+  const [datePickerMonth, setDatePickerMonth] = useState(new Date().getMonth());
+  const [datePickerYear, setDatePickerYear] = useState(new Date().getFullYear());
+  const [timeInputVal, setTimeInputVal] = useState("12:00 PM");
+
+  const [datePickerFormat, setDatePickerFormat] = useState("Relative");
+  const [datePickerTimeFormat, setDatePickerTimeFormat] = useState("12 hour");
+  const [datePickerTimezone, setDatePickerTimezone] = useState("GMT+5:30");
+  const [datePickerRemind, setDatePickerRemind] = useState("None");
+
+  const [showMeetingToast, setShowMeetingToast] = useState(false);
+  const [meetingToastDismissed, setMeetingToastDismissed] = useState(false);
+
+  // Refs for keydown handler to prevent stale closures
+  const atMenuOpenRef = useRef(atMenuOpen);
+  atMenuOpenRef.current = atMenuOpen;
+  const atQueryRef = useRef(atQuery);
+  atQueryRef.current = atQuery;
+  const atMenuIndexRef = useRef(atMenuIndex);
+  atMenuIndexRef.current = atMenuIndex;
+  const workspacePagesRef = useRef(workspacePages);
+  workspacePagesRef.current = workspacePages;
+
+  // --- Helper Functions for @ Mentions & Page Links ---
+  const getAtMenuItems = () => {
+    const query = atQuery.trim().toLowerCase();
+    const items: any[] = [];
+
+    // 1. DATE OPTIONS
+    const dates = [
+      { type: 'date', label: 'Today', date: new Date(), icon: '📅', subtitle: new Date().toLocaleDateString('default', { weekday: 'long', month: 'short', day: 'numeric', year: 'numeric' }) },
+      { type: 'date', label: 'Tomorrow', date: new Date(Date.now() + 86400000), icon: '📅', subtitle: new Date(Date.now() + 86400000).toLocaleDateString('default', { weekday: 'long', month: 'short', day: 'numeric', year: 'numeric' }) },
+      { type: 'date', label: 'Yesterday', date: new Date(Date.now() - 86400000), icon: '📅', subtitle: new Date(Date.now() - 86400000).toLocaleDateString('default', { weekday: 'long', month: 'short', day: 'numeric', year: 'numeric' }) },
+    ];
+    
+    const matchedDates = dates.filter(d => d.label.toLowerCase().includes(query));
+    if (matchedDates.length > 0) {
+      items.push({ category: 'Date', options: matchedDates });
+    }
+
+    // 2. PEOPLE OPTION
+    items.push({
+      category: 'People',
+      options: [
+        { type: 'people', label: query ? `Invite "${atQuery}"...` : 'Invite contributors...', queryVal: atQuery, icon: '👤' }
+      ]
+    });
+
+    // 3. LINK TO PAGE OPTIONS
+    const matchedPages = workspacePages
+      .filter((p: any) => p.id !== activePageId && (p.title || 'Untitled').toLowerCase().includes(query))
+      .slice(0, 5)
+      .map((p: any) => ({
+        type: 'page',
+        id: p.id,
+        label: p.title || 'Untitled page',
+        icon: p.icon || '📄',
+        subtitle: p.parent_title ? `In ${p.parent_title}` : 'Workspace page',
+        page: p
+      }));
+
+    if (matchedPages.length > 0) {
+      items.push({ category: 'Link to page', options: matchedPages });
+    } else if (!query) {
+      const recent = workspacePages.slice(0, 3).map((p: any) => ({
+        type: 'page',
+        id: p.id,
+        label: p.title || 'Untitled page',
+        icon: p.icon || '📄',
+        subtitle: 'Recent page',
+        page: p
+      }));
+      if (recent.length > 0) {
+        items.push({ category: 'Link to page', options: recent });
+      }
+    }
+
+    // 4. NEW PAGE OPTION
+    if (query.length > 0) {
+      items.push({
+        category: 'New page',
+        options: [
+          { type: 'new-page', label: `Create new page "${atQuery}"`, queryVal: atQuery, icon: '➕' }
+        ]
+      });
+    }
+
+    return items;
+  };
+
+  const getFlatAtMenuItems = () => {
+    const groups = getAtMenuItems();
+    const flat: any[] = [];
+    groups.forEach(g => {
+      g.options.forEach((opt: any) => {
+        flat.push({ ...opt, category: g.category });
+      });
+    });
+    return flat;
+  };
+
+  const handleSelectAtItem = async (item: any) => {
+    if (!editor) return;
+    const { state } = editor;
+    const { $from } = state.selection;
+
+    const textBefore = $from.parent.textBetween(
+      Math.max(0, $from.parentOffset - 40),
+      $from.parentOffset,
+      undefined,
+      "\uFFFC"
+    );
+
+    const match = textBefore.match(/(?:^|\s)@([^\s]*)$/);
+    if (!match) return;
+
+    const atStart = $from.pos - match[0].length;
+    const atEnd = $from.pos;
+
+    if (item.type === 'date') {
+      const dateStr = item.date.toISOString();
+      const labelStr = `@${item.label} ${new Date().toLocaleTimeString('default', { hour: '2-digit', minute: '2-digit' })}`;
+      const dateHtml = `<span class="mention-date-pill" data-date="${dateStr}" data-label="${labelStr}" data-include-time="true">${labelStr}</span>&nbsp;`;
+      
+      editor.chain().focus().deleteRange({ from: atStart, to: atEnd }).insertContent(dateHtml).run();
+      addToast(`Inserted date pill: ${item.label}`, "info");
+    } 
+    else if (item.type === 'people') {
+      const inviteName = item.queryVal || 'Contributor';
+      const inviteHtml = `<span class="mention-people-pill" data-name="${inviteName}">👤 Invite ${inviteName}</span>&nbsp;`;
+      
+      editor.chain().focus().deleteRange({ from: atStart, to: atEnd }).insertContent(inviteHtml).run();
+      addToast(`Sent mock invitation email to "${inviteName}"!`, "success");
+    }
+    else if (item.type === 'page') {
+      const pageHtml = `<span class="mention-page-pill" data-page-id="${item.id}">${item.icon || '📄'} ${item.label}</span>&nbsp;`;
+      
+      editor.chain().focus().deleteRange({ from: atStart, to: atEnd }).insertContent(pageHtml).run();
+      addToast(`Linked to page: ${item.label}`, "success");
+    }
+    else if (item.type === 'new-page') {
+      try {
+        const res = await fetch("/api/pages", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ title: item.queryVal || "Untitled Page", icon: "📄", type: "editor" }),
+        });
+        if (res.ok) {
+          const newPage = await res.json();
+          const pageHtml = `<span class="mention-page-pill" data-page-id="${newPage.id}">📄 ${newPage.title}</span>&nbsp;`;
+          
+          editor.chain().focus().deleteRange({ from: atStart, to: atEnd }).insertContent(pageHtml).run();
+          addToast(`Created and linked new page: ${newPage.title}!`, "success");
+        }
+      } catch (err) {
+        console.error("Error creating sub-page:", err);
+      }
+    }
+
+    setAtMenuOpen(false);
+    atMenuOpenRef.current = false;
+  };
+
+  // --- Monthly Calendar Helpers & Logic ---
+  const getDaysInMonthGrid = (month: number, year: number) => {
+    const firstDayIndex = new Date(year, month, 1).getDay();
+    const totalDays = new Date(year, month + 1, 0).getDate();
+    const prevMonthTotalDays = new Date(year, month, 0).getDate();
+    const days: any[] = [];
+
+    for (let i = firstDayIndex - 1; i >= 0; i--) {
+      days.push({
+        day: prevMonthTotalDays - i,
+        isCurrentMonth: false,
+        date: new Date(year, month - 1, prevMonthTotalDays - i)
+      });
+    }
+
+    for (let i = 1; i <= totalDays; i++) {
+      days.push({
+        day: i,
+        isCurrentMonth: true,
+        date: new Date(year, month, i)
+      });
+    }
+
+    const remaining = 42 - days.length;
+    for (let i = 1; i <= remaining; i++) {
+      days.push({
+        day: i,
+        isCurrentMonth: false,
+        date: new Date(year, month + 1, i)
+      });
+    }
+
+    return days;
+  };
+
+  const getFormattedDatePillLabel = (dateVal: Date, includeTime: boolean, endDate: Date | null) => {
+    const now = new Date();
+    const isToday = dateVal.toDateString() === now.toDateString();
+    
+    const tomorrow = new Date(now);
+    tomorrow.setDate(now.getDate() + 1);
+    const isTomorrow = dateVal.toDateString() === tomorrow.toDateString();
+
+    const yesterday = new Date(now);
+    yesterday.setDate(now.getDate() - 1);
+    const isYesterday = dateVal.toDateString() === yesterday.toDateString();
+
+    let baseLabel = "";
+    if (isToday) baseLabel = "Today";
+    else if (isTomorrow) baseLabel = "Tomorrow";
+    else if (isYesterday) baseLabel = "Yesterday";
+    else {
+      baseLabel = dateVal.toLocaleDateString('default', { month: 'short', day: 'numeric', year: 'numeric' });
+    }
+
+    let timeStr = "";
+    if (includeTime) {
+      timeStr = " " + dateVal.toLocaleTimeString('default', { hour: '2-digit', minute: '2-digit' });
+    }
+
+    let endLabel = "";
+    if (endDate) {
+      const isEndToday = endDate.toDateString() === now.toDateString();
+      const isEndTomorrow = endDate.toDateString() === tomorrow.toDateString();
+      const isEndYesterday = endDate.toDateString() === yesterday.toDateString();
+      
+      let endBase = "";
+      if (isEndToday) endBase = "Today";
+      else if (isEndTomorrow) endBase = "Tomorrow";
+      else if (isEndYesterday) endBase = "Yesterday";
+      else {
+        endBase = endDate.toLocaleDateString('default', { month: 'short', day: 'numeric', year: 'numeric' });
+      }
+
+      let endTimeStr = "";
+      if (includeTime) {
+        endTimeStr = " " + endDate.toLocaleTimeString('default', { hour: '2-digit', minute: '2-digit' });
+      }
+      endLabel = ` → ${endBase}${endTimeStr}`;
+    }
+
+    return `@${baseLabel}${timeStr}${endLabel}`;
+  };
+
+  const updateDatePillInDoc = (dateVal: Date, includeTime: boolean, endDate: Date | null) => {
+    if (!editor || !selectedDatePillElement) return;
+
+    try {
+      const pos = editor.view.posAtDOM(selectedDatePillElement, 0);
+      if (pos !== null && pos !== undefined) {
+        const oldText = selectedDatePillElement.textContent || '';
+        const oldLen = oldText.length;
+        
+        const formattedLabel = getFormattedDatePillLabel(dateVal, includeTime, endDate);
+        const newHtml = `<span class="mention-date-pill" data-date="${dateVal.toISOString()}" data-label="${formattedLabel}" data-include-time="${includeTime}"${endDate ? ` data-end-date="${endDate.toISOString()}"` : ''}>${formattedLabel}</span>`;
+        
+        editor.chain().focus().deleteRange({ from: pos, to: pos + oldLen }).insertContentAt(pos, newHtml).run();
+        
+        setTimeout(() => {
+          if (!editor.view.dom) return;
+          const newEl = editor.view.dom.querySelector(`.mention-date-pill[data-date="${dateVal.toISOString()}"]`);
+          if (newEl) {
+            setSelectedDatePillElement(newEl as HTMLElement);
+          }
+        }, 50);
+      }
+    } catch (e) {
+      console.error("Error updating date pill:", e);
+    }
+  };
+
+  const handleCalendarDayClick = (dayDate: Date) => {
+    const newDate = new Date(dayDate);
+    newDate.setHours(datePickerDate.getHours());
+    newDate.setMinutes(datePickerDate.getMinutes());
+    newDate.setSeconds(0);
+    newDate.setMilliseconds(0);
+    
+    setDatePickerDate(newDate);
+    updateDatePillInDoc(newDate, datePickerIncludeTime, datePickerEndDate);
+  };
+
+  const handleEditorClick = (e: React.MouseEvent) => {
+    const target = e.target as HTMLElement;
+    
+    // Clicking Date Pill opens Detailed picker
+    const datePill = target.closest('.mention-date-pill');
+    if (datePill) {
+      const dateVal = datePill.getAttribute('data-date');
+      const includeTimeVal = datePill.getAttribute('data-include-time') === 'true';
+      const endDateVal = datePill.getAttribute('data-end-date');
+      
+      const parsedDate = dateVal ? new Date(dateVal) : new Date();
+      setSelectedDatePillElement(datePill as HTMLElement);
+      setDatePickerDate(parsedDate);
+      setDatePickerIncludeTime(includeTimeVal);
+      setDatePickerEndDate(endDateVal ? new Date(endDateVal) : null);
+      setDatePickerMonth(parsedDate.getMonth());
+      setDatePickerYear(parsedDate.getFullYear());
+      setTimeInputVal(parsedDate.toLocaleTimeString('default', { hour: '2-digit', minute: '2-digit' }));
+      
+      const rect = datePill.getBoundingClientRect();
+      setDatePickerCoords({
+        top: rect.bottom + window.scrollY + 8,
+        left: Math.max(10, rect.left + window.scrollX - 80)
+      });
+      setDatePickerOpen(true);
+      return;
+    }
+
+    // Clicking Linked Page Pill navigates to page
+    const pagePill = target.closest('.mention-page-pill');
+    if (pagePill) {
+      const pageId = pagePill.getAttribute('data-page-id');
+      if (pageId) {
+        setActivePage(pageId);
+      }
+      return;
+    }
+  };
+
+  // --- Real-time @ typing and keyword scanning interceptor ---
+  const handleEditorSelectionOrTextUpdate = (editorInstance: any) => {
+    if (!editorInstance) return;
+    const { state, view } = editorInstance;
+    const { selection } = state;
+    const { $from } = selection;
+
+    if (!$from.parent.isTextblock) {
+      setAtMenuOpen(false);
+      atMenuOpenRef.current = false;
+      return;
+    }
+
+    const textBefore = $from.parent.textBetween(
+      Math.max(0, $from.parentOffset - 40),
+      $from.parentOffset,
+      undefined,
+      "\uFFFC"
+    );
+
+    const match = textBefore.match(/(?:^|\s)@([^\s]*)$/);
+    if (match) {
+      const query = match[1];
+      setAtQuery(query);
+      atQueryRef.current = query;
+      setAtMenuOpen(true);
+      atMenuOpenRef.current = true;
+      setAtMenuIndex(0); // Reset index on new search
+      
+      // Load workspace pages for links
+      if (workspacePages.length === 0) {
+        fetch("/api/pages")
+          .then(res => res.ok ? res.json() : [])
+          .then(data => setWorkspacePages(data))
+          .catch(err => console.error("Error loading pages for autocomplete:", err));
+      }
+
+      try {
+        const domRect = view.coordsAtPos(selection.from);
+        setAtMenuCoords({
+          top: domRect.bottom + window.scrollY + 5,
+          left: Math.max(10, domRect.left + window.scrollX)
+        });
+      } catch (e) {
+        console.warn(e);
+      }
+
+      // Scanner for Meeting Notes Assistant
+      const activeLine = $from.parent.textContent;
+      if (activeLine.toLowerCase().includes("meeting") && !meetingToastDismissed) {
+        setShowMeetingToast(true);
+      }
+    } else {
+      setAtMenuOpen(false);
+      atMenuOpenRef.current = false;
+    }
+  };
+
+  // --- Gemini Meeting Outline Generator ---
+  const handleAddMeetingNotes = async () => {
+    addToast("Generating structured meeting template...", "info");
+    try {
+      const res = await fetch("/api/generate", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          context: "Create a beautiful meeting notes template with fields for Date, attendees list, agenda, key discussions, decision logs, and an action items checklist.",
+          command: "prompt",
+          model: aiModel
+        })
+      });
+      if (res.ok) {
+        const data = await res.json();
+        const tiptapJson = markdownToTiptap(data.completion || "") as any;
+        if (tiptapJson && tiptapJson.content) {
+          editor?.chain().focus().insertContent(tiptapJson.content).run();
+        }
+        addToast("AI Meeting Notes template prepended!", "success");
+        setShowMeetingToast(false);
+      } else {
+        addToast("Failed to generate meeting template.", "error");
+      }
+    } catch (err) {
+      console.error(err);
+      addToast("Failed to connect to AI server.", "error");
+    }
+  };
 
   const COVER_IMAGES = [
     "https://images.unsplash.com/photo-1707343843437-caacff5cfa74?q=80&w=2275&auto=format&fit=crop",
@@ -435,6 +860,10 @@ export default function Editor() {
           setShowAiMenu(true);
         }
       }
+      handleEditorSelectionOrTextUpdate(editor);
+    },
+    onSelectionUpdate: ({ editor }) => {
+      handleEditorSelectionOrTextUpdate(editor);
     }
   });
 
@@ -462,6 +891,36 @@ export default function Editor() {
       if (!editor) return;
       const { state } = editor;
       const { $anchor } = state.selection;
+
+      // 1. Intercept keyboard inputs during @ Autocomplete menu active
+      if (atMenuOpenRef.current) {
+        if (e.key === 'ArrowUp') {
+          e.preventDefault();
+          const count = getFlatAtMenuItems().length;
+          setAtMenuIndex(prev => (prev > 0 ? prev - 1 : count - 1));
+          return;
+        } else if (e.key === 'ArrowDown') {
+          e.preventDefault();
+          const count = getFlatAtMenuItems().length;
+          setAtMenuIndex(prev => (prev < count - 1 ? prev + 1 : 0));
+          return;
+        } else if (e.key === 'Enter') {
+          e.preventDefault();
+          const flat = getFlatAtMenuItems();
+          const idx = atMenuIndexRef.current;
+          if (flat[idx]) {
+            handleSelectAtItem(flat[idx]);
+          }
+          return;
+        } else if (e.key === 'Escape') {
+          e.preventDefault();
+          setAtMenuOpen(false);
+          atMenuOpenRef.current = false;
+          return;
+        }
+      }
+
+      // 2. Intercept keyboard inputs during / Slash command menu active
       const isSlashMenuOpen = $anchor.parent.isTextblock && $anchor.parent.textContent === '/';
       
       if (isSlashMenuOpen) {
@@ -611,6 +1070,7 @@ export default function Editor() {
   if (activePageId === 'automations') return <AgentsView />;
   if (activePageId === 'templates') return <TemplatesView />;
   if (activePageId === 'trash') return <TrashView />;
+  if (activePageId === 'whatsapp') return <WhatsAppView />;
 
   if (!activePage) {
     return <CommandCenter />;
