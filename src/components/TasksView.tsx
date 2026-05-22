@@ -99,27 +99,37 @@ export default function TasksView() {
   const formatTaskDue = (task: any) => {
     if (!task.due_date) return null;
     
-    const today = new Date();
-    const todayStr = today.toISOString().split('T')[0];
+    try {
+      const isISO = task.due_date.includes('T');
+      const datePart = isISO ? task.due_date.split('T')[0] : task.due_date;
+      const timePart = isISO ? task.due_date.split('T')[1]?.substring(0, 5) : null;
 
-    const tomorrow = new Date();
-    tomorrow.setDate(tomorrow.getDate() + 1);
-    const tomorrowStr = tomorrow.toISOString().split('T')[0];
+      const today = new Date();
+      const todayStr = today.toISOString().split('T')[0];
 
-    if (task.due_date < todayStr) {
-      return { text: 'Overdue', isOverdue: true };
-    } else if (task.due_date === todayStr) {
-      return { text: 'Today', isOverdue: false };
-    } else if (task.due_date === tomorrowStr) {
-      return { text: 'Tomorrow', isOverdue: false };
-    } else {
-      try {
-        const date = new Date(task.due_date + 'T00:00:00');
-        const formatted = date.toLocaleDateString([], { month: 'short', day: 'numeric' });
-        return { text: formatted, isOverdue: false };
-      } catch (e) {
-        return { text: task.due_date, isOverdue: false };
+      const tomorrow = new Date();
+      tomorrow.setDate(tomorrow.getDate() + 1);
+      const tomorrowStr = tomorrow.toISOString().split('T')[0];
+
+      let timeLabel = '';
+      if (isISO && timePart && timePart !== '00:00') {
+        const fullDateObj = new Date(task.due_date);
+        timeLabel = ' at ' + fullDateObj.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
       }
+
+      if (datePart < todayStr) {
+        return { text: `Overdue${timeLabel}`, isOverdue: true };
+      } else if (datePart === todayStr) {
+        return { text: `Today${timeLabel}`, isOverdue: false };
+      } else if (datePart === tomorrowStr) {
+        return { text: `Tomorrow${timeLabel}`, isOverdue: false };
+      } else {
+        const dateObj = new Date(datePart + 'T00:00:00');
+        const formattedDate = dateObj.toLocaleDateString([], { month: 'short', day: 'numeric' });
+        return { text: `${formattedDate}${timeLabel}`, isOverdue: false };
+      }
+    } catch (e) {
+      return { text: task.due_date, isOverdue: false };
     }
   };
 

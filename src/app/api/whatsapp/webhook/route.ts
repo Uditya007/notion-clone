@@ -58,7 +58,7 @@ export async function POST(req: Request) {
 
     // 2. Parse schedule intent using Gemini or robust local NLP matcher fallback
     let parsed: {
-      type: 'task' | 'meeting' | 'unknown';
+      type: 'task' | 'meeting' | 'query_tasks' | 'unknown';
       title: string;
       date: string;
       duration?: number;
@@ -74,14 +74,19 @@ export async function POST(req: Request) {
 
         const prompt = `
           Analyze this WhatsApp message: "${message}".
-          Decide if the user wants to schedule a "task" (to-do, follow up, reminder) or a "meeting" (sync, call, calendar event).
+          Decide if the user wants to:
+          1. "task": Schedule a new task (to-do, follow up, reminder, buy, etc.).
+          2. "meeting": Schedule a new meeting (sync, call, calendar event).
+          3. "query_tasks": Query, list, check, or be reminded of existing tasks already scheduled (e.g. "what are my tasks for tomorrow?", "remind me what tasks I have scheduled", "list my tasks for today").
+          4. "unknown": None of the above.
+          
           Use the current time ${currentTimeISO} as the base reference to resolve terms like "tomorrow", "next Monday", "5pm", etc.
           
           Return ONLY a valid JSON object of the following format:
           {
-            "type": "task" | "meeting" | "unknown",
-            "title": "Short title describing the task or meeting",
-            "date": "ISO 8601 string for the date/time",
+            "type": "task" | "meeting" | "query_tasks" | "unknown",
+            "title": "Short title describing the task/meeting, or the date description if query (e.g. 'tomorrow')",
+            "date": "ISO 8601 string for the date/time (or target date if query)",
             "duration": 60 (optional, duration in minutes if a meeting)
           }
           No formatting, no backticks, no markdown, no chat text. Just raw JSON.
@@ -93,7 +98,7 @@ export async function POST(req: Request) {
         });
 
         const parsedJson = JSON.parse(text.trim().replace(/^```json\s*|```$/gi, ''));
-        if (parsedJson && (parsedJson.type === 'task' || parsedJson.type === 'meeting')) {
+        if (parsedJson && (parsedJson.type === 'task' || parsedJson.type === 'meeting' || parsedJson.type === 'query_tasks')) {
           parsed = parsedJson;
         }
       } catch (err) {
@@ -101,53 +106,68 @@ export async function POST(req: Request) {
       }
     }
 
-    // Local high-fidelity NLP rules (handles "task/todo" and "meeting/sync" beautifully)
+    // Local high-fidelity NLP rules (handles "task/todo", "meeting/sync" and "query_tasks" beautifully)
     if (parsed.type === 'unknown') {
       const lower = message.toLowerCase();
       const now = new Date();
       
-      // Determine base date
-      let targetDate = new Date();
-      if (lower.includes('tomorrow')) {
-        targetDate.setDate(now.getDate() + 1);
-      } else if (lower.includes('next week') || lower.includes('in a week')) {
-        targetDate.setDate(now.getDate() + 7);
-      }
+      const isQuery = lower.includes('list') || lower.includes('show') || lower.includes('what are') || lower.includes('remind me') || lower.includes('check tasks') || lower.includes('get tasks');
 
-      // Check for times
-      const timeMatch = lower.match(/(\d{1,2})\s*(am|pm)/i);
-      if (timeMatch) {
-        let hr = parseInt(timeMatch[1]);
-        const isPm = timeMatch[2].toLowerCase() === 'pm';
-        if (isPm && hr < 12) hr += 12;
-        if (!isPm && hr === 12) hr = 0;
-        targetDate.setHours(hr, 0, 0, 0);
-      } else {
-        // Default to 9:00 AM tomorrow or today
-        targetDate.setHours(9, 0, 0, 0);
-      }
-
-      // Intent determination
-      const isMeeting = lower.includes('meeting') || lower.includes('sync') || lower.includes('call') || lower.includes('zoom');
-      const isTask = lower.includes('task') || lower.includes('todo') || lower.includes('remind') || lower.includes('buy') || lower.includes('submit') || lower.includes('write');
-
-      if (isMeeting) {
-        // Extract meeting title
-        let title = message.replace(/(schedule|meeting|sync|call|tomorrow|next week|at|on|for|pm|am|\d+)/gi, '').trim();
+      if (isQuery) {
+        let targetDate = new Date();
+        if (lower.includes('tomorrow')) {
+          targetDate.setDate(now.getDate() + 1);
+        } else if (lower.includes('yesterday')) {
+          targetDate.setDate(now.getDate() - 1);
+        }
         parsed = {
-          type: 'meeting',
-          title: title ? `Sync: ${title}` : 'Scheduled Sync Call',
-          date: targetDate.toISOString(),
-          duration: 60
-        };
-      } else {
-        // Fallback default is a task
-        let title = message.replace(/(schedule|task|todo|remind|tomorrow|next week|at|on|for|pm|am|\d+)/gi, '').trim();
-        parsed = {
-          type: 'task',
-          title: title || 'Task scheduled via WhatsApp',
+          type: 'query_tasks',
+          title: lower.includes('tomorrow') ? 'tomorrow' : 'today',
           date: targetDate.toISOString()
         };
+      } else {
+        // Determine base date
+        let targetDate = new Date();
+        if (lower.includes('tomorrow')) {
+          targetDate.setDate(now.getDate() + 1);
+        } else if (lower.includes('next week') || lower.includes('in a week')) {
+          targetDate.setDate(now.getDate() + 7);
+        }
+
+        // Check for times
+        const timeMatch = lower.match(/(\d{1,2})\s*(am|pm)/i);
+        if (timeMatch) {
+          let hr = parseInt(timeMatch[1]);
+          const isPm = timeMatch[2].toLowerCase() === 'pm';
+          if (isPm && hr < 12) hr += 12;
+          if (!isPm && hr === 12) hr = 0;
+          targetDate.setHours(hr, 0, 0, 0);
+        } else {
+          // Default to 9:00 AM tomorrow or today
+          targetDate.setHours(9, 0, 0, 0);
+        }
+
+        // Intent determination
+        const isMeeting = lower.includes('meeting') || lower.includes('sync') || lower.includes('call') || lower.includes('zoom');
+
+        if (isMeeting) {
+          // Extract meeting title
+          let title = message.replace(/(schedule|meeting|sync|call|tomorrow|next week|at|on|for|pm|am|\d+)/gi, '').trim();
+          parsed = {
+            type: 'meeting',
+            title: title ? `Sync: ${title}` : 'Scheduled Sync Call',
+            date: targetDate.toISOString(),
+            duration: 60
+          };
+        } else {
+          // Fallback default is a task
+          let title = message.replace(/(schedule|task|todo|remind|tomorrow|next week|at|on|for|pm|am|\d+)/gi, '').trim();
+          parsed = {
+            type: 'task',
+            title: title || 'Task scheduled via WhatsApp',
+            date: targetDate.toISOString()
+          };
+        }
       }
     }
 
@@ -228,6 +248,95 @@ export async function POST(req: Request) {
 
       createdPage = pageData;
       replyText = `🎙️ *Meeting Scheduled!* \n\nI have successfully scheduled your meeting: *"${parsed.title}"*.\n📅 *Time:* ${formattedTime}\n📄 *Workspace Note created:* "Meeting: ${parsed.title}" with default agenda!\n\nI've generated a Notion-style briefing page for you in your workspace.`;
+    } 
+    else if (parsed.type === 'query_tasks') {
+      const lowerMsg = message.toLowerCase();
+      // If the query doesn't specify a clear target day (e.g. general query), query all incomplete tasks
+      const hasSpecificDay = lowerMsg.includes('tomorrow') || lowerMsg.includes('today') || lowerMsg.includes('yesterday') || lowerMsg.includes('monday') || lowerMsg.includes('tuesday') || lowerMsg.includes('wednesday') || lowerMsg.includes('thursday') || lowerMsg.includes('friday') || lowerMsg.includes('saturday') || lowerMsg.includes('sunday');
+
+      if (!hasSpecificDay) {
+        // Query all incomplete tasks
+        const { data: tasksList, error: tasksErr } = await supabaseAdmin
+          .from('tasks')
+          .select('*')
+          .eq('user_id', userId)
+          .eq('completed', false)
+          .order('due_date', { ascending: true, nullsFirst: false });
+
+        if (tasksErr) throw tasksErr;
+
+        if (!tasksList || tasksList.length === 0) {
+          replyText = `🎉 *All Caught Up!* \n\nYou have no incomplete tasks in your Clearspace workspace right now.\n\nEnjoy your free time!`;
+        } else {
+          let listStr = `📋 *Your Incomplete Tasks:* \n\n`;
+          tasksList.forEach((task: any, index: number) => {
+            let dueStr = '';
+            if (task.due_date) {
+              const isISO = task.due_date.includes('T');
+              const datePart = isISO ? task.due_date.split('T')[0] : task.due_date;
+              const dateObj = new Date(datePart + 'T00:00:00');
+              const formattedDate = dateObj.toLocaleDateString([], { month: 'short', day: 'numeric' });
+              
+              let timeStr = '';
+              if (isISO) {
+                const timePart = task.due_date.split('T')[1]?.substring(0, 5);
+                if (timePart && timePart !== '00:00') {
+                  const fullDateObj = new Date(task.due_date);
+                  timeStr = ` at ${fullDateObj.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}`;
+                }
+              }
+              dueStr = ` (📅 Due: *${formattedDate}${timeStr}*)`;
+            }
+            listStr += `${index + 1}. *${task.title}*${dueStr}\n`;
+          });
+          
+          listStr += `\nAccess your workspace to manage or mark them as completed!`;
+          replyText = listStr;
+        }
+      } else {
+        // Target date range query
+        const targetDateObj = new Date(parsed.date);
+        const startOfDay = new Date(targetDateObj);
+        startOfDay.setHours(0, 0, 0, 0);
+        const endOfDay = new Date(targetDateObj);
+        endOfDay.setHours(23, 59, 59, 999);
+
+        const { data: tasksList, error: tasksErr } = await supabaseAdmin
+          .from('tasks')
+          .select('*')
+          .eq('user_id', userId)
+          .gte('due_date', startOfDay.toISOString())
+          .lte('due_date', endOfDay.toISOString())
+          .order('due_date', { ascending: true });
+
+        if (tasksErr) throw tasksErr;
+
+        const formattedDay = targetDateObj.toLocaleDateString('default', {
+          weekday: 'long', month: 'short', day: 'numeric'
+        });
+
+        if (!tasksList || tasksList.length === 0) {
+          replyText = `🎉 *No Tasks Scheduled!* \n\nYou have no tasks scheduled for *${formattedDay}* in Clearspace.\n\nEnjoy your clear space!`;
+        } else {
+          let listStr = `📋 *Your Tasks for ${formattedDay}:* \n\n`;
+          tasksList.forEach((task: any, index: number) => {
+            let timeStr = '';
+            if (task.due_date && task.due_date.includes('T')) {
+              const timePart = task.due_date.split('T')[1]?.substring(0, 5);
+              if (timePart && timePart !== '00:00') {
+                const fullDateObj = new Date(task.due_date);
+                timeStr = ` (🕒 ${fullDateObj.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })})`;
+              }
+            }
+            const statusIcon = task.completed ? '✅' : '❌';
+            const statusText = task.completed ? 'Completed' : 'Incomplete';
+            listStr += `${index + 1}. *${task.title}*${timeStr} - ${statusIcon} _${statusText}_\n`;
+          });
+          
+          listStr += `\nKeep up the great work!`;
+          replyText = listStr;
+        }
+      }
     } else {
       replyText = `Sorry, I couldn't resolve if that was a task or a meeting. Try sending something like: \n- *"Schedule task: submit monthly invoice tomorrow by 5pm"* \n- *"Schedule meeting: project planning tomorrow at 3pm"*`;
     }
