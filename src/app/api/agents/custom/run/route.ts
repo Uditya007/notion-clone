@@ -18,7 +18,7 @@ export async function POST(request: Request) {
     }
 
     const body = await request.json();
-    const { agentId, context: quickRunContext } = body;
+    const { agentId, context: quickRunContext, model } = body;
 
     if (!agentId) {
       return NextResponse.json({ error: 'Missing agentId' }, { status: 400 });
@@ -128,10 +128,11 @@ export async function POST(request: Request) {
 
     const google = createGoogleGenerativeAI({ apiKey: googleApiKey });
 
-    console.log(`[Custom Agent Runner] Executing prompt for agent "${agent.name}"...`);
+    const selectedModel = model || 'gemini-2.5-flash';
+    console.log(`[Custom Agent Runner] Executing prompt for agent "${agent.name}" using model ${selectedModel}...`);
 
     const { text } = await generateText({
-      model: google('gemini-2.5-flash'),
+      model: google(selectedModel),
       system: `You are a highly capable operational AI agent named "${agent.name}". 
 ${agent.description ? `Description of your role: ${agent.description}` : ''}
 Formulate your response in clean, professional markdown layout structure (headings, bold, lists). Do not include any extra wrapper text or pleasantries.`,

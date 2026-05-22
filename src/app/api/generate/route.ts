@@ -5,7 +5,7 @@ import { createClient } from '@/lib/supabase/server';
 export const dynamic = 'force-dynamic';
 
 export async function POST(req: Request) {
-  const { prompt, context, command, grounded } = await req.json();
+  const { prompt, context, command, grounded, model } = await req.json();
 
   console.log("[API/GENERATE] Received command:", command, "grounded:", grounded);
   console.log("[API/GENERATE] GOOGLE_GENERATIVE_AI_API_KEY exists in process.env:", !!process.env.GOOGLE_GENERATIVE_AI_API_KEY);
@@ -103,9 +103,10 @@ Always be extremely polite and helpful. If you execute a task or event command, 
       apiKey: process.env.GOOGLE_GENERATIVE_AI_API_KEY
     });
 
-    console.log("[API/GENERATE] Calling streamText with gemini-2.5-flash...");
+    const selectedModel = model || 'gemini-2.5-flash';
+    console.log(`[API/GENERATE] Calling streamText with ${selectedModel}...`);
     const result = await streamText({
-      model: google('gemini-2.5-flash'),
+      model: google(selectedModel),
       system: systemPrompt,
       prompt: prompt || "Execute the requested command on the document context.",
     });

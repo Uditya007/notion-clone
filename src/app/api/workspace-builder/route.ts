@@ -38,7 +38,7 @@ export async function POST(req: Request) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
-    const { description } = await req.json();
+    const { description, model } = await req.json();
     if (!description || typeof description !== 'string') {
       return NextResponse.json({ error: 'Invalid description' }, { status: 400 });
     }
@@ -81,9 +81,10 @@ Return this exact JSON format:
   ]
 }`;
 
-    console.log("[AI Workspace Builder] Sending prompt to AI model...");
+    const selectedModel = model || 'gemini-2.5-flash';
+    console.log(`[AI Workspace Builder] Sending prompt to AI model using ${selectedModel}...`);
     const { text } = await generateText({
-      model: google('gemini-2.5-flash'),
+      model: google(selectedModel),
       system: systemPrompt,
       prompt: userPrompt,
     });

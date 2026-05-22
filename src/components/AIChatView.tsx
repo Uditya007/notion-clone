@@ -8,12 +8,14 @@ import { useCompletion } from '@ai-sdk/react';
 import { supabase } from '@/lib/supabase/client';
 
 export default function AIChatView() {
-  const { activeConversationId, setActiveConversation } = useAppStore();
+  const { activeConversationId, setActiveConversation, aiModel } = useAppStore();
   const [messages, setMessages] = useState<any[]>([]);
   const [convTitle, setConvTitle] = useState('New Chat');
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const [inputText, setInputText] = useState('');
   const [isGrounded, setIsGrounded] = useState(true);
+  
+  // ... rest of the component state/handlers ...
 
   const fetchMessages = async (convId: string) => {
     try {
@@ -140,7 +142,8 @@ export default function AIChatView() {
       body: {
         context: historyContext ? `Past conversation context:\n${historyContext}` : '',
         command: 'prompt',
-        grounded: isGrounded
+        grounded: isGrounded,
+        model: aiModel
       }
     });
   };

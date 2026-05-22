@@ -2,13 +2,13 @@
 
 import { useAppStore } from '@/store/useAppStore';
 import styles from './Modals.module.css';
-import { User, LogOut, Check, Settings, Monitor, Lock, Bell, Palette, Globe, X } from "lucide-react";
+import { User, LogOut, Check, Settings, Monitor, Lock, Bell, Palette, Globe, X, Sparkles } from "lucide-react";
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { supabase } from '@/lib/supabase/client';
 
 export default function SettingsModal() {
-  const { isSettingsOpen, setSettingsOpen, addToast } = useAppStore();
+  const { isSettingsOpen, setSettingsOpen, addToast, aiModel, setAIModel } = useAppStore();
   const [activeTab, setActiveTab] = useState('account');
   const router = useRouter();
   const [user, setUser] = useState<any>(null);
@@ -158,12 +158,26 @@ export default function SettingsModal() {
             >
               <Globe size={16} /> Language & region
             </button>
+            <button 
+              className={`${styles.settingsNavItem} ${activeTab === 'ai' ? styles.settingsNavActive : ''}`}
+              onClick={() => setActiveTab('ai')}
+            >
+              <Sparkles size={16} /> AI Settings
+            </button>
           </div>
         </div>
         
         <div className={styles.settingsContent}>
           <div className={styles.settingsContentHeader}>
-            <h3>{activeTab === 'account' ? 'My account' : activeTab === 'appearance' ? 'Appearance' : 'Language & region'}</h3>
+            <h3>
+              {activeTab === 'account' 
+                ? 'My account' 
+                : activeTab === 'appearance' 
+                ? 'Appearance' 
+                : activeTab === 'ai'
+                ? 'AI Settings'
+                : 'Language & region'}
+            </h3>
             <button className={styles.closeBtn} onClick={() => setSettingsOpen(false)}>
               <X size={16} />
             </button>
@@ -288,6 +302,57 @@ export default function SettingsModal() {
                   <select className={styles.settingsSelect}>
                     <option>English</option>
                   </select>
+                </div>
+              </div>
+            )}
+
+            {activeTab === 'ai' && (
+              <div className={styles.settingsSection}>
+                <div className={styles.settingsRow}>
+                  <div className={styles.settingsLabel}>Default AI Model</div>
+                  <select 
+                    className={styles.settingsSelect}
+                    value={aiModel}
+                    onChange={(e) => setAIModel(e.target.value)}
+                  >
+                    <option value="gemini-2.5-flash">Gemini 2.5 Flash (Recommended: Ultra-fast & Economical)</option>
+                    <option value="gemini-2.5-pro">Gemini 2.5 Pro (Highest Intelligence - Reasoning & Coding)</option>
+                    <option value="gemini-1.5-flash">Gemini 1.5 Flash (Standard Speed)</option>
+                    <option value="gemini-1.5-pro">Gemini 1.5 Pro (Standard Intelligence)</option>
+                  </select>
+                </div>
+
+                <div style={{
+                  marginTop: '20px',
+                  padding: '16px',
+                  borderRadius: 'var(--radius-md)',
+                  border: '1.5px solid var(--border-light)',
+                  background: 'rgba(255, 255, 255, 0.02)',
+                }}>
+                  <div style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '8px',
+                    fontWeight: 600,
+                    color: 'var(--text-main)',
+                    marginBottom: '12px',
+                    fontSize: '14px'
+                  }}>
+                    <Sparkles size={16} style={{ color: '#eab308' }} />
+                    <span>Gemini Core Models Guide</span>
+                  </div>
+                  
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: '12px', fontSize: '13px', lineHeight: '1.5' }}>
+                    <div style={{ borderLeft: '3.5px solid #10b981', paddingLeft: '10px' }}>
+                      <strong style={{ color: '#10b981', display: 'block', marginBottom: '2px' }}>Gemini 2.5 Flash</strong>
+                      <span style={{ color: 'var(--text-muted)' }}>Highly optimized for high-speed interactions. Best for daily writing assistance, instant page summaries, workspace search, and automated operations.</span>
+                    </div>
+
+                    <div style={{ borderLeft: '3.5px solid #3b82f6', paddingLeft: '10px' }}>
+                      <strong style={{ color: '#3b82f6', display: 'block', marginBottom: '2px' }}>Gemini 2.5 Pro</strong>
+                      <span style={{ color: 'var(--text-muted)' }}>Tailored for high-complexity cognitive reasoning. Best for structured workspace architecture planning, writing code, and complex automation workflows.</span>
+                    </div>
+                  </div>
                 </div>
               </div>
             )}

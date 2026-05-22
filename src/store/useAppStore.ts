@@ -88,6 +88,10 @@ type AppState = {
   addToast: (message: string, type: ToastType, duration?: number) => void;
   removeToast: (id: string) => void;
   
+  // AI Model state
+  aiModel: string;
+  setAIModel: (model: string) => void;
+  
   // Actions
   setActivePage: (id: string | null) => void;
   setSearchOpen: (isOpen: boolean) => void;
@@ -105,6 +109,7 @@ export const useAppStore = create<AppState>((set) => ({
   isAIPanelOpen: false,
   sidebarCollapsed: false,
   toasts: [],
+  aiModel: typeof window !== 'undefined' ? (localStorage.getItem('clearspace-ai-model') || 'gemini-2.5-flash') : 'gemini-2.5-flash',
   
   addToast: (message, type, duration = 3000) => {
     const id = Math.random().toString(36).substr(2, 9);
@@ -115,6 +120,12 @@ export const useAppStore = create<AppState>((set) => ({
   },
   
   removeToast: (id) => set((state) => ({ toasts: state.toasts.filter(t => t.id !== id) })),
+  setAIModel: (model) => {
+    if (typeof window !== 'undefined') {
+      localStorage.setItem('clearspace-ai-model', model);
+    }
+    set({ aiModel: model });
+  },
   
   setActivePage: (id) => set({ activePageId: id, activeConversationId: null, isSearchOpen: false }),
   setSearchOpen: (isOpen) => set({ isSearchOpen: isOpen }),

@@ -181,7 +181,7 @@ const getUserColor = (id: string) => {
 
 export default function Editor() {
   const [isMounted, setIsMounted] = useState(false);
-  const { activePageId, setActivePage } = useAppStore();
+  const { activePageId, setActivePage, aiModel } = useAppStore();
   const [activePage, setActivePageData] = useState<any>(null);
   const [workspaceName, setWorkspaceName] = useState("My Workspace");
   const [hasDatabase, setHasDatabase] = useState(false);
@@ -567,7 +567,8 @@ export default function Editor() {
     complete(input, {
       body: {
         context: editor?.getText() || '',
-        command: 'prompt'
+        command: 'prompt',
+        model: aiModel
       }
     });
   };
@@ -576,7 +577,8 @@ export default function Editor() {
     complete('', {
       body: {
         context: editor?.getText() || '',
-        command
+        command,
+        model: aiModel
       }
     });
   };

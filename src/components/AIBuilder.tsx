@@ -37,7 +37,7 @@ export default function AIBuilder({ isOpen, onClose }: AIBuilderProps) {
   const [currentStepIndex, setCurrentStepIndex] = useState(0);
   const [error, setError] = useState<string | null>(null);
   
-  const { setActivePage } = useAppStore();
+  const { setActivePage, aiModel } = useAppStore();
 
   useEffect(() => {
     let interval: NodeJS.Timeout;
@@ -70,7 +70,7 @@ export default function AIBuilder({ isOpen, onClose }: AIBuilderProps) {
       const response = await fetch('/api/workspace-builder', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ description })
+        body: JSON.stringify({ description, model: aiModel })
       });
 
       const data = await response.json();
