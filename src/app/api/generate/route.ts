@@ -115,7 +115,13 @@ Always explain clearly and politely in your text response what action(s) you are
       apiKey: process.env.GOOGLE_GENERATIVE_AI_API_KEY
     });
 
-    const selectedModel = model || 'gemini-2.5-flash';
+    let selectedModel = model || 'gemini-2.5-flash';
+    if (selectedModel === 'gemini-1.5-flash') {
+      selectedModel = 'gemini-flash-latest';
+    } else if (selectedModel === 'gemini-1.5-pro') {
+      selectedModel = 'gemini-pro-latest';
+    }
+    
     console.log(`[API/GENERATE] Calling streamText with ${selectedModel}...`);
     const result = await streamText({
       model: google(selectedModel),

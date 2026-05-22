@@ -128,7 +128,12 @@ export async function POST(request: Request) {
 
     const google = createGoogleGenerativeAI({ apiKey: googleApiKey });
 
-    const selectedModel = model || 'gemini-2.5-flash';
+    let selectedModel = model || 'gemini-2.5-flash';
+    if (selectedModel === 'gemini-1.5-flash') {
+      selectedModel = 'gemini-flash-latest';
+    } else if (selectedModel === 'gemini-1.5-pro') {
+      selectedModel = 'gemini-pro-latest';
+    }
     console.log(`[Custom Agent Runner] Executing prompt for agent "${agent.name}" using model ${selectedModel}...`);
 
     const { text } = await generateText({

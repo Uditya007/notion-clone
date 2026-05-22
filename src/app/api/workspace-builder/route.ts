@@ -81,7 +81,13 @@ Return this exact JSON format:
   ]
 }`;
 
-    const selectedModel = model || 'gemini-2.5-flash';
+    let selectedModel = model || 'gemini-2.5-flash';
+    if (selectedModel === 'gemini-1.5-flash') {
+      selectedModel = 'gemini-flash-latest';
+    } else if (selectedModel === 'gemini-1.5-pro') {
+      selectedModel = 'gemini-pro-latest';
+    }
+
     console.log(`[AI Workspace Builder] Sending prompt to AI model using ${selectedModel}...`);
     const { text } = await generateText({
       model: google(selectedModel),

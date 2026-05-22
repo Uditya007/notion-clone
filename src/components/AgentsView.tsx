@@ -308,7 +308,7 @@ export default function AgentsView() {
   const [outputDatabaseId, setOutputDatabaseId] = useState('');
   const [isVariablesExpanded, setIsVariablesExpanded] = useState(false);
 
-  const { setActivePage, addToast } = useAppStore();
+  const { setActivePage, addToast, aiModel } = useAppStore();
   const panelRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -552,7 +552,8 @@ export default function AgentsView() {
         endpoint = '/api/agents/custom/run';
         body = { 
           agentId: selectedBuiltInAgent.id,
-          context: quickRunContext
+          context: quickRunContext,
+          model: aiModel
         };
       } else {
         endpoint = `/api/agents/${selectedBuiltInAgent.type}`;
