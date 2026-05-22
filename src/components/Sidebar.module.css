@@ -898,3 +898,260 @@
   background-color: rgba(59, 130, 246, 0.15);
 }
 
+/* OVERHAULED SIDEBAR NEW STYLES */
+.topTabBar {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 4px 12px 10px;
+}
+
+.topTabActive {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  background-color: var(--bg-active);
+  border: 1px solid var(--border);
+  padding: 4px 12px;
+  border-radius: 100px;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text-main);
+  cursor: pointer;
+  box-shadow: var(--shadow-sm);
+  outline: none;
+}
+
+.topTabButton {
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  background-color: transparent;
+  border: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--gray-400);
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.topTabButton:hover {
+  background-color: var(--bg-hover);
+  color: var(--text-main);
+}
+
+.topTabButtonActive {
+  color: var(--text-main);
+  background-color: var(--bg-active);
+}
+
+/* AGENTS SECTION */
+.agentsSection {
+  padding: 8px 0;
+  border-bottom: 1px solid var(--border);
+}
+
+.agentsRow {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 8px 12px;
+}
+
+.agentCard {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  width: 64px;
+  cursor: pointer;
+}
+
+.agentCircle {
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  border: 1.5px solid var(--border);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-color: var(--bg-hover);
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  overflow: hidden;
+}
+
+.agentAvatarImg {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.newAgentCircle {
+  border-style: dashed;
+  border-width: 1.5px;
+  color: var(--gray-400);
+}
+
+.agentCard:hover .agentCircle {
+  border-color: var(--primary, #3b82f6);
+  transform: scale(1.05);
+}
+
+.agentLabel {
+  font-size: 10px;
+  color: var(--text-muted);
+  text-align: center;
+  width: 100%;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* CHAT HISTORY FEED */
+.chatHistoryFeed {
+  flex: 1;
+  overflow-y: auto;
+  padding: 10px 0;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.historyGroup {
+  display: flex;
+  flex-direction: column;
+}
+
+.historyList {
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+}
+
+.chatHistoryItem {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 12px;
+  border-radius: var(--radius-sm);
+  margin: 0 4px;
+  font-size: 13px;
+  color: var(--text-muted);
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.chatHistoryItem:hover {
+  background-color: var(--bg-hover);
+  color: var(--text-main);
+}
+
+.chatHistoryItemActive {
+  background-color: var(--bg-active);
+  color: var(--text-main);
+  font-weight: 600;
+}
+
+.chatHistoryIcon {
+  color: var(--gray-400);
+  flex-shrink: 0;
+}
+
+.chatHistoryTitle {
+  flex: 1;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.chatHistoryDate {
+  font-size: 11px;
+  color: var(--gray-400);
+  flex-shrink: 0;
+}
+
+/* CHAT FOOTER */
+.chatFooter {
+  padding: 10px 12px;
+  border-top: 1px solid var(--border);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background-color: var(--white);
+}
+
+.chatNewChatBtn {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  padding: 8px 12px;
+  background-color: transparent;
+  border: 1px solid var(--border);
+  border-radius: 20px;
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--text-main);
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.chatNewChatBtn:hover {
+  background-color: var(--bg-hover);
+}
+
+.chatComposeBtn {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-color: transparent;
+  border: 1px solid var(--border);
+  color: var(--gray-500);
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.chatComposeBtn:hover {
+  background-color: var(--bg-hover);
+  color: var(--text-main);
+}
+
+/* NORMAL MODE BELL BUTTON ROW */
+.bellRowNormal {
+  padding: 4px 12px 10px;
+  border-bottom: 1px solid var(--border);
+}
+
+.bellBtnNormal {
+  width: 100%;
+  height: 28px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-color: transparent;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--text-muted);
+  cursor: pointer;
+  transition: all 0.15s ease;
+  position: relative;
+}
+
+.bellBtnNormal:hover {
+  background-color: var(--bg-hover);
+  color: var(--text-main);
+}
+
+.bellBtnNormalActive {
+  background-color: var(--bg-active) !important;
+  color: var(--text-main) !important;
+}
+
+

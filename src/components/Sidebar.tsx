@@ -23,7 +23,10 @@ import {
   User,
   MoreHorizontal,
   GripVertical,
-  Sparkles
+  Sparkles,
+  MessageSquare,
+  Mic,
+  SquarePen
 } from "lucide-react";
 import styles from "./Sidebar.module.css";
 import { useState, useEffect, useRef } from "react";
@@ -42,6 +45,106 @@ export default function Sidebar() {
   const [isAIBuilderOpen, setIsAIBuilderOpen] = useState(false);
   const [showProfileMenu, setShowProfileMenu] = useState(false);
   
+  // Conversations State
+  const [conversations, setConversations] = useState<any[]>([]);
+
+  const getGroupedConversations = () => {
+    const nowTime = new Date().getTime();
+    const oneWeekAgo = nowTime - 7 * 86400000;
+    const thirtyDaysAgo = nowTime - 30 * 86400000;
+
+    const groups = {
+      'Past week': [] as any[],
+      'Past 30 days': [] as any[],
+      'Older': [] as any[]
+    };
+
+    const sorted = [...conversations].sort((a: any, b: any) => {
+      const dateA = new Date(a.updated_at || a.updatedAt || 0).getTime();
+      const dateB = new Date(b.updated_at || b.updatedAt || 0).getTime();
+      return dateB - dateA;
+    });
+
+    sorted.forEach((conv) => {
+      const time = new Date(conv.updated_at || conv.updatedAt || 0).getTime();
+      if (time >= oneWeekAgo) {
+        groups['Past week'].push(conv);
+      } else if (time >= thirtyDaysAgo) {
+        groups['Past 30 days'].push(conv);
+      } else {
+        groups['Older'].push(conv);
+      }
+    });
+
+    return groups;
+  };
+
+  const formatSidebarDate = (dateStr: string) => {
+    if (!dateStr) return '';
+    const date = new Date(dateStr);
+    const time = date.getTime();
+    const now = new Date();
+    const diff = now.getTime() - time;
+
+    if (diff < 3600000) {
+      return `${Math.max(1, Math.floor(diff / 60000))}m`;
+    }
+    if (diff < 86400000) {
+      return `${Math.floor(diff / 3600000)}h`;
+    }
+    if (diff < 7 * 86400000) {
+      const days = Math.floor(diff / 86400000);
+      if (days <= 2) return `${days}d`;
+      return date.toLocaleDateString('default', { month: 'short', day: 'numeric' });
+    }
+    if (diff < 30 * 86400000) {
+      const weeks = Math.floor(diff / (7 * 86400000));
+      return `${weeks}w`;
+    }
+    return date.toLocaleDateString('default', { month: 'short', day: 'numeric' });
+  };
+
+  const handleChatTabClick = async () => {
+    if (activeConversationId) return;
+    try {
+      const res = await fetch('/api/conversations');
+      if (res.ok) {
+        const data = await res.json();
+        if (data && data.length > 0) {
+          const sorted = data.sort((a: any, b: any) => {
+            const dateA = new Date(a.updated_at || a.updatedAt || 0).getTime();
+            const dateB = new Date(b.updated_at || b.updatedAt || 0).getTime();
+            return dateB - dateA;
+          });
+          setActiveConversation(sorted[0].id);
+        } else {
+          handleCreateConversation();
+        }
+      }
+    } catch (err) {
+      console.error('Error opening conversation:', err);
+      handleCreateConversation();
+    }
+  };
+
+  const handleMicTabClick = async () => {
+    try {
+      const res = await fetch("/api/pages", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ title: `Meeting @${new Date().toLocaleDateString('default', { weekday: 'long', hour: '2-digit', minute: '2-digit' })}`, icon: "🎙️", type: "editor" }),
+      });
+      if (res.ok) {
+        const newPage = await res.json();
+        setPagesList((prev) => [...prev, newPage]);
+        setActivePage(newPage.id);
+        addToast("🎙️ Created a new meeting note session!", "success");
+      }
+    } catch (err) {
+      console.error("Error creating meeting note:", err);
+    }
+  };
+
   // Notification Alert States
   const [alerts, setAlerts] = useState<any>({ overdue: [], dueToday: [], dueTomorrow: [], totalAlerts: 0 });
   const [showNotifications, setShowNotifications] = useState(false);
@@ -62,6 +165,34 @@ export default function Sidebar() {
   const profileMenuRef = useRef<HTMLDivElement>(null);
   const notificationsRef = useRef<HTMLDivElement>(null);
   const hasShownToastRef = useRef(false);
+
+  const fetchConversations = async () => {
+    try {
+      const res = await fetch('/api/conversations');
+      if (res.ok) {
+        const data = await res.json();
+        setConversations(data);
+      }
+    } catch (err) {
+      console.error('Error fetching conversations in sidebar:', err);
+    }
+  };
+
+  const handleCreateConversation = async () => {
+    try {
+      const res = await fetch('/api/conversations', {
+        method: 'POST',
+      });
+      if (res.ok) {
+        const newConv = await res.json();
+        setConversations((prev) => [newConv, ...prev]);
+        setActiveConversation(newConv.id);
+        addToast("✦ Created new AI Chat session", "success");
+      }
+    } catch (err) {
+      console.error('Error creating conversation:', err);
+    }
+  };
 
   const fetchAlerts = async () => {
     try {
@@ -96,6 +227,7 @@ export default function Sidebar() {
     fetchProfile();
     fetchGoogleStatus();
     fetchAlerts();
+    fetchConversations();
 
     const pagesChannel = supabase
       .channel('realtime:pages')
@@ -111,9 +243,17 @@ export default function Sidebar() {
       })
       .subscribe();
 
+    const conversationsChannel = supabase
+      .channel('realtime:sidebar_conversations')
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'conversations' }, () => {
+        fetchConversations();
+      })
+      .subscribe();
+
     return () => {
       supabase.removeChannel(pagesChannel);
       supabase.removeChannel(tasksChannel);
+      supabase.removeChannel(conversationsChannel);
     };
   }, []);
 
@@ -413,284 +553,343 @@ export default function Sidebar() {
           )}
         </div>
 
-        {/* SEARCH ROUNDED INPUT */}
-        <div className={styles.searchContainer} onClick={() => setSearchOpen(true)}>
-          <div className={styles.searchBar}>
-            <Search size={14} />
-            <span>Search...</span>
-            <kbd className={styles.searchShortcut}>⌘K</kbd>
-          </div>
-        </div>
-
-        {/* QUICK ACTIONS ROW */}
-        <div className={styles.quickActionsRow}>
-          <button className={styles.rowBtn} onClick={() => setIsAIBuilderOpen(true)} title="✦ AI Builder">
-            <Sparkles size={16} />
-          </button>
-          <button className={styles.rowBtn} onClick={() => handlePageSelect('home')} title="📊 Command Center">
-            <LayoutDashboard size={16} />
-          </button>
-          <div className={styles.bellContainer} ref={notificationsRef}>
-            <button 
-              className={`${styles.rowBtn} ${alerts.totalAlerts > 0 ? styles.bellActive : ''} ${showNotifications ? styles.rowBtnActive : ''}`} 
-              onClick={() => setShowNotifications(!showNotifications)} 
-              title="Notifications"
-            >
-              <Bell size={16} />
-              {alerts.totalAlerts > 0 && (
-                <span className={styles.bellBadgeCount}>{alerts.totalAlerts}</span>
-              )}
-            </button>
-            
-            {showNotifications && (
-              <div className={styles.notificationsPopover}>
-                <div className={styles.popoverHeader}>
-                  <h4>Task Deadlines</h4>
-                  {alerts.totalAlerts === 0 ? (
-                    <span className={styles.allClearBadge}>✦ All Clear</span>
-                  ) : (
-                    <span className={styles.alertCountBadge}>{alerts.totalAlerts} Alert{alerts.totalAlerts > 1 ? 's' : ''}</span>
-                  )}
-                </div>
-                
-                <div className={styles.popoverScrollArea}>
-                  {alerts.totalAlerts === 0 ? (
-                    <div className={styles.popoverEmptyState}>
-                      <span className={styles.popoverSparkles}>✦</span>
-                      <p>No upcoming task deadlines!</p>
-                      <span>Keep up the amazing work!</span>
-                    </div>
-                  ) : (
-                    <>
-                      {alerts.overdue.length > 0 && (
-                        <div className={styles.alertSection}>
-                          <div className={styles.popoverSectionTitle}>Overdue</div>
-                          {alerts.overdue.map((task: any) => (
-                            <PopoverTaskItem 
-                              key={`overdue-${task.id}`} 
-                              task={task} 
-                              badgeClass={styles.overdueBadge} 
-                              badgeText="Overdue" 
-                            />
-                          ))}
-                        </div>
-                      )}
-                      
-                      {alerts.dueToday.length > 0 && (
-                        <div className={styles.alertSection}>
-                          <div className={styles.popoverSectionTitle}>Due Today</div>
-                          {alerts.dueToday.map((task: any) => (
-                            <PopoverTaskItem 
-                              key={`today-${task.id}`} 
-                              task={task} 
-                              badgeClass={styles.todayBadge} 
-                              badgeText="Today" 
-                            />
-                          ))}
-                        </div>
-                      )}
-                      
-                      {alerts.dueTomorrow.length > 0 && (
-                        <div className={styles.alertSection}>
-                          <div className={styles.popoverSectionTitle}>Due Tomorrow</div>
-                          {alerts.dueTomorrow.map((task: any) => (
-                            <PopoverTaskItem 
-                              key={`tomorrow-${task.id}`} 
-                              task={task} 
-                              badgeClass={styles.tomorrowBadge} 
-                              badgeText="Tomorrow" 
-                            />
-                          ))}
-                        </div>
-                      )}
-                    </>
-                  )}
-                </div>
-              </div>
-            )}
-          </div>
-          <button className={styles.rowBtn} onClick={() => setSettingsOpen(true)} title="⚙️ Settings">
-            <Settings size={16} />
-          </button>
-        </div>
-
-        {/* NAVIGATION SECTION */}
-        <div>
-          <span className={styles.sectionLabel}>Workspace</span>
-          <div className={styles.navGroup}>
-            <button 
-              className={`${styles.navItem} ${activePageId === 'home' ? styles.navActive : ''}`} 
-              onClick={() => handlePageSelect('home')}
-            >
-              <Home size={15} className={styles.navIconHome} />
+        {/* TOP TAB BAR */}
+        <div className={styles.topTabBar}>
+          {activeConversationId === null ? (
+            <button className={styles.topTabActive} onClick={() => handlePageSelect('home')}>
+              <Home size={15} />
               <span>Home</span>
             </button>
-
-            <button 
-              className={`${styles.navItem} ${activePageId === 'inbox' ? styles.navActive : ''}`} 
-              onClick={() => handlePageSelect('inbox')}
-            >
-              <Inbox size={15} className={styles.navIconInbox} />
-              <span>Inbox</span>
+          ) : (
+            <button className={styles.topTabButton} onClick={() => handlePageSelect('home')} title="Home">
+              <Home size={16} />
             </button>
-
-            <button 
-              className={`${styles.navItem} ${activeConversationId ? styles.navActive : ''}`} 
-              onClick={async () => {
-                // Open the history panel
-                setAIPanelOpen(true);
-                
-                // If not already in a chat, let's load/create one
-                if (!activeConversationId) {
-                  try {
-                    const res = await fetch('/api/conversations');
-                    if (res.ok) {
-                      const data = await res.json();
-                      if (data && data.length > 0) {
-                        // Sort by updated_at or updatedAt desc
-                        const sorted = data.sort((a: any, b: any) => {
-                          const dateA = new Date(a.updated_at || a.updatedAt || 0).getTime();
-                          const dateB = new Date(b.updated_at || b.updatedAt || 0).getTime();
-                          return dateB - dateA;
-                        });
-                        setActiveConversation(sorted[0].id);
-                      } else {
-                        // Create a new conversation if none exist
-                        const createRes = await fetch('/api/conversations', { method: 'POST' });
-                        if (createRes.ok) {
-                          const newConv = await createRes.json();
-                          setActiveConversation(newConv.id);
-                        }
-                      }
-                    }
-                  } catch (err) {
-                    console.error('Error auto-opening/creating conversation:', err);
-                  }
-                } else {
-                  // If we are already in a chat, clicking AI Chat can toggle the history panel drawer
-                  setAIPanelOpen(!isAIPanelOpen);
-                }
-              }}
-            >
-              <Sparkles size={15} className={styles.navIconAI} style={{ color: '#eab308' }} />
-              <span>AI Chat</span>
-            </button>
-
-            <button 
-              className={`${styles.navItem} ${activePageId === 'tasks' ? styles.navActive : ''}`} 
-              onClick={() => handlePageSelect('tasks')}
-            >
-              <CheckSquare size={15} className={styles.navIconTasks} />
-              <span>My Tasks</span>
-            </button>
-
-            <button 
-              className={`${styles.navItem} ${activePageId === 'calendar' ? styles.navActive : ''}`} 
-              onClick={() => handlePageSelect('calendar')}
-            >
-              <Calendar size={15} className={styles.navIconCalendar} />
-              <span>Calendar</span>
-            </button>
-
-            <button 
-              className={`${styles.navItem} ${activePageId === 'automations' ? styles.navActive : ''}`} 
-              onClick={() => handlePageSelect('automations')}
-            >
-              <Zap size={15} className={styles.navIconAutomations} />
-              <span>Agents</span>
-            </button>
-
-            <button 
-              className={`${styles.navItem} ${activePageId === 'templates' ? styles.navActive : ''}`} 
-              onClick={() => handlePageSelect('templates')}
-            >
-              <Copy size={15} className={styles.navIconTemplates} />
-              <span>Templates</span>
-            </button>
-
-            {/* Document Import trigger inside sidebar items */}
-            <button className={styles.navItem} onClick={() => importFileInputRef.current?.click()}>
-              <Download size={15} className={styles.navIconImport} style={{ transform: "rotate(180deg)" }} />
-              <span>Import Document</span>
-            </button>
-            <input 
-              type="file" 
-              ref={importFileInputRef} 
-              onChange={handleImportFileChange}
-              accept=".md,.html,.htm"
-              style={{ display: 'none' }}
-            />
-          </div>
-        </div>
-
-        {/* PAGES SCROLL AREA */}
-        <div className={styles.scrollArea}>
-          {favorites.length > 0 && (
-            <div>
-              <span className={styles.sectionLabel}>Favorites</span>
-              <div className={styles.pageTree}>
-                {favorites.map((page: any) => (
-                  <PageTreeItem key={`fav-${page.id}`} page={{ ...page, children: [] }} />
-                ))}
-              </div>
-            </div>
           )}
 
-          <div>
-            <div className={styles.pagesSectionHeader}>
-              <span className={styles.sectionLabel}>Pages</span>
-              <button className={styles.addPageBtn} onClick={(e) => handleAddPage(e, null)} title="Create new page">
-                <Plus size={14} />
-              </button>
-            </div>
-            
-            {/* Page tree or beginner state if empty */}
-            {pagesList.length === 0 ? (
-              <div className={styles.beginnerHelper}>
-                <span className={styles.beginnerEmoji}>📄</span>
-                <p className={styles.beginnerText}>No pages yet</p>
-                <button className={styles.beginnerAIBtn} onClick={() => setIsAIBuilderOpen(true)}>
-                  + Create with AI
-                </button>
-                <button className={styles.beginnerBlankBtn} onClick={(e) => handleAddPage(e, null)}>
-                  + Blank page
-                </button>
-              </div>
-            ) : (
-              <div className={styles.pageTree}>
-                {pageTreeRoots.map((page: any) => (
-                  <PageTreeItem key={page.id} page={page} />
-                ))}
-              </div>
-            )}
-          </div>
-        </div>
+          {activeConversationId !== null ? (
+            <button className={styles.topTabActive} title="AI Chat">
+              <MessageSquare size={15} />
+              <span>Chat</span>
+            </button>
+          ) : (
+            <button className={styles.topTabButton} onClick={handleChatTabClick} title="AI Chat">
+              <MessageSquare size={16} />
+            </button>
+          )}
 
-        {/* BOTTOM TRASH & USER SECTION */}
-        <div className={styles.footer}>
-          <button 
-            className={`${styles.navItem} ${activePageId === 'trash' ? styles.navActive : ''}`} 
-            onClick={() => handlePageSelect('trash')}
-            style={{ margin: 0 }}
-          >
-            <Trash2 size={15} className={styles.navIconTrash} />
-            <span>Trash</span>
-            {trashCount > 0 && (
-              <span className={styles.trashBadge}>{trashCount}</span>
-            )}
+          <button className={styles.topTabButton} onClick={handleMicTabClick} title="New Meeting Note (Voice)">
+            <Mic size={16} />
           </button>
 
-          {/* User Profile bottom row */}
-          <div className={styles.userRow} onClick={() => setSettingsOpen(true)}>
-            <div className={styles.userAvatar}>
-              {userProfile.name.charAt(0).toUpperCase()}
-            </div>
-            <div className={styles.userMeta}>
-              <span className={styles.userName}>{userProfile.name}</span>
-              <span className={styles.userEmail}>{userProfile.email}</span>
-            </div>
-          </div>
+          <button 
+            className={`${styles.topTabButton} ${activePageId === 'inbox' ? styles.topTabButtonActive : ''}`} 
+            onClick={() => handlePageSelect('inbox')} 
+            title="Inbox"
+          >
+            <Inbox size={16} />
+          </button>
+
+          <button className={styles.topTabButton} onClick={() => setSearchOpen(true)} title="Search (⌘K)">
+            <Search size={16} />
+          </button>
         </div>
+
+        {activeConversationId !== null ? (
+          /* ==================== AI CHAT MODE SIDEBAR ==================== */
+          <>
+            {/* AGENTS ROW */}
+            <div className={styles.agentsSection}>
+              <span className={styles.sectionLabel}>Notion AI</span>
+              <div className={styles.agentsRow}>
+                <div className={`${styles.agentCard} ${styles.agentCardActive}`}>
+                  <div className={styles.agentCircle}>
+                    <img src="/notion-ai-avatar.png" alt="Notion AI" className={styles.agentAvatarImg} />
+                  </div>
+                  <span className={styles.agentLabel}>Notion AI</span>
+                </div>
+                
+                <div className={styles.agentCard} onClick={() => setIsAIBuilderOpen(true)}>
+                  <div className={`${styles.agentCircle} ${styles.newAgentCircle}`}>
+                    <Plus size={20} />
+                  </div>
+                  <span className={styles.agentLabel}>New agent</span>
+                </div>
+              </div>
+            </div>
+
+            {/* GROUPED CHAT HISTORY FEED */}
+            <div className={styles.chatHistoryFeed}>
+              {Object.entries(getGroupedConversations()).map(([label, items]) => {
+                if (items.length === 0) return null;
+                return (
+                  <div key={label} className={styles.historyGroup}>
+                    <span className={styles.sectionLabel}>{label}</span>
+                    <div className={styles.historyList}>
+                      {items.map((conv) => {
+                        const isActive = activeConversationId === conv.id;
+                        return (
+                          <div 
+                            key={conv.id}
+                            className={`${styles.chatHistoryItem} ${isActive ? styles.chatHistoryItemActive : ''}`}
+                            onClick={() => setActiveConversation(conv.id)}
+                          >
+                            <MessageSquare size={14} className={styles.chatHistoryIcon} />
+                            <span className={styles.chatHistoryTitle}>{conv.title || 'New Chat'}</span>
+                            <span className={styles.chatHistoryDate}>
+                              {formatSidebarDate(conv.updated_at || conv.updatedAt || conv.createdAt)}
+                            </span>
+                          </div>
+                        );
+                      })}
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+
+            {/* CHAT FOOTER */}
+            <div className={styles.chatFooter}>
+              <button className={styles.chatNewChatBtn} onClick={handleCreateConversation}>
+                <Plus size={14} />
+                <span>New chat</span>
+              </button>
+              <button className={styles.chatComposeBtn} onClick={handleCreateConversation} title="New chat">
+                <SquarePen size={15} />
+              </button>
+            </div>
+          </>
+        ) : (
+          /* ==================== WORKSPACE MODE SIDEBAR ==================== */
+          <>
+            {/* QUICK ACTIONS ROW (ONLY SHOWN IN NORMAL MODE TO RETAIN NOTIFICATIONS BELL IF NEEDED) */}
+            <div className={styles.bellRowNormal}>
+              <div className={styles.bellContainer} ref={notificationsRef}>
+                <button 
+                  className={`${styles.bellBtnNormal} ${alerts.totalAlerts > 0 ? styles.bellActive : ''} ${showNotifications ? styles.bellBtnNormalActive : ''}`} 
+                  onClick={() => setShowNotifications(!showNotifications)} 
+                  title="Notifications"
+                >
+                  <Bell size={14} style={{ marginRight: 6 }} />
+                  <span>Tasks Alerts</span>
+                  {alerts.totalAlerts > 0 && (
+                    <span className={styles.bellBadgeCount}>{alerts.totalAlerts}</span>
+                  )}
+                </button>
+                
+                {showNotifications && (
+                  <div className={styles.notificationsPopover}>
+                    <div className={styles.popoverHeader}>
+                      <h4>Task Deadlines</h4>
+                      {alerts.totalAlerts === 0 ? (
+                        <span className={styles.allClearBadge}>✦ All Clear</span>
+                      ) : (
+                        <span className={styles.alertCountBadge}>{alerts.totalAlerts} Alert{alerts.totalAlerts > 1 ? 's' : ''}</span>
+                      )}
+                    </div>
+                    
+                    <div className={styles.popoverScrollArea}>
+                      {alerts.totalAlerts === 0 ? (
+                        <div className={styles.popoverEmptyState}>
+                          <span className={styles.popoverSparkles}>✦</span>
+                          <p>No upcoming task deadlines!</p>
+                          <span>Keep up the amazing work!</span>
+                        </div>
+                      ) : (
+                        <>
+                          {alerts.overdue.length > 0 && (
+                            <div className={styles.alertSection}>
+                              <div className={styles.popoverSectionTitle}>Overdue</div>
+                              {alerts.overdue.map((task: any) => (
+                                <PopoverTaskItem 
+                                  key={`overdue-${task.id}`} 
+                                  task={task} 
+                                  badgeClass={styles.overdueBadge} 
+                                  badgeText="Overdue" 
+                                />
+                              ))}
+                            </div>
+                          )}
+                          
+                          {alerts.dueToday.length > 0 && (
+                            <div className={styles.alertSection}>
+                              <div className={styles.popoverSectionTitle}>Due Today</div>
+                              {alerts.dueToday.map((task: any) => (
+                                <PopoverTaskItem 
+                                  key={`today-${task.id}`} 
+                                  task={task} 
+                                  badgeClass={styles.todayBadge} 
+                                  badgeText="Today" 
+                                />
+                              ))}
+                            </div>
+                          )}
+                          
+                          {alerts.dueTomorrow.length > 0 && (
+                            <div className={styles.alertSection}>
+                              <div className={styles.popoverSectionTitle}>Due Tomorrow</div>
+                              {alerts.dueTomorrow.map((task: any) => (
+                                <PopoverTaskItem 
+                                  key={`tomorrow-${task.id}`} 
+                                  task={task} 
+                                  badgeClass={styles.tomorrowBadge} 
+                                  badgeText="Tomorrow" 
+                                />
+                              ))}
+                            </div>
+                          )}
+                        </>
+                      )}
+                    </div>
+                  </div>
+                )}
+              </div>
+            </div>
+
+            {/* NAVIGATION SECTION */}
+            <div>
+              <span className={styles.sectionLabel}>Workspace</span>
+              <div className={styles.navGroup}>
+                <button 
+                  className={`${styles.navItem} ${activePageId === 'home' ? styles.navActive : ''}`} 
+                  onClick={() => handlePageSelect('home')}
+                >
+                  <Home size={15} className={styles.navIconHome} />
+                  <span>Home</span>
+                </button>
+
+                <button 
+                  className={`${styles.navItem} ${activePageId === 'inbox' ? styles.navActive : ''}`} 
+                  onClick={() => handlePageSelect('inbox')}
+                >
+                  <Inbox size={15} className={styles.navIconInbox} />
+                  <span>Inbox</span>
+                </button>
+
+                <button 
+                  className={`${styles.navItem}`} 
+                  onClick={handleChatTabClick}
+                >
+                  <Sparkles size={15} className={styles.navIconAI} style={{ color: '#eab308' }} />
+                  <span>AI Chat</span>
+                </button>
+
+                <button 
+                  className={`${styles.navItem} ${activePageId === 'tasks' ? styles.navActive : ''}`} 
+                  onClick={() => handlePageSelect('tasks')}
+                >
+                  <CheckSquare size={15} className={styles.navIconTasks} />
+                  <span>My Tasks</span>
+                </button>
+
+                <button 
+                  className={`${styles.navItem} ${activePageId === 'calendar' ? styles.navActive : ''}`} 
+                  onClick={() => handlePageSelect('calendar')}
+                >
+                  <Calendar size={15} className={styles.navIconCalendar} />
+                  <span>Calendar</span>
+                </button>
+
+                <button 
+                  className={`${styles.navItem} ${activePageId === 'automations' ? styles.navActive : ''}`} 
+                  onClick={() => handlePageSelect('automations')}
+                >
+                  <Zap size={15} className={styles.navIconAutomations} />
+                  <span>Agents</span>
+                </button>
+
+                <button 
+                  className={`${styles.navItem} ${activePageId === 'templates' ? styles.navActive : ''}`} 
+                  onClick={() => handlePageSelect('templates')}
+                >
+                  <Copy size={15} className={styles.navIconTemplates} />
+                  <span>Templates</span>
+                </button>
+
+                {/* Document Import trigger inside sidebar items */}
+                <button className={styles.navItem} onClick={() => importFileInputRef.current?.click()}>
+                  <Download size={15} className={styles.navIconImport} style={{ transform: "rotate(180deg)" }} />
+                  <span>Import Document</span>
+                </button>
+                <input 
+                  type="file" 
+                  ref={importFileInputRef} 
+                  onChange={handleImportFileChange}
+                  accept=".md,.html,.htm"
+                  style={{ display: 'none' }}
+                />
+              </div>
+            </div>
+
+            {/* PAGES SCROLL AREA */}
+            <div className={styles.scrollArea}>
+              {favorites.length > 0 && (
+                <div>
+                  <span className={styles.sectionLabel}>Favorites</span>
+                  <div className={styles.pageTree}>
+                    {favorites.map((page: any) => (
+                      <PageTreeItem key={`fav-${page.id}`} page={{ ...page, children: [] }} />
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              <div>
+                <div className={styles.pagesSectionHeader}>
+                  <span className={styles.sectionLabel}>Pages</span>
+                  <button className={styles.addPageBtn} onClick={(e) => handleAddPage(e, null)} title="Create new page">
+                    <Plus size={14} />
+                  </button>
+                </div>
+                
+                {/* Page tree or beginner state if empty */}
+                {pagesList.length === 0 ? (
+                  <div className={styles.beginnerHelper}>
+                    <span className={styles.beginnerEmoji}>📄</span>
+                    <p className={styles.beginnerText}>No pages yet</p>
+                    <button className={styles.beginnerAIBtn} onClick={() => setIsAIBuilderOpen(true)}>
+                      + Create with AI
+                    </button>
+                    <button className={styles.beginnerBlankBtn} onClick={(e) => handleAddPage(e, null)}>
+                      + Blank page
+                    </button>
+                  </div>
+                ) : (
+                  <div className={styles.pageTree}>
+                    {pageTreeRoots.map((page: any) => (
+                      <PageTreeItem key={page.id} page={page} />
+                    ))}
+                  </div>
+                )}
+              </div>
+            </div>
+
+            {/* BOTTOM TRASH & USER SECTION */}
+            <div className={styles.footer}>
+              <button 
+                className={`${styles.navItem} ${activePageId === 'trash' ? styles.navActive : ''}`} 
+                onClick={() => handlePageSelect('trash')}
+                style={{ margin: 0 }}
+              >
+                <Trash2 size={15} className={styles.navIconTrash} />
+                <span>Trash</span>
+                {trashCount > 0 && (
+                  <span className={styles.trashBadge}>{trashCount}</span>
+                )}
+              </button>
+
+              {/* User Profile bottom row */}
+              <div className={styles.userRow} onClick={() => setSettingsOpen(true)}>
+                <div className={styles.userAvatar}>
+                  {userProfile.name.charAt(0).toUpperCase()}
+                </div>
+                <div className={styles.userMeta}>
+                  <span className={styles.userName}>{userProfile.name}</span>
+                  <span className={styles.userEmail}>{userProfile.email}</span>
+                </div>
+              </div>
+            </div>
+          </>
+        )}
       </aside>
       <AIBuilder isOpen={isAIBuilderOpen} onClose={() => setIsAIBuilderOpen(false)} />
     </>
