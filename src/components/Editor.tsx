@@ -24,6 +24,7 @@ import ExportModal from "./ExportModal";
 import WhatsAppView from "./WhatsAppView";
 import CommandCenter from "./CommandCenter";
 import AudioRecorder from "./AudioRecorder";
+import MeetingRecorderDashboard from "./MeetingRecorderDashboard";
 import AnalyticsPanel from "./AnalyticsPanel";
 import { Mic, BarChart2, Menu } from "lucide-react";
 import { useCompletion } from '@ai-sdk/react';
@@ -1263,6 +1264,11 @@ export default function Editor() {
                   pageId={activePageId!} 
                   initialContent={activePage?.content || ''} 
                   onUpdateContent={(newContent) => updatePageAttribute({ content: newContent })} 
+                />
+              ) : activePage?.icon === "🎙️" && (!activePage?.content || activePage.content.trim() === "" || activePage.content === '{"type":"doc","content":[{"type":"paragraph"}]}') ? (
+                <MeetingRecorderDashboard 
+                  pageId={activePageId!} 
+                  onTranscriptionComplete={() => fetchPageData(activePageId!)}
                 />
               ) : (
                 <>
