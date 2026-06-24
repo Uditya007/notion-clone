@@ -12,6 +12,7 @@ interface MeetingRecorderDashboardProps {
 
 export default function MeetingRecorderDashboard({ pageId, onTranscriptionComplete }: MeetingRecorderDashboardProps) {
   const [status, setStatus] = useState<"idle" | "recording" | "processing">("idle");
+  const [isRecordingActive, setIsRecordingActive] = useState(false);
   const [duration, setDuration] = useState(0);
   const [isDragOver, setIsDragOver] = useState(false);
   const [useAI, setUseAI] = useState(true);
@@ -45,6 +46,12 @@ export default function MeetingRecorderDashboard({ pageId, onTranscriptionComple
     const mins = Math.floor(seconds / 60);
     const secs = seconds % 60;
     return `${mins.toString().padStart(2, "0")}:${secs.toString().padStart(2, "0")}`;
+  };
+
+  const handleChooseRecord = () => {
+    setStatus("recording");
+    setIsRecordingActive(false);
+    setDuration(0);
   };
 
   const startRecordingSession = async () => {
@@ -107,7 +114,7 @@ export default function MeetingRecorderDashboard({ pageId, onTranscriptionComple
       setupVisualizer(stream);
 
       mediaRecorder.start();
-      setStatus("recording");
+      setIsRecordingActive(true);
       setDuration(0);
 
       timerRef.current = setInterval(() => {
@@ -185,6 +192,7 @@ export default function MeetingRecorderDashboard({ pageId, onTranscriptionComple
   };
 
   const stopRecordingSession = () => {
+    setIsRecordingActive(false);
     if (timerRef.current) {
       clearInterval(timerRef.current);
       timerRef.current = null;
@@ -423,7 +431,7 @@ export default function MeetingRecorderDashboard({ pageId, onTranscriptionComple
           </div>
 
           <div className={styles.actionsGrid}>
-            <div className={styles.actionCard} onClick={startRecordingSession}>
+            <div className={styles.actionCard} onClick={handleChooseRecord}>
               <Mic size={24} className={styles.cardIcon} />
               <h3 className={styles.cardTitle}>Record Live Meeting</h3>
               <p className={styles.cardDesc}>
@@ -463,19 +471,40 @@ export default function MeetingRecorderDashboard({ pageId, onTranscriptionComple
 
       {status === "recording" && (
         <div className={styles.recordingPanel}>
-          <div className={`${styles.iconWrapper} ${styles.pulseMic}`} style={{ background: "rgba(220, 38, 38, 0.1)", borderColor: "rgba(220, 38, 38, 0.3)", color: "#ef4444" }}>
-            <Mic size={32} />
-          </div>
-          <div className={styles.timer}>{formatTime(duration)}</div>
-          <div className={styles.visualizerWrapper}>
-            <canvas ref={canvasRef} width={300} height={60} className={styles.canvas} />
+          <div className={styles.animationContainer}>
+            {isRecordingActive && (
+              <>
+                <div className={styles.pulseRing} />
+                <div className={`${styles.pulseRing} ${styles.ring2}`} />
+              </>
+            )}
+            <div 
+              className={`${styles.iconWrapper} ${isRecordingActive ? styles.pulseMic : ""}`} 
+              style={isRecordingActive ? { background: "rgba(220, 38, 38, 0.1)", borderColor: "rgba(220, 38, 38, 0.3)", color: "#ef4444", marginBottom: 0 } : { background: "rgba(255, 255, 255, 0.05)", borderColor: "rgba(255, 255, 255, 0.1)", color: "#9ca3af", marginBottom: 0 }}
+            >
+              <Mic size={32} />
+            </div>
           </div>
 
+          <div className={styles.timer}>{formatTime(duration)}</div>
+          
+          {isRecordingActive && (
+            <div className={styles.visualizerWrapper}>
+              <canvas ref={canvasRef} width={300} height={60} className={styles.canvas} />
+            </div>
+          )}
+
           <div className={styles.recordingControls}>
-            <button className={styles.stopButton} onClick={stopRecordingSession} title="Stop and generate meeting notes">
-              <Square size={20} fill="#ffffff" />
-            </button>
-            <button className={styles.cancelButton} onClick={cancelRecordingSession} title="Discard recording">
+            {!isRecordingActive ? (
+              <button className={styles.startBtn} onClick={startRecordingSession}>
+                <Mic size={16} /> Start Recording
+              </button>
+            ) : (
+              <button className={styles.stopButton} onClick={stopRecordingSession} title="Stop and generate meeting notes">
+                <Square size={20} fill="#ffffff" />
+              </button>
+            )}
+            <button className={styles.cancelButton} onClick={cancelRecordingSession} title="Discard and go back">
               <Trash2 size={18} />
             </button>
           </div>
