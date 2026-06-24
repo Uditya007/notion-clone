@@ -744,6 +744,25 @@ export default function Sidebar() {
                         </>
                       )}
                     </div>
+                    {alerts.totalAlerts > 0 && (
+                      <button 
+                        className={styles.whatsappAlertBtn} 
+                        onClick={() => {
+                          const phone = window.prompt("Enter WhatsApp number with country code e.g. +919876543210");
+                          if (!phone) return;
+                          fetch("/api/whatsapp/send-alert", { 
+                            method: "POST", 
+                            headers: {"Content-Type":"application/json"}, 
+                            body: JSON.stringify({ phone, overdue: alerts.overdue, dueToday: alerts.dueToday }) 
+                          }).then(res => {
+                            if (res.ok) addToast("📱 Task alerts sent to WhatsApp!", "success");
+                            else addToast("Failed to send WhatsApp alert", "error");
+                          }).catch(() => addToast("Failed to send WhatsApp alert", "error"));
+                        }}
+                      >
+                        📱 Send to WhatsApp
+                      </button>
+                    )}
                   </div>
                 )}
               </div>

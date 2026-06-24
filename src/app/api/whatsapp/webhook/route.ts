@@ -58,7 +58,7 @@ export async function POST(req: Request) {
 
     // 2. Parse schedule intent using Gemini or robust local NLP matcher fallback
     let parsed: {
-      type: 'task' | 'meeting' | 'query_tasks' | 'unknown';
+      type: 'task' | 'meeting' | 'query_tasks' | 'create_note' | 'unknown';
       title: string;
       date: string;
       duration?: number;
@@ -78,13 +78,14 @@ export async function POST(req: Request) {
           1. "task": Schedule a new task (to-do, follow up, reminder, buy, etc.).
           2. "meeting": Schedule a new meeting (sync, call, calendar event).
           3. "query_tasks": Query, list, check, or be reminded of existing tasks already scheduled (e.g. "what are my tasks for tomorrow?", "remind me what tasks I have scheduled", "list my tasks for today").
-          4. "unknown": None of the above.
+          4. "create_note": User wants to save a note or text to their workspace. Trigger phrases: "note:", "remember this", "write down", "jot down", "save this", "add to workspace", "create page". Title should be first 50 chars of the content. Date can be empty string.
+          5. "unknown": None of the above.
           
           Use the current time ${currentTimeISO} as the base reference to resolve terms like "tomorrow", "next Monday", "5pm", etc.
           
           Return ONLY a valid JSON object of the following format:
           {
-            "type": "task" | "meeting" | "query_tasks" | "unknown",
+            "type": "task" | "meeting" | "query_tasks" | "create_note" | "unknown",
             "title": "Short title describing the task/meeting, or the date description if query (e.g. 'tomorrow')",
             "date": "ISO 8601 string for the date/time (or target date if query)",
             "duration": 60 (optional, duration in minutes if a meeting)
@@ -98,7 +99,7 @@ export async function POST(req: Request) {
         });
 
         const parsedJson = JSON.parse(text.trim().replace(/^```json\s*|```$/gi, ''));
-        if (parsedJson && (parsedJson.type === 'task' || parsedJson.type === 'meeting' || parsedJson.type === 'query_tasks')) {
+        if (parsedJson && (parsedJson.type === 'task' || parsedJson.type === 'meeting' || parsedJson.type === 'query_tasks' || parsedJson.type === 'create_note')) {
           parsed = parsedJson;
         }
       } catch (err) {
@@ -160,13 +161,20 @@ export async function POST(req: Request) {
             duration: 60
           };
         } else {
-          // Fallback default is a task
-          let title = message.replace(/(schedule|task|todo|remind|tomorrow|next week|at|on|for|pm|am|\d+)/gi, '').trim();
-          parsed = {
-            type: 'task',
-            title: title || 'Task scheduled via WhatsApp',
-            date: targetDate.toISOString()
-          };
+          const isNote = ['note:', 'remember:', 'jot:', 'write down:', 'save:'].some(kw => lower.includes(kw));
+          if (isNote) {
+            const kw = ['note:', 'remember:', 'jot:', 'write down:', 'save:'].find(k => lower.includes(k));
+            const noteContent = kw ? message.substring(lower.indexOf(kw) + kw.length).trim() : message;
+            parsed = { type: 'create_note', title: noteContent.slice(0, 50), date: '' };
+          } else {
+            // Fallback default is a task
+            let title = message.replace(/(schedule|task|todo|remind|tomorrow|next week|at|on|for|pm|am|\d+)/gi, '').trim();
+            parsed = {
+              type: 'task',
+              title: title || 'Task scheduled via WhatsApp',
+              date: targetDate.toISOString()
+            };
+          }
         }
       }
     }
@@ -249,6 +257,28 @@ export async function POST(req: Request) {
       createdPage = pageData;
       replyText = `🎙️ *Meeting Scheduled!* \n\nI have successfully scheduled your meeting: *"${parsed.title}"*.\n📅 *Time:* ${formattedTime}\n📄 *Workspace Note created:* "Meeting: ${parsed.title}" with default agenda!\n\nI've generated a Notion-style briefing page for you in your workspace.`;
     } 
+    else if (parsed.type === 'create_note') {
+      const noteContent = message; // full original message
+      const noteTitle = parsed.title || "WhatsApp Note - " + new Date().toLocaleDateString();
+      const datetime = new Date().toLocaleString();
+      
+      const { data: pageData, error: pageErr } = await supabaseAdmin
+        .from('pages')
+        .insert([{
+          user_id: userId,
+          title: noteTitle,
+          content: "<p>" + noteContent + "</p><p><em>Created via WhatsApp on " + datetime + "</em></p>",
+          icon: "📱",
+          type: "editor"
+        }])
+        .select()
+        .single();
+        
+      if (pageErr) throw pageErr;
+      
+      createdPage = pageData;
+      replyText = "📱 *Note Saved!*\n\nI've created a new page in your workspace:\n*\"" + noteTitle + "\"*\n\nOpen Cora to view and edit it!";
+    }
     else if (parsed.type === 'query_tasks') {
       const lowerMsg = message.toLowerCase();
       // If the query doesn't specify a clear target day (e.g. general query), query all incomplete tasks

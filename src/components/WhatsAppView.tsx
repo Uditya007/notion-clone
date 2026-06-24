@@ -77,6 +77,7 @@ export default function WhatsAppView() {
   const [nlpEnabled, setNlpEnabled] = useState(true);
   const [autoPages, setAutoPages] = useState(true);
   const [smsAlerts, setSmsAlerts] = useState(false);
+  const [digestPhone, setDigestPhone] = useState("");
   
   // Webhook activities log
   const [activities, setActivities] = useState<WebhookActivity[]>([
@@ -95,8 +96,16 @@ export default function WhatsAppView() {
   useEffect(() => {
     if (typeof window !== "undefined") {
       setWebhookUrl(`${window.location.origin}/api/whatsapp/webhook`);
+      const savedPhone = localStorage.getItem("cora-wa-phone");
+      if (savedPhone) setDigestPhone(savedPhone);
     }
   }, []);
+
+  const handlePhoneChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const val = e.target.value;
+    setDigestPhone(val);
+    localStorage.setItem("cora-wa-phone", val);
+  };
 
   // Auto scroll to bottom
   useEffect(() => {
@@ -663,6 +672,35 @@ export default function WhatsAppView() {
                     <li>Set your Twilio incoming message endpoint to our copyable <strong>Webhook URL</strong> above.</li>
                     <li>Type any text from your real phone and watch it schedule tasks instantly!</li>
                   </ol>
+                </div>
+
+                <div className={styles.digestSection}>
+                  <h3 style={{ margin: '0 0 4px 0', fontSize: '14px', fontWeight: 600 }}>☀️ Daily Digest</h3>
+                  <p style={{ fontSize: '12px', color: 'var(--text-muted)', margin: '0 0 8px 0' }}>Send a morning summary of due tasks and recent page updates to your phone.</p>
+                  <input 
+                    type="text" 
+                    value={digestPhone} 
+                    onChange={handlePhoneChange} 
+                    placeholder="+919876543210" 
+                    style={{ padding: '8px 12px', borderRadius: '6px', border: '1px solid var(--border)', background: 'var(--bg-primary)', color: 'var(--text-primary)' }}
+                  />
+                  <button 
+                    onClick={() => {
+                      if (!digestPhone) {
+                        alert("Enter your WhatsApp number first");
+                        return;
+                      }
+                      fetch("/api/whatsapp/daily-digest?phone=" + encodeURIComponent(digestPhone))
+                        .then(res => {
+                          if (res.ok) addToast("☀️ Daily digest sent to WhatsApp!", "success");
+                          else addToast("Failed to send digest", "error");
+                        })
+                        .catch(() => addToast("Failed to send digest", "error"));
+                    }}
+                    style={{ padding: '8px', borderRadius: '6px', background: '#25D366', color: 'white', border: 'none', cursor: 'pointer', fontWeight: 500, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px' }}
+                  >
+                    📱 Send Today's Digest
+                  </button>
                 </div>
 
               </div>

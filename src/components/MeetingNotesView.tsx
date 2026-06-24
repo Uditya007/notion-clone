@@ -2,7 +2,7 @@
 
 import { useState, useRef, useEffect } from "react";
 import styles from "./MeetingNotesView.module.css";
-import { Calendar, Sparkles, FileText, CheckCircle, MoreHorizontal, Mail, Copy, MessageCircle, X, Settings2 } from "lucide-react";
+import { Calendar, Sparkles, FileText, CheckCircle, MoreHorizontal, Mail, Copy, MessageCircle, MessageSquare, X, Settings2 } from "lucide-react";
 import { useAppStore } from "@/store/useAppStore";
 
 interface MeetingNotesViewProps {
@@ -60,6 +60,39 @@ export default function MeetingNotesView({ data, pageTitle, onDisable }: Meeting
 
   const handleSendSlack = () => {
     addToast("💬 Meeting notes shared to #sales-outreach-campaign!", "success");
+  };
+
+  const handleSendWhatsApp = () => {
+    let formattedText = `🎙️ *Meeting Summary: ${pageTitle}*\n\n`;
+
+    if (data.summary.actionItems && data.summary.actionItems.length > 0) {
+      formattedText += `📋 *Action Items:*\n`;
+      data.summary.actionItems.forEach(item => {
+        formattedText += `• ${item.text}\n`;
+      });
+      formattedText += `\n`;
+    }
+
+    if (data.summary.sections && data.summary.sections.length > 0) {
+      formattedText += `📝 *Key Points:*\n`;
+      data.summary.sections.forEach(sect => {
+        if (sect.bullets) {
+          sect.bullets.forEach(bullet => {
+            formattedText += `• ${bullet.text}\n`;
+          });
+        }
+      });
+      formattedText += `\n`;
+    }
+
+    formattedText += `_Shared from Cora Workspace_`;
+
+    if (window.innerWidth < 768) {
+      window.open(`https://wa.me/?text=${encodeURIComponent(formattedText)}`, '_blank');
+    } else {
+      navigator.clipboard.writeText(formattedText);
+      addToast("📋 Meeting summary copied — paste into WhatsApp!", "success");
+    }
   };
 
   const handleCopyTranscript = () => {
@@ -122,6 +155,9 @@ export default function MeetingNotesView({ data, pageTitle, onDisable }: Meeting
           </button>
           <button className={styles.actionBtn} onClick={handleSendEmail}>
             <Mail size={13} /> Email
+          </button>
+          <button className={styles.actionBtn} onClick={handleSendWhatsApp}>
+            <MessageSquare size={13} color="#25D366" /> WhatsApp
           </button>
           <button className={`${styles.actionBtn} ${styles.slackBtn}`} onClick={handleSendSlack}>
             <MessageCircle size={13} /> Slack

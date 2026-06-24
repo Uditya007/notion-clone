@@ -968,3 +968,13 @@
 .walkthroughList li strong {
   color: #fff;
 }
+
+.digestSection {
+  padding: 16px;
+  background: var(--bg-secondary);
+  border-radius: 8px;
+  margin-top: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
