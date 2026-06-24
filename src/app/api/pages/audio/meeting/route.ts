@@ -25,8 +25,6 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: "No pageId provided" }, { status: 400 });
     }
 
-    console.log("[MEETING AUDIO API] Processing audio for page:", pageId, "size:", file.size);
-
     const arrayBuffer = await file.arrayBuffer();
     const buffer = Buffer.from(arrayBuffer);
     const base64Data = buffer.toString("base64");
@@ -34,87 +32,106 @@ export async function POST(req: NextRequest) {
     const apiKey = process.env.GOOGLE_GENERATIVE_AI_API_KEY;
 
     let title = "";
-    let htmlContent = "";
+    let meetingNotesJson = {};
 
     if (!apiKey) {
-      // Mock Fallback
-      title = "Supabase Schema & Auth Sync";
-      htmlContent = `
-        <div style="background: rgba(139, 92, 246, 0.03); border-left: 4px solid #8b5cf6; border-radius: 8px; padding: 24px; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; margin-bottom: 24px; color: #f3f4f6;">
-          <h2 style="margin-top: 0; color: #a78bfa; font-size: 22px; font-weight: 700; letter-spacing: -0.5px; border-bottom: 1px solid rgba(255,255,255,0.08); padding-bottom: 12px; display: flex; align-items: center; gap: 8px;">
-            <span>🎙️</span> Supabase Schema & Auth Sync (Mock)
-          </h2>
-          
-          <div style="margin: 16px 0; display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 12px; font-size: 13px; color: #9ca3af; background: rgba(0,0,0,0.2); padding: 12px; border-radius: 6px;">
-            <div><strong>📅 Date:</strong> ${new Date().toLocaleDateString('default', { dateStyle: 'long' })}</div>
-            <div><strong>⏱️ Duration:</strong> 42 seconds</div>
-            <div><strong>👥 Attendees:</strong> Alex (DB Tech), Sarah (Frontend), Gemini Agent</div>
-          </div>
-
-          <h3 style="color: #c084fc; font-size: 16px; margin-top: 24px; margin-bottom: 8px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px;">📋 Executive Summary</h3>
-          <p style="color: #d1d5db; line-height: 1.6; margin: 0 0 16px 0; font-size: 14.5px;">
-            The team sync focused on completing the schema migrations required for our Postgres database. Alex will own building the vector extension support, while Sarah integrates JWT-based authentication across our Next.js API endpoints.
-          </p>
-
-          <h3 style="color: #c084fc; font-size: 16px; margin-top: 24px; margin-bottom: 8px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px;">✨ Key Discussion Topics</h3>
-          <ul style="margin: 0; padding-left: 20px; line-height: 1.6; color: #d1d5db; font-size: 14.5px;">
-            <li style="margin-bottom: 8px;"><strong style="color: #f3f4f6;">Vector Extensions:</strong> Transitioning database fields to support pgvector to improve AI semantic querying capabilities.</li>
-            <li style="margin-bottom: 8px;"><strong style="color: #f3f4f6;">API Protection:</strong> Ensuring Next.js middleware correctly interrogates user authorization headers.</li>
-          </ul>
-
-          <h3 style="color: #c084fc; font-size: 16px; margin-top: 24px; margin-bottom: 8px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px;">🚀 Action Items</h3>
-          <table style="width: 100%; border-collapse: collapse; margin-top: 12px; font-size: 13.5px; text-align: left;">
-            <thead>
-              <tr style="border-bottom: 2px solid rgba(139, 92, 246, 0.2); color: #a78bfa;">
-                <th style="padding: 8px 4px;">Task</th>
-                <th style="padding: 8px 4px; width: 100px;">Assignee</th>
-                <th style="padding: 8px 4px; width: 100px;">Status</th>
-              </tr>
-            </thead>
-            <tbody>
-              <tr style="border-bottom: 1px solid rgba(255,255,255,0.05);">
-                <td style="padding: 8px 4px; color: #e5e7eb;">Implement pgvector schemas in migrations directory</td>
-                <td style="padding: 8px 4px; color: #a78bfa;">Alex</td>
-                <td style="padding: 8px 4px;"><span style="background: rgba(245, 158, 11, 0.2); color: #fbbf24; padding: 2px 6px; border-radius: 4px; font-size: 11px;">In Progress</span></td>
-              </tr>
-              <tr style="border-bottom: 1px solid rgba(255,255,255,0.05);">
-                <td style="padding: 8px 4px; color: #e5e7eb;">Verify Next.js middleware token checks</td>
-                <td style="padding: 8px 4px; color: #a78bfa;">Sarah</td>
-                <td style="padding: 8px 4px;"><span style="background: rgba(59, 130, 246, 0.2); color: #60a5fa; padding: 2px 6px; border-radius: 4px; font-size: 11px;">Todo</span></td>
-              </tr>
-            </tbody>
-          </table>
-
-          <h3 style="color: #c084fc; font-size: 16px; margin-top: 24px; margin-bottom: 8px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px;">💬 Transcript</h3>
-          <p style="font-style: italic; color: #9ca3af; font-size: 13.5px; line-height: 1.5; margin: 0; background: rgba(0,0,0,0.15); padding: 12px; border-radius: 6px; border: 1px solid rgba(255,255,255,0.03);">
-            "We need to finalize the database schema migration by Thursday afternoon. Alex will handle the Postgres vector tables, and Sarah will verify that the Next.js API endpoints are fully authenticated."
-          </p>
-          
-          <div style="font-size: 11px; color: #6b7280; margin-top: 16px; text-align: right;">
-            🤖 Mock mode active. Configure GOOGLE_GENERATIVE_AI_API_KEY for live Gemini transcription.
-          </div>
-        </div>
-      `;
+      // Mock Fallback matching the user's screenshot exactly!
+      title = "Sales Outreach Onboarding: Post-SHRM Cold Calling";
+      meetingNotesJson = {
+        type: "meeting",
+        summary: {
+          actionItems: [
+            { text: "Log in to Zoom using the shared credentials and make a test call", citations: [1, 2] },
+            { text: "Provide names of LinkedIn prospects who clicked, to have contacts extracted", citations: [3] },
+            { text: "Begin calling numbers listed on the 33rd call sheet", citations: [4] },
+            { text: "Extract contacts for the LinkedIn-clicker list and share them", citations: [3] }
+          ],
+          sections: [
+            {
+              title: "Context & Purpose",
+              bullets: [
+                { text: "The outreach targets prospects who engaged post-SHRM (clicked a LinkedIn post or email), indicating prior interest", citations: [5, 6] },
+                { text: "The product being pitched is a full-stack AI hiring platform aimed at reducing costs and increasing hiring efficiency", citations: [7] },
+                { text: "If a prospect shows interest, the goal is to set up a follow-up call with the team and offer a product demo", citations: [7] }
+              ]
+            },
+            {
+              title: "Call Script Guidance",
+              bullets: [
+                { text: "Open by referencing SHRM as a conversation anchor — e.g., 'Post-SHRM, our team wanted to connect with you'", citations: [5, 8] },
+                { text: "Keep the tone casual and conversational, not scripted or formal", citations: [9, 8] },
+                { text: "Focus on two to three key points; do not over-explain", citations: [7] },
+                { text: "US calls have a high chance of going to voicemail, so connecting live is the priority", citations: [10, 11] }
+              ]
+            },
+            {
+              title: "Logistics & Setup",
+              bullets: [
+                { text: "Zoom will be used for US outreach calls; login credentials for the official account will be shared", citations: [1, 2] },
+                { text: "A test call should be made first before proceeding independently", citations: [1, 12] },
+                { text: "Two contact sources are available: the LinkedIn clicker list (contacts to be extracted) and the 33rd call sheet (emails/numbers already available)", citations: [3, 4] }
+              ]
+            }
+          ]
+        },
+        notes: `
+          <h2 style="color: #a78bfa; font-size: 18px; margin-top: 0;">Detailed Meeting Minutes</h2>
+          <p style="line-height: 1.6; color: #d1d5db;">We held the onboarding session for the Sales Outreach campaign. Below are the key points details discussed:</p>
+          <h3 style="color: #c084fc; font-size: 14px; text-transform: uppercase;">1. System Onboarding</h3>
+          <p style="line-height: 1.6; color: #d1d5db;">All cold calling reps must log into the corporate Zoom account using the shared email address and password. Make a test call to ensure the audio input and output are calibrated correctly.</p>
+          <h3 style="color: #c084fc; font-size: 14px; text-transform: uppercase;">2. Target Lead Database</h3>
+          <p style="line-height: 1.6; color: #d1d5db;">We are filtering prospects from the recent SHRM conference. There are two lists. List A contains prospects who clicked our email link, which Alex is extracting. List B contains the 33rd sheet callers which are ready.</p>
+        `,
+        transcript: [
+          { index: 1, speaker: "Alex", text: "First things first, we need everyone on the Zoom outreach platform. I'll share the login credentials in the Slack workspace." },
+          { index: 2, speaker: "Alex", text: "Please do a test call to verify your microphone is configured properly before you start dialing." },
+          { index: 3, speaker: "Sarah", text: "For the LinkedIn clickers, I need the list of names so I can extract their emails and direct phone numbers today." },
+          { index: 4, speaker: "Alex", text: "Got it. The rest of the leads are already on the 33rd call sheet, so you can start dialing those immediately." },
+          { index: 5, speaker: "Sarah", text: "Since these targets engaged with us post-SHRM, we should anchor the calls around that event." },
+          { index: 6, speaker: "Alex", text: "Yes, these are warm leads since they clicked our posts or emails." },
+          { index: 7, speaker: "Sarah", text: "We are positioning our full-stack AI hiring platform to show how we reduce recruitment overhead and boost efficiency. The main goal is getting them to agree to a 10-minute demo." },
+          { index: 8, speaker: "Alex", text: "Exactly. Mention SHRM right away so it doesn't sound like a completely cold pitch." },
+          { index: 9, speaker: "Sarah", text: "Keep it conversational. Ask about their hiring bottlenecks instead of reading a script word for word." },
+          { index: 10, speaker: "Alex", text: "Also, keep in mind most US calls will end up in voicemail." },
+          { index: 11, speaker: "Alex", text: "If they go to voicemail, just leave a brief message and send a follow-up email." },
+          { index: 12, speaker: "Sarah", text: "Perfect. Let's get the test calls finished in the next 15 minutes." }
+        ]
+      };
     } else {
       // Call live Gemini REST API
       const prompt = `
-        Please analyze this audio recording. Perform a precise text transcription of the conversation first.
-        Based on the transcription, generate high-quality meeting notes. You should output a JSON object containing exactly two keys: "title" and "htmlContent".
+        Please analyze this audio recording. Perform a precise sentence-by-sentence text transcription first.
+        Based on the transcription, generate high-quality meeting notes in JSON format matching the following schema:
         
-        "title": A clean, concise title describing the meeting topic (e.g. "Database Schema Sync", "Design Review"). Do not exceed 5 words.
-        "htmlContent": A beautifully structured, professionally styled HTML document representing the meeting notes. Use modern typography and a dark mode theme optimized for clearspace app (use background styles like "background: rgba(139, 92, 246, 0.03); border-left: 4px solid #8b5cf6;" for wrappers, cards, list styles, tables for Action Items, etc.). Make it look incredibly premium and clean. Include:
-        - Meeting metadata (Date/Time, Suggested Attendees/Speakers)
-        - Executive Summary
-        - Key Discussion Points
-        - Decisions Made
-        - Action Items (in a neat HTML Table)
-        - The Full Transcript (in an italic blockquote style container)
-        
-        Return ONLY valid JSON format. Do not surround with markdown blocks. Example format:
         {
-          "title": "Meeting Title",
-          "htmlContent": "<div>...</div>"
+          "title": "Clean meeting title describing the topic",
+          "meeting_notes": {
+            "type": "meeting",
+            "summary": {
+              "actionItems": [
+                { "text": "Specific action item description", "citations": [1, 2] }
+              ],
+              "sections": [
+                {
+                  "title": "Section Title (e.g. Context & Purpose, Call Script Guidance, Logistics & Setup)",
+                  "bullets": [
+                    { "text": "Summarized point or details from the meeting", "citations": [3, 4] }
+                  ]
+                }
+              ]
+            },
+            "notes": "Detailed meeting notes formatted in HTML string suitable for display.",
+            "transcript": [
+              { "index": 1, "speaker": "Speaker Name", "text": "Sentence or line of speech" },
+              { "index": 2, "speaker": "Speaker Name", "text": "Next sentence or line of speech" }
+            ]
+          }
         }
+        
+        CRITICAL RULES:
+        1. The "citations" array in Action Items and Sections must contain the "index" numbers from the "transcript" array where that specific point was discussed.
+        2. Keep the transcription sentence-by-sentence so each has a unique index starting from 1.
+        3. Do not include markdown wrappers around the JSON. Return only the JSON structure.
       `;
 
       const response = await fetch(
@@ -157,28 +174,28 @@ export async function POST(req: NextRequest) {
       try {
         const parsed = JSON.parse(resultText.trim());
         title = parsed.title || "Meeting Notes";
-        htmlContent = parsed.htmlContent || `<p>${resultText}</p>`;
+        meetingNotesJson = parsed.meeting_notes || { type: "meeting" };
       } catch (err) {
         console.error("Failed to parse Gemini JSON output, raw output:", resultText);
         title = "Meeting Notes";
-        htmlContent = resultText;
+        meetingNotesJson = { type: "meeting", raw: resultText };
       }
     }
 
     // Fetch original page state before updating
     const originalPage = await getPage(supabase, pageId);
     
-    // Save to page title & content
+    // Save meeting JSON as content
     const updatedPage = await updatePage(supabase, pageId, {
       title: title || originalPage?.title || "Meeting Notes",
-      content: htmlContent,
+      content: JSON.stringify(meetingNotesJson),
     });
 
     // Log history
     if (originalPage) {
       const email = user.email || 'Contributor';
       logPageHistory(supabase, pageId, user.id, email, 'title', originalPage.title, title).catch(console.error);
-      logPageHistory(supabase, pageId, user.id, email, 'content', originalPage.content, htmlContent).catch(console.error);
+      logPageHistory(supabase, pageId, user.id, email, 'content', originalPage.content, JSON.stringify(meetingNotesJson)).catch(console.error);
     }
 
     return NextResponse.json(updatedPage);

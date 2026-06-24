@@ -1,0 +1,286 @@
+.container {
+  display: flex;
+  flex-direction: column;
+  background: rgba(255, 255, 255, 0.01);
+  border: 1px solid rgba(255, 255, 255, 0.05);
+  border-radius: 12px;
+  max-width: 800px;
+  margin: 20px auto;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
+  color: #e5e7eb;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  overflow: hidden;
+}
+
+.header {
+  padding: 24px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.titleArea {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.calendarIcon {
+  color: #a78bfa;
+}
+
+.title {
+  font-size: 18px;
+  font-weight: 700;
+  color: #f3f4f6;
+  margin: 0;
+}
+
+.tabBar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background: rgba(255, 255, 255, 0.02);
+  padding: 8px 16px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.tabs {
+  display: flex;
+  gap: 8px;
+}
+
+.tabButton {
+  background: transparent;
+  border: none;
+  color: #9ca3af;
+  padding: 8px 16px;
+  font-size: 13.5px;
+  font-weight: 600;
+  border-radius: 6px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  transition: all 0.2s ease;
+}
+
+.tabButton:hover {
+  color: #f3f4f6;
+  background: rgba(255, 255, 255, 0.03);
+}
+
+.activeTab {
+  color: #a78bfa;
+  background: rgba(139, 92, 246, 0.1);
+}
+
+.optionsBtn {
+  background: transparent;
+  border: none;
+  color: #9ca3af;
+  cursor: pointer;
+  padding: 6px;
+  border-radius: 6px;
+  display: flex;
+  align-items: center;
+}
+
+.optionsBtn:hover {
+  color: #f3f4f6;
+  background: rgba(255, 255, 255, 0.04);
+}
+
+/* Actions Row */
+.actionsRow {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 12px 24px;
+  background: rgba(255, 255, 255, 0.01);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.03);
+  font-size: 13px;
+  color: #9ca3af;
+}
+
+.actionButtons {
+  display: flex;
+  gap: 8px;
+}
+
+.actionBtn {
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  color: #d1d5db;
+  padding: 6px 12px;
+  border-radius: 6px;
+  font-size: 12.5px;
+  font-weight: 600;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  transition: all 0.15s ease;
+}
+
+.actionBtn:hover {
+  background: rgba(255, 255, 255, 0.06);
+  color: #f3f4f6;
+}
+
+.slackBtn:hover {
+  border-color: rgba(74, 21, 75, 0.5);
+  background: rgba(74, 21, 75, 0.15);
+  color: #ec4899;
+}
+
+.closeBtn {
+  background: transparent;
+  border: none;
+  color: #9ca3af;
+  cursor: pointer;
+  padding: 4px;
+  display: flex;
+  align-items: center;
+}
+
+.closeBtn:hover {
+  color: #f3f4f6;
+}
+
+/* Content Area */
+.contentArea {
+  padding: 24px;
+  min-height: 360px;
+}
+
+.section {
+  margin-bottom: 28px;
+}
+
+.sectionTitle {
+  font-size: 15px;
+  font-weight: 700;
+  color: #f3f4f6;
+  margin: 0 0 16px 0;
+  text-transform: capitalize;
+}
+
+.actionList {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding: 0;
+  margin: 0;
+  list-style: none;
+}
+
+.actionItemRow {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+}
+
+.checkbox {
+  margin-top: 3px;
+  width: 15px;
+  height: 15px;
+  accent-color: #8b5cf6;
+  cursor: pointer;
+}
+
+.completedText {
+  text-decoration: line-through;
+  color: #6b7280 !important;
+}
+
+.bulletList {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding-left: 20px;
+  margin: 0;
+}
+
+.bulletItem {
+  color: #d1d5db;
+  line-height: 1.5;
+  font-size: 14px;
+}
+
+/* Citation Badges */
+.citation {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(139, 92, 246, 0.15);
+  border: 1px solid rgba(139, 92, 246, 0.3);
+  color: #a78bfa;
+  font-size: 10px;
+  font-weight: 700;
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  margin-left: 6px;
+  cursor: pointer;
+  user-select: none;
+  transition: all 0.15s ease;
+  vertical-align: middle;
+}
+
+.citation:hover {
+  background: #8b5cf6;
+  color: #ffffff;
+  box-shadow: 0 0 8px rgba(139, 92, 246, 0.6);
+}
+
+/* Transcript styling */
+.transcriptList {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.transcriptLine {
+  display: flex;
+  gap: 12px;
+  padding: 8px 12px;
+  border-radius: 8px;
+  transition: all 0.3s ease;
+  border: 1px solid transparent;
+}
+
+.transcriptIndex {
+  font-family: monospace;
+  font-size: 11px;
+  color: #6b7280;
+  width: 20px;
+  text-align: right;
+  margin-top: 3px;
+}
+
+.speakerName {
+  font-weight: 700;
+  color: #c084fc;
+  font-size: 13.5px;
+  min-width: 64px;
+}
+
+.speechText {
+  color: #d1d5db;
+  font-size: 14px;
+  line-height: 1.5;
+}
+
+/* Flash Highlight when linked from citation */
+.highlightLine {
+  background: rgba(139, 92, 246, 0.1) !important;
+  border-color: rgba(139, 92, 246, 0.3) !important;
+  animation: flashHighlight 2s ease-out;
+}
+
+@keyframes flashHighlight {
+  0% { background: rgba(139, 92, 246, 0.4); }
+  100% { background: rgba(139, 92, 246, 0.1); }
+}

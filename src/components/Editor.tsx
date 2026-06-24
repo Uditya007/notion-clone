@@ -25,6 +25,7 @@ import WhatsAppView from "./WhatsAppView";
 import CommandCenter from "./CommandCenter";
 import AudioRecorder from "./AudioRecorder";
 import MeetingRecorderDashboard from "./MeetingRecorderDashboard";
+import MeetingNotesView from "./MeetingNotesView";
 import AnalyticsPanel from "./AnalyticsPanel";
 import { Mic, BarChart2, Menu } from "lucide-react";
 import { useCompletion } from '@ai-sdk/react';
@@ -250,6 +251,7 @@ export default function Editor() {
   const [isAudioRecordingOpen, setIsAudioRecordingOpen] = useState(false);
   const [showAnalyticsPanel, setShowAnalyticsPanel] = useState(false);
   const [saveStatus, setSaveStatus] = useState<'saved' | 'saving'>('saved');
+  const [disableMeetingDashboard, setDisableMeetingDashboard] = useState(false);
   const [slashIndex, setSlashIndex] = useState(0);
 
   // --- Notion-style Mentions, Dates & Assistant States ---
@@ -734,6 +736,7 @@ export default function Editor() {
 
   useEffect(() => {
     if (activePageId && !['inbox', 'calendar', 'tasks', 'automations', 'templates', 'trash'].includes(activePageId)) {
+      setDisableMeetingDashboard(false);
       fetchPageData(activePageId);
 
       const channel = supabase.channel(`realtime:page:${activePageId}`);
@@ -1064,6 +1067,16 @@ export default function Editor() {
     setShowTooltip(false);
   };
 
+  let meetingData = null;
+  if (activePage?.content && !disableMeetingDashboard) {
+    try {
+      const parsed = JSON.parse(activePage.content);
+      if (parsed && typeof parsed === 'object' && parsed.type === 'meeting') {
+        meetingData = parsed;
+      }
+    } catch (e) {}
+  }
+
   if (!isMounted) return null;
   if (activePageId === 'calendar') return <CalendarView />;
   if (activePageId === 'inbox') return <InboxView />;
@@ -1269,6 +1282,12 @@ export default function Editor() {
                 <MeetingRecorderDashboard 
                   pageId={activePageId!} 
                   onTranscriptionComplete={() => fetchPageData(activePageId!)}
+                />
+              ) : meetingData ? (
+                <MeetingNotesView 
+                  data={meetingData} 
+                  pageTitle={activePage?.title || "Meeting Notes"}
+                  onDisable={() => setDisableMeetingDashboard(true)}
                 />
               ) : (
                 <>
