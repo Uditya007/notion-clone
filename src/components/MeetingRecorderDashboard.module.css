@@ -156,22 +156,42 @@
   background: #dc2626;
   color: #ffffff;
   border: none;
-  border-radius: 50%;
-  width: 56px;
-  height: 56px;
+  border-radius: 24px;
+  padding: 12px 24px;
+  font-size: 14px;
+  font-weight: 700;
   display: flex;
   align-items: center;
-  justify-content: center;
+  gap: 8px;
   cursor: pointer;
-  box-shadow: 0 0 20px rgba(220, 38, 38, 0.4);
+  box-shadow: 0 4px 15px rgba(220, 38, 38, 0.4);
   transition: all 0.2s ease;
 }
 
 .stopButton:hover {
-  transform: scale(1.08);
+  transform: scale(1.03);
   background: #b91c1c;
-  box-shadow: 0 0 30px rgba(220, 38, 38, 0.6);
+  box-shadow: 0 6px 20px rgba(220, 38, 38, 0.6);
 }
+
+.liveTranscriptBox {
+  width: 100%;
+  max-width: 480px;
+  background: rgba(0, 0, 0, 0.2);
+  border: 1px solid rgba(255, 255, 255, 0.05);
+  border-radius: 8px;
+  padding: 16px;
+  font-size: 13.5px;
+  color: #d1d5db;
+  min-height: 80px;
+  max-height: 120px;
+  overflow-y: auto;
+  margin-bottom: 24px;
+  text-align: left;
+  font-style: italic;
+  line-height: 1.5;
+}
+
 
 .cancelButton {
   background: rgba(255, 255, 255, 0.05);

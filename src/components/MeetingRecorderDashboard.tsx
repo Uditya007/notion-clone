@@ -16,6 +16,7 @@ export default function MeetingRecorderDashboard({ pageId, onTranscriptionComple
   const [duration, setDuration] = useState(0);
   const [isDragOver, setIsDragOver] = useState(false);
   const [useAI, setUseAI] = useState(true);
+  const [liveTranscript, setLiveTranscript] = useState("");
   const { addToast } = useAppStore();
 
   const mediaRecorderRef = useRef<MediaRecorder | null>(null);
@@ -52,6 +53,7 @@ export default function MeetingRecorderDashboard({ pageId, onTranscriptionComple
     setStatus("recording");
     setIsRecordingActive(false);
     setDuration(0);
+    setLiveTranscript("");
   };
 
   const startRecordingSession = async () => {
@@ -78,35 +80,41 @@ export default function MeetingRecorderDashboard({ pageId, onTranscriptionComple
         }
       };
 
-      // Set up browser-based real-time SpeechRecognition if AI is disabled
-      if (!useAI) {
-        recognitionTextRef.current = "";
-        const SpeechRecognitionClass = (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
-        if (SpeechRecognitionClass) {
-          const recognition = new SpeechRecognitionClass();
-          recognition.continuous = true;
-          recognition.interimResults = true;
-          recognition.lang = "en-US";
-          
-          recognition.onresult = (event: any) => {
-            let finalTranscript = "";
-            for (let i = event.resultIndex; i < event.results.length; ++i) {
-              if (event.results[i].isFinal) {
-                finalTranscript += event.results[i][0].transcript + " ";
-              }
+      // Set up browser-based real-time SpeechRecognition for live on-screen text
+      recognitionTextRef.current = "";
+      setLiveTranscript("");
+      
+      const SpeechRecognitionClass = (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
+      if (SpeechRecognitionClass) {
+        const recognition = new SpeechRecognitionClass();
+        recognition.continuous = true;
+        recognition.interimResults = true;
+        recognition.lang = "en-US";
+        
+        recognition.onresult = (event: any) => {
+          let currentInterim = "";
+          let finalTranscript = "";
+          for (let i = event.resultIndex; i < event.results.length; ++i) {
+            if (event.results[i].isFinal) {
+              finalTranscript += event.results[i][0].transcript + " ";
+            } else {
+              currentInterim += event.results[i][0].transcript;
             }
-            if (finalTranscript) {
-              recognitionTextRef.current += finalTranscript;
-            }
-          };
+          }
+          if (finalTranscript) {
+            recognitionTextRef.current += finalTranscript;
+          }
+          setLiveTranscript(recognitionTextRef.current + currentInterim);
+        };
 
-          recognition.onerror = (e: any) => {
-            console.error("Speech recognition error:", e);
-          };
+        recognition.onerror = (e: any) => {
+          console.error("Speech recognition error:", e);
+        };
 
-          recognition.start();
-          recognitionRef.current = recognition;
-        } else {
+        recognition.start();
+        recognitionRef.current = recognition;
+      } else {
+        if (!useAI) {
           addToast("⚠️ Web Speech API is not supported in this browser. Transcript will be empty.", "warning");
         }
       }
@@ -259,7 +267,7 @@ export default function MeetingRecorderDashboard({ pageId, onTranscriptionComple
   const handleLocalProcessing = async () => {
     setStatus("processing");
     
-    const textStr = recognitionTextRef.current.trim();
+    const textStr = liveTranscript.trim() || recognitionTextRef.current.trim();
 
     const localMeetingNotes = {
       type: "meeting",
@@ -489,9 +497,14 @@ export default function MeetingRecorderDashboard({ pageId, onTranscriptionComple
           <div className={styles.timer}>{formatTime(duration)}</div>
           
           {isRecordingActive && (
-            <div className={styles.visualizerWrapper}>
-              <canvas ref={canvasRef} width={300} height={60} className={styles.canvas} />
-            </div>
+            <>
+              <div className={styles.visualizerWrapper}>
+                <canvas ref={canvasRef} width={300} height={60} className={styles.canvas} />
+              </div>
+              <div className={styles.liveTranscriptBox}>
+                {liveTranscript || "Listening to speech..."}
+              </div>
+            </>
           )}
 
           <div className={styles.recordingControls}>
@@ -501,7 +514,7 @@ export default function MeetingRecorderDashboard({ pageId, onTranscriptionComple
               </button>
             ) : (
               <button className={styles.stopButton} onClick={stopRecordingSession} title="Stop and generate meeting notes">
-                <Square size={20} fill="#ffffff" />
+                <Square size={16} fill="#ffffff" /> Stop Recording
               </button>
             )}
             <button className={styles.cancelButton} onClick={cancelRecordingSession} title="Discard and go back">
