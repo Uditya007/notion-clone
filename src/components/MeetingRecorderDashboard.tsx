@@ -2,7 +2,7 @@
 
 import { useEffect, useRef, useState } from "react";
 import styles from "./MeetingRecorderDashboard.module.css";
-import { Mic, Square, Trash2, RefreshCw, UploadCloud, FileAudio } from "lucide-react";
+import { Mic, Square, Trash2, RefreshCw, UploadCloud, FileAudio, Sparkles, Zap, Plus } from "lucide-react";
 import { useAppStore } from "@/store/useAppStore";
 
 interface MeetingRecorderDashboardProps {
@@ -14,12 +14,17 @@ export default function MeetingRecorderDashboard({ pageId, onTranscriptionComple
   const [status, setStatus] = useState<"idle" | "recording" | "processing">("idle");
   const [duration, setDuration] = useState(0);
   const [isDragOver, setIsDragOver] = useState(false);
+  const [useAI, setUseAI] = useState(true);
   const { addToast } = useAppStore();
 
   const mediaRecorderRef = useRef<MediaRecorder | null>(null);
   const audioChunksRef = useRef<Blob[]>([]);
   const timerRef = useRef<NodeJS.Timeout | null>(null);
   
+  // Speech Recognition refs
+  const recognitionRef = useRef<any>(null);
+  const recognitionTextRef = useRef<string>("");
+
   // Visualizer refs
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
   const audioContextRef = useRef<AudioContext | null>(null);
@@ -58,9 +63,46 @@ export default function MeetingRecorderDashboard({ pageId, onTranscriptionComple
       };
 
       mediaRecorder.onstop = async () => {
-        const audioBlob = new Blob(audioChunksRef.current, { type: "audio/webm" });
-        await handleAudioProcessing(audioBlob);
+        if (useAI) {
+          const audioBlob = new Blob(audioChunksRef.current, { type: "audio/webm" });
+          await handleAudioProcessing(audioBlob);
+        } else {
+          await handleLocalProcessing();
+        }
       };
+
+      // Set up browser-based real-time SpeechRecognition if AI is disabled
+      if (!useAI) {
+        recognitionTextRef.current = "";
+        const SpeechRecognitionClass = (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
+        if (SpeechRecognitionClass) {
+          const recognition = new SpeechRecognitionClass();
+          recognition.continuous = true;
+          recognition.interimResults = true;
+          recognition.lang = "en-US";
+          
+          recognition.onresult = (event: any) => {
+            let finalTranscript = "";
+            for (let i = event.resultIndex; i < event.results.length; ++i) {
+              if (event.results[i].isFinal) {
+                finalTranscript += event.results[i][0].transcript + " ";
+              }
+            }
+            if (finalTranscript) {
+              recognitionTextRef.current += finalTranscript;
+            }
+          };
+
+          recognition.onerror = (e: any) => {
+            console.error("Speech recognition error:", e);
+          };
+
+          recognition.start();
+          recognitionRef.current = recognition;
+        } else {
+          addToast("⚠️ Web Speech API is not supported in this browser. Transcript will be empty.", "warning");
+        }
+      }
 
       setupVisualizer(stream);
 
@@ -156,6 +198,11 @@ export default function MeetingRecorderDashboard({ pageId, onTranscriptionComple
       mediaRecorderRef.current.stop();
     }
 
+    if (recognitionRef.current) {
+      recognitionRef.current.stop();
+      recognitionRef.current = null;
+    }
+
     if (streamRef.current) {
       streamRef.current.getTracks().forEach((track) => track.stop());
       streamRef.current = null;
@@ -200,6 +247,123 @@ export default function MeetingRecorderDashboard({ pageId, onTranscriptionComple
     }
   };
 
+  // Local Free Mode Processing (Zero Token cost)
+  const handleLocalProcessing = async () => {
+    setStatus("processing");
+    
+    const textStr = recognitionTextRef.current.trim();
+
+    const localMeetingNotes = {
+      type: "meeting",
+      summary: {
+        actionItems: [
+          { text: "Double click to write your first action item here...", citations: [1] }
+        ],
+        sections: [
+          {
+            title: "Context & Purpose",
+            bullets: [
+              { text: "Double click to write custom notes on purpose here...", citations: [1] }
+            ]
+          },
+          {
+            title: "Logistics & Setup",
+            bullets: [
+              { text: "Details on logistics and setup...", citations: [1] }
+            ]
+          }
+        ]
+      },
+      notes: `
+        <h2 style="color: #a78bfa; font-size: 18px; margin-top: 0;">Manual Meeting Notes</h2>
+        <p style="color: #d1d5db; line-height: 1.6;">Use the text fields or double click headings to customize these manual notes.</p>
+      `,
+      transcript: [
+        { index: 1, speaker: "Transcribed Voice", text: textStr || "No live speech captured. Click the options menu to edit raw contents." }
+      ]
+    };
+
+    try {
+      const res = await fetch(`/api/pages/${pageId}`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          title: `Meeting @${new Date().toLocaleDateString('default', { dateStyle: 'medium' })}`,
+          content: JSON.stringify(localMeetingNotes),
+        }),
+      });
+
+      if (res.ok) {
+        addToast("✨ Local meeting notes template created successfully!", "success");
+        onTranscriptionComplete();
+      } else {
+        addToast("Failed to save local template.", "error");
+        setStatus("idle");
+      }
+    } catch (e) {
+      console.error(e);
+      addToast("Failed to save local template.", "error");
+      setStatus("idle");
+    }
+  };
+
+  // Start directly with a blank manual draft (Zero tokens)
+  const handleStartBlankManualNotes = async () => {
+    setStatus("processing");
+    const blankMeetingNotes = {
+      type: "meeting",
+      summary: {
+        actionItems: [
+          { text: "Add your first action item here...", citations: [] }
+        ],
+        sections: [
+          {
+            title: "Context & Purpose",
+            bullets: [
+              { text: "Write the meeting context here...", citations: [] }
+            ]
+          },
+          {
+            title: "Logistics & Setup",
+            bullets: [
+              { text: "Write setup details here...", citations: [] }
+            ]
+          }
+        ]
+      },
+      notes: `
+        <h2 style="color: #a78bfa; font-size: 18px; margin-top: 0;">Meeting Details</h2>
+        <p style="color: #d1d5db; line-height: 1.6;">Start manually logging notes here.</p>
+      `,
+      transcript: [
+        { index: 1, speaker: "Editor", text: "Manual meeting note drafting session." }
+      ]
+    };
+
+    try {
+      const res = await fetch(`/api/pages/${pageId}`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          title: `Meeting @${new Date().toLocaleDateString('default', { dateStyle: 'medium' })}`,
+          content: JSON.stringify(blankMeetingNotes),
+        }),
+      });
+
+      if (res.ok) {
+        addToast("📝 Created a blank manual meeting note draft!", "success");
+        onTranscriptionComplete();
+      } else {
+        addToast("Failed to save blank template.", "error");
+        setStatus("idle");
+      }
+    } catch (e) {
+      console.error(e);
+      addToast("Failed to save blank template.", "error");
+      setStatus("idle");
+    }
+  };
+
   // Upload Handlers
   const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -240,31 +404,59 @@ export default function MeetingRecorderDashboard({ pageId, onTranscriptionComple
             Capture your conversations. Cora AI transcribes audio and synthesizes professional meeting notes with summaries, key decisions, and action tables instantly.
           </p>
 
+          {/* Toggle Switch */}
+          <div className={styles.toggleRow}>
+            <button 
+              className={`${styles.toggleBtn} ${useAI ? styles.toggleActive : ""}`}
+              onClick={() => setUseAI(true)}
+              title="Transcribes and summarizes automatically with Gemini AI (uses API credits)"
+            >
+              <Sparkles size={14} /> AI Copilot
+            </button>
+            <button 
+              className={`${styles.toggleBtn} ${!useAI ? styles.toggleActive : ""}`}
+              onClick={() => setUseAI(false)}
+              title="Transcribes locally on your device for free, with zero token costs"
+            >
+              <Zap size={14} /> Free Local Mode
+            </button>
+          </div>
+
           <div className={styles.actionsGrid}>
             <div className={styles.actionCard} onClick={startRecordingSession}>
               <Mic size={24} className={styles.cardIcon} />
               <h3 className={styles.cardTitle}>Record Live Meeting</h3>
-              <p className={styles.cardDesc}>Transcribe voice in real time</p>
+              <p className={styles.cardDesc}>
+                {useAI ? "Transcribe & summarize with AI" : "Local real-time free transcription"}
+              </p>
             </div>
 
-            <div 
-              className={`${styles.actionCard} ${isDragOver ? styles.dragover : ""}`}
-              onDragOver={handleDragOver}
-              onDragLeave={handleDragLeave}
-              onDrop={handleDrop}
-              onClick={() => fileInputRef.current?.click()}
-            >
-              <UploadCloud size={24} className={styles.cardIcon} />
-              <h3 className={styles.cardTitle}>Upload Audio File</h3>
-              <p className={styles.cardDesc}>Drag & drop MP3, WAV, M4A, WEBM</p>
-              <input 
-                type="file" 
-                ref={fileInputRef} 
-                style={{ display: "none" }} 
-                accept="audio/*"
-                onChange={handleFileChange}
-              />
-            </div>
+            {useAI ? (
+              <div 
+                className={`${styles.actionCard} ${isDragOver ? styles.dragover : ""}`}
+                onDragOver={handleDragOver}
+                onDragLeave={handleDragLeave}
+                onDrop={handleDrop}
+                onClick={() => fileInputRef.current?.click()}
+              >
+                <UploadCloud size={24} className={styles.cardIcon} />
+                <h3 className={styles.cardTitle}>Upload Audio File</h3>
+                <p className={styles.cardDesc}>Drag & drop MP3, WAV, M4A, WEBM</p>
+                <input 
+                  type="file" 
+                  ref={fileInputRef} 
+                  style={{ display: "none" }} 
+                  accept="audio/*"
+                  onChange={handleFileChange}
+                />
+              </div>
+            ) : (
+              <div className={styles.actionCard} onClick={handleStartBlankManualNotes}>
+                <Plus size={24} className={styles.cardIcon} />
+                <h3 className={styles.cardTitle}>Blank Manual Draft</h3>
+                <p className={styles.cardDesc}>Write meeting notes directly without recording</p>
+              </div>
+            )}
           </div>
         </>
       )}
@@ -293,8 +485,12 @@ export default function MeetingRecorderDashboard({ pageId, onTranscriptionComple
       {status === "processing" && (
         <div className={styles.processingPanel}>
           <div className={styles.spinner}></div>
-          <h3 className={styles.cardTitle} style={{ marginBottom: "8px" }}>Analyzing & Structuring Notes</h3>
-          <p className={styles.cardDesc}>Cora AI is processing transcription and parsing action items...</p>
+          <h3 className={styles.cardTitle} style={{ marginBottom: "8px" }}>
+            {useAI ? "Analyzing & Structuring Notes" : "Preparing Workspace Notes"}
+          </h3>
+          <p className={styles.cardDesc}>
+            {useAI ? "Cora AI is processing transcription and parsing action items..." : "Structuring your manual workspace note template..."}
+          </p>
         </div>
       )}
     </div>
