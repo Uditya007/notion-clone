@@ -315,6 +315,10 @@ export default function WhatsAppView() {
           <MessageSquare className={styles.headerIcon} style={{ color: "#25D366" }} />
           <div>
             <h1>WhatsApp Integration Dashboard</h1>
+            <div className={styles.connectedBadge}>
+              <span className={styles.connectedDot} />
+              Live
+            </div>
             <p>Schedule tasks and create dynamic meeting documents via chat.</p>
           </div>
         </div>
@@ -466,7 +470,7 @@ export default function WhatsAppView() {
               </div>
               <button 
                 onClick={() => handleSendMessage()}
-                className={styles.sendButton}
+                className={`${styles.sendButton} ${inputValue.trim() ? styles.sendButtonActive : ''}`}
                 disabled={!inputValue.trim()}
               >
                 <Send size={16} fill="var(--white)" style={{ transform: inputValue.trim() ? "translate(1px, 0)" : "none" }} />
@@ -675,14 +679,16 @@ export default function WhatsAppView() {
                 </div>
 
                 <div className={styles.digestSection}>
-                  <h3 style={{ margin: '0 0 4px 0', fontSize: '14px', fontWeight: 600 }}>☀️ Daily Digest</h3>
-                  <p style={{ fontSize: '12px', color: 'var(--text-muted)', margin: '0 0 8px 0' }}>Send a morning summary of due tasks and recent page updates to your phone.</p>
+                  <div className={styles.digestTitle}>
+                    <span>☀️</span>
+                    <span>Daily Digest</span>
+                  </div>
                   <input 
                     type="text" 
                     value={digestPhone} 
                     onChange={handlePhoneChange} 
                     placeholder="+919876543210" 
-                    style={{ padding: '8px 12px', borderRadius: '6px', border: '1px solid var(--border)', background: 'var(--bg-primary)', color: 'var(--text-primary)' }}
+                    className={styles.digestInput}
                   />
                   <button 
                     onClick={() => {
@@ -697,7 +703,7 @@ export default function WhatsAppView() {
                         })
                         .catch(() => addToast("Failed to send digest", "error"));
                     }}
-                    style={{ padding: '8px', borderRadius: '6px', background: '#25D366', color: 'white', border: 'none', cursor: 'pointer', fontWeight: 500, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px' }}
+                    className={styles.digestBtn}
                   >
                     📱 Send Today's Digest
                   </button>
