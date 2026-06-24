@@ -2,7 +2,7 @@
 
 import { useState, useRef, useEffect } from "react";
 import styles from "./MeetingNotesView.module.css";
-import { Calendar, Sparkles, FileText, CheckCircle, MoreHorizontal, Mail, Copy, Slack, X, Settings2 } from "lucide-react";
+import { Calendar, Sparkles, FileText, CheckCircle, MoreHorizontal, Mail, Copy, MessageCircle, X, Settings2 } from "lucide-react";
 import { useAppStore } from "@/store/useAppStore";
 
 interface MeetingNotesViewProps {
@@ -62,6 +62,14 @@ export default function MeetingNotesView({ data, pageTitle, onDisable }: Meeting
     addToast("💬 Meeting notes shared to #sales-outreach-campaign!", "success");
   };
 
+  const handleCopyTranscript = () => {
+    if (data.transcript) {
+      const text = data.transcript.map((line: any) => `${line.speaker}: ${line.text}`).join('\n');
+      navigator.clipboard.writeText(text);
+      addToast("📋 Transcript copied to clipboard!", "success");
+    }
+  };
+
   return (
     <div className={styles.container}>
       {/* Header */}
@@ -116,7 +124,7 @@ export default function MeetingNotesView({ data, pageTitle, onDisable }: Meeting
             <Mail size={13} /> Email
           </button>
           <button className={`${styles.actionBtn} ${styles.slackBtn}`} onClick={handleSendSlack}>
-            <Slack size={13} /> Slack
+            <MessageCircle size={13} /> Slack
           </button>
           <button className={styles.closeBtn} onClick={onDisable} title="Switch view">
             <X size={15} />
@@ -125,7 +133,7 @@ export default function MeetingNotesView({ data, pageTitle, onDisable }: Meeting
       </div>
 
       {/* Content Area */}
-      <div className={styles.contentArea}>
+      <div key={activeTab} className={styles.contentArea}>
         {activeTab === "summary" && (
           <div>
             {/* Action Items */}
@@ -195,7 +203,12 @@ export default function MeetingNotesView({ data, pageTitle, onDisable }: Meeting
 
         {activeTab === "transcript" && (
           <div className={styles.transcriptList}>
-            {data.transcript?.map((line) => (
+            <div className={styles.transcriptHeader}>
+               <button onClick={handleCopyTranscript} className={styles.actionBtn} style={{ marginBottom: "16px" }}>
+                 <Copy size={13} /> Copy transcript
+               </button>
+            </div>
+            {data.transcript?.map((line: any) => (
               <div 
                 key={line.index}
                 ref={(el) => { transcriptRefs.current[line.index] = el; }}

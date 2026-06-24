@@ -1,14 +1,14 @@
 "use client";
 
 import { useEffect, useState, useRef } from 'react';
-import { useAppStore } from '@/store/useAppStore';
+import { useAppStore, Page } from '@/store/useAppStore';
 import styles from './Modals.module.css';
 import { Search, FileText, X, Sparkles, AlertCircle } from 'lucide-react';
 import { useCompletion } from '@ai-sdk/react';
 
 export default function SearchModal() {
   const { isSearchOpen, setSearchOpen, setActivePage } = useAppStore();
-  const [pagesList, setPagesList] = useState<any[]>([]);
+  const [pagesList, setPagesList] = useState<Page[]>([]);
   const [query, setQuery] = useState('');
   const [isAiMode, setIsAiMode] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
@@ -71,7 +71,7 @@ export default function SearchModal() {
 
   if (!isSearchOpen) return null;
 
-  const filteredPages = pagesList.filter((page: any) => 
+  const filteredPages = pagesList.filter((page: Page) => 
     page.title.toLowerCase().includes(query.toLowerCase()) || 
     (page.content && page.content.toLowerCase().includes(query.toLowerCase()))
   );
@@ -144,7 +144,7 @@ export default function SearchModal() {
           ) : (
             <div className={styles.resultsList}>
               <div className={styles.resultsLabel}>Matching Pages</div>
-              {filteredPages.map((page: any) => (
+              {filteredPages.map((page: Page) => (
                 <div 
                   key={page.id} 
                   className={styles.resultItem}

@@ -4,9 +4,12 @@ import styles from './Views.module.css';
 import { Trash2, RotateCcw, AlertTriangle } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import { supabase } from '@/lib/supabase/client';
+import { Page } from '@/store/useAppStore';
+
+type TrashPage = Page & { deleted_at?: string | null };
 
 export default function TrashView() {
-  const [pages, setPages] = useState<any[]>([]);
+  const [pages, setPages] = useState<TrashPage[]>([]);
 
   const fetchDeletedPages = async () => {
     try {
@@ -17,12 +20,12 @@ export default function TrashView() {
         const thirtyDaysAgo = new Date();
         thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
         
-        const validPages = data.filter((page: any) => {
+        const validPages = data.filter((page: TrashPage) => {
           const deletedAt = new Date(page.deleted_at || page.deletedAt || new Date());
           return deletedAt > thirtyDaysAgo;
         });
         
-        validPages.sort((a: any, b: any) => new Date(b.deleted_at || b.deletedAt || new Date()).getTime() - new Date(a.deleted_at || a.deletedAt || new Date()).getTime());
+        validPages.sort((a: TrashPage, b: TrashPage) => new Date(b.deleted_at || b.deletedAt || new Date()).getTime() - new Date(a.deleted_at || a.deletedAt || new Date()).getTime());
         setPages(validPages);
       }
     } catch (err) {
@@ -113,7 +116,7 @@ export default function TrashView() {
             <div>Deleted</div>
             <div style={{ textAlign: 'right' }}>Actions</div>
           </div>
-          {pages.map(page => (
+          {pages.map((page: TrashPage) => (
             <div key={page.id} className={styles.logRow}>
               <div className={styles.logName} style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
                 <span style={{ fontSize: '16px' }}>{page.icon || '📄'}</span>

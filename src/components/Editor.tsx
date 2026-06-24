@@ -44,8 +44,8 @@ const SLASH_COMMANDS = [
   { title: 'Quote', icon: '"', action: (editor: any) => editor.chain().focus().clearNodes().toggleBlockquote().run() },
   { title: 'Code block', icon: '<>', action: (editor: any) => editor.chain().focus().clearNodes().toggleCodeBlock().run() },
   { title: 'Divider', icon: '—', action: (editor: any) => editor.chain().focus().clearNodes().setHorizontalRule().run() },
-  { title: 'Database grid', icon: '🗄', action: () => {} },
-  { title: 'Ask AI Builder', icon: '✨', action: () => {} },
+  { title: 'Database grid', icon: '🗄', action: (editor: any) => editor.chain().focus().insertContent('【 Database Grid 】').run() },
+  { title: 'Ask AI Builder', icon: '✨', action: () => useAppStore.getState().setAIPanelOpen(true) },
 ];
 
 function markdownToHtml(md: string): string {

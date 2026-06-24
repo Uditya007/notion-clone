@@ -5,14 +5,17 @@ import styles from './DatabaseView.module.css';
 import { Plus, Filter, ArrowUpDown, LayoutGrid, LayoutTemplate, LayoutList, Sparkles, Trash2 } from 'lucide-react';
 import DatabaseRowModal from './DatabaseRowModal';
 import { supabase } from '@/lib/supabase/client';
+import { Database, Column, Row } from '@/store/useAppStore';
+
+type AutomationRule = { id: string; db_id?: string; trigger_col_id?: string; trigger_val: string; action_type: string; action_config?: any; };
 
 export default function DatabaseView({ dbId }: { dbId: string }) {
-  const [db, setDb] = useState<any>(null);
+  const [db, setDb] = useState<Database | null>(null);
   const [selectedRowId, setSelectedRowId] = useState<string | null>(null);
 
   // Database Automations Panel States
   const [showAutomationModal, setShowAutomationModal] = useState(false);
-  const [automationsList, setAutomationsList] = useState<any[]>([]);
+  const [automationsList, setAutomationsList] = useState<AutomationRule[]>([]);
   const [selectedColId, setSelectedColId] = useState('');
   const [triggerVal, setTriggerVal] = useState('');
   const [actionType, setActionType] = useState('email');
@@ -100,11 +103,11 @@ export default function DatabaseView({ dbId }: { dbId: string }) {
   };
 
   const handleUpdateCell = async (rowId: string, columnId: string, value: string) => {
-    setDb((prev: any) => {
+    setDb((prev: Database | null) => {
       if (!prev) return prev;
       return {
         ...prev,
-        rows: prev.rows.map((r: any) => {
+        rows: prev.rows.map((r: Row) => {
           if (r.id === rowId) {
             return {
               ...r,
@@ -127,8 +130,8 @@ export default function DatabaseView({ dbId }: { dbId: string }) {
     }
   };
 
-  const handleSetView = async (viewType: string) => {
-    setDb((prev: any) => prev ? { ...prev, view_type: viewType } : null);
+  const handleSetView = async (viewType: 'table' | 'board' | 'gallery') => {
+    setDb((prev: Database | null) => prev ? { ...prev, view: viewType } : null);
     try {
       await fetch('/api/databases', {
         method: 'PATCH',
@@ -197,16 +200,16 @@ export default function DatabaseView({ dbId }: { dbId: string }) {
       <table className={styles.table}>
         <thead>
           <tr>
-            {db.columns.map((col: any) => (
+            {db.columns.map((col: Column) => (
               <th key={col.id} className={styles.th}>{col.name}</th>
             ))}
             <th className={styles.th} style={{ width: 40 }}><Plus size={14} /></th>
           </tr>
         </thead>
         <tbody>
-          {db.rows.map((row: any) => (
+          {db.rows.map((row: Row) => (
             <tr key={row.id}>
-              {db.columns.map((col: any, idx: number) => (
+              {db.columns.map((col: Column, idx: number) => (
                 <td key={col.id} className={`${styles.td} ${idx === 0 ? styles.titleCell : ''}`}>
                   <input
                     className={styles.cellInput}
@@ -235,26 +238,31 @@ export default function DatabaseView({ dbId }: { dbId: string }) {
   );
 
   const renderBoard = () => {
-    const selectCol = db.columns.find((c: any) => c.type === 'select' || c.type === 'multiselect');
+    const selectCol = db.columns.find((c: Column) => c.type === 'select' || c.type === 'multiselect');
     const groups = selectCol?.options || ['No Status'];
     
     return (
       <div className={styles.boardWrapper}>
-        {groups.map((group: any) => (
+        {groups.map((group: string) => (
           <div key={group} className={styles.boardColumn}>
             <div className={styles.boardColHeader}>
               <span className={styles.pill}>{group}</span>
-              <span>{db.rows.filter((r: any) => (r.cells[selectCol?.id || ''] || []).includes(group) || (!selectCol && group === 'No Status')).length}</span>
+              <span>{db.rows.filter((r: Row) => {
+                const cells = r.cells || {};
+                const val = cells[selectCol?.id || ''];
+                if (Array.isArray(val)) return val.includes(group);
+                return val === group || (!selectCol && group === 'No Status');
+              }).length}</span>
             </div>
             <div className={styles.boardCards}>
               {db.rows
-                .filter((r: any) => {
+                .filter((r: Row) => {
                   if (!selectCol) return group === 'No Status';
                   const val = r.cells[selectCol.id];
                   if (Array.isArray(val)) return val.includes(group);
                   return val === group;
                 })
-                .map((row: any) => (
+                .map((row: Row) => (
                   <div key={row.id} className={styles.boardCard} onClick={() => setSelectedRowId(row.id)}>
                     <div className={styles.cardTitle}>{row.cells[db.columns[0]?.id] || 'Untitled'}</div>
                   </div>
@@ -269,7 +277,7 @@ export default function DatabaseView({ dbId }: { dbId: string }) {
 
   const renderGallery = () => (
     <div className={styles.galleryWrapper}>
-      {db.rows.map((row: any) => (
+      {db.rows.map((row: Row) => (
         <div key={row.id} className={styles.galleryCard} onClick={() => setSelectedRowId(row.id)}>
           <div className={styles.galleryCover}>
             <LayoutGrid size={24} opacity={0.2} />
@@ -282,7 +290,7 @@ export default function DatabaseView({ dbId }: { dbId: string }) {
     </div>
   );
 
-  const activeView = db.view_type || 'table';
+  const activeView = db.view || 'table';
 
   return (
     <div className={styles.container}>
@@ -345,8 +353,8 @@ export default function DatabaseView({ dbId }: { dbId: string }) {
               {automationsList.length === 0 ? (
                 <div style={{ fontSize: '12px', color: 'var(--text-muted)', textAlign: 'center', padding: '16px' }}>No active triggers configured. Build one below!</div>
               ) : (
-                automationsList.map(rule => {
-                  const targetColName = db.columns.find((c: any) => c.id === rule.trigger_col_id)?.name || 'Column';
+                automationsList.map((rule: AutomationRule) => {
+                  const targetColName = db.columns.find((c: Column) => c.id === rule.trigger_col_id)?.name || 'Column';
                   return (
                     <div key={rule.id} className={styles.ruleItem}>
                       <span className={styles.ruleText}>
@@ -374,7 +382,7 @@ export default function DatabaseView({ dbId }: { dbId: string }) {
                     required
                   >
                     <option value="">-- Select Column --</option>
-                    {db.columns.map((c: any) => (
+                    {db.columns.map((c: Column) => (
                       <option key={c.id} value={c.id}>{c.name}</option>
                     ))}
                   </select>

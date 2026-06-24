@@ -30,15 +30,19 @@ import {
 } from "lucide-react";
 import styles from "./Sidebar.module.css";
 import { useState, useEffect, useRef } from "react";
-import { useAppStore } from "@/store/useAppStore";
+import { useAppStore, Page, Conversation } from "@/store/useAppStore";
 import { supabase } from "@/lib/supabase/client";
+
+type SidebarPage = Page & { parent_id?: string | null; is_favorite?: boolean; is_deleted?: boolean; };
+type SidebarPageNode = Omit<SidebarPage, 'children'> & { children: SidebarPageNode[] };
+type SidebarConversation = Conversation & { updated_at?: string };
 import AIBuilder from "./AIBuilder";
 
 export default function Sidebar() {
   const [isCollapsed, setIsCollapsed] = useState(false);
   const [isMobileOpen, setIsMobileOpen] = useState(false);
   const [isClient, setIsClient] = useState(false);
-  const [pagesList, setPagesList] = useState<any[]>([]);
+  const [pagesList, setPagesList] = useState<SidebarPage[]>([]);
   const [workspaceName, setWorkspaceName] = useState("My Workspace");
   const [userProfile, setUserProfile] = useState<{ name: string; email: string }>({ name: "User", email: "user@cora.app" });
   const [isGoogleConnected, setIsGoogleConnected] = useState(false);
@@ -46,7 +50,7 @@ export default function Sidebar() {
   const [showProfileMenu, setShowProfileMenu] = useState(false);
   
   // Conversations State
-  const [conversations, setConversations] = useState<any[]>([]);
+  const [conversations, setConversations] = useState<SidebarConversation[]>([]);
 
   const getGroupedConversations = () => {
     const nowTime = new Date().getTime();
@@ -54,18 +58,18 @@ export default function Sidebar() {
     const thirtyDaysAgo = nowTime - 30 * 86400000;
 
     const groups = {
-      'Past week': [] as any[],
-      'Past 30 days': [] as any[],
-      'Older': [] as any[]
+      'Past week': [] as SidebarConversation[],
+      'Past 30 days': [] as SidebarConversation[],
+      'Older': [] as SidebarConversation[]
     };
 
-    const sorted = [...conversations].sort((a: any, b: any) => {
+    const sorted = [...conversations].sort((a: SidebarConversation, b: SidebarConversation) => {
       const dateA = new Date(a.updated_at || a.updatedAt || 0).getTime();
       const dateB = new Date(b.updated_at || b.updatedAt || 0).getTime();
       return dateB - dateA;
     });
 
-    sorted.forEach((conv) => {
+    sorted.forEach((conv: SidebarConversation) => {
       const time = new Date(conv.updated_at || conv.updatedAt || 0).getTime();
       if (time >= oneWeekAgo) {
         groups['Past week'].push(conv);
@@ -111,7 +115,7 @@ export default function Sidebar() {
       if (res.ok) {
         const data = await res.json();
         if (data && data.length > 0) {
-          const sorted = data.sort((a: any, b: any) => {
+          const sorted = data.sort((a: SidebarConversation, b: SidebarConversation) => {
             const dateA = new Date(a.updated_at || a.updatedAt || 0).getTime();
             const dateB = new Date(b.updated_at || b.updatedAt || 0).getTime();
             return dateB - dateA;
@@ -432,15 +436,15 @@ export default function Sidebar() {
     window.location.href = "/login";
   };
 
-  const buildPageTree = () => {
-    const pageMap = new Map();
+  const buildPageTree = (): SidebarPageNode[] => {
+    const pageMap = new Map<string, SidebarPageNode>();
     pagesList.forEach((p) => pageMap.set(p.id, { ...p, children: [] }));
-    const roots: any[] = [];
+    const roots: SidebarPageNode[] = [];
 
     pagesList.forEach((p) => {
-      const mapped = pageMap.get(p.id);
+      const mapped = pageMap.get(p.id)!;
       if (p.parent_id && pageMap.has(p.parent_id)) {
-        pageMap.get(p.parent_id).children.push(mapped);
+        pageMap.get(p.parent_id)!.children.push(mapped);
       } else {
         roots.push(mapped);
       }
@@ -453,7 +457,7 @@ export default function Sidebar() {
   const favorites = pagesList.filter((p) => p.is_favorite);
   const trashCount = pagesList.filter((p) => p.is_deleted).length;
 
-  const PageTreeItem = ({ page, level = 0 }: { page: any, level?: number }) => {
+  const PageTreeItem = ({ page, level = 0 }: { page: SidebarPageNode, level?: number }) => {
     const [expanded, setExpanded] = useState(true);
     const isActive = activePageId === page.id;
 
@@ -493,7 +497,7 @@ export default function Sidebar() {
 
         {expanded && page.children.length > 0 && (
           <div className={styles.nestedPages}>
-            {page.children.map((child: any) => (
+            {page.children.map((child: SidebarPageNode) => (
               <PageTreeItem key={child.id} page={child} level={level + 1} />
             ))}
           </div>

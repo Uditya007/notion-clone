@@ -132,7 +132,7 @@ export const useAppStore = create<AppState>((set) => ({
   setSettingsOpen: (isOpen) => set({ isSettingsOpen: isOpen }),
   setAIPanelOpen: (isOpen) => set({ isAIPanelOpen: isOpen }),
   setSidebarCollapsed: (isCollapsed) => set({ sidebarCollapsed: isCollapsed }),
-  setActiveConversation: (id) => set((state) => ({ 
+  setActiveConversation: (id): void => set((state) => ({ 
     activeConversationId: id, 
     activePageId: id ? null : state.activePageId 
   })),

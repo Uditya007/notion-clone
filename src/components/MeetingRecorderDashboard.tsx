@@ -172,7 +172,7 @@ export default function MeetingRecorderDashboard({ pageId, onTranscriptionComple
 
     const draw = () => {
       animationFrameRef.current = requestAnimationFrame(draw);
-      analyser.getByteFrequencyData(dataArray);
+      analyser.getByteFrequencyData(dataArray as any);
 
       ctx.fillStyle = "rgba(10, 10, 18, 0.3)";
       ctx.fillRect(0, 0, width, height);

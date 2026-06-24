@@ -102,6 +102,10 @@
   border-bottom: 1px solid rgba(255, 255, 255, 0.03);
   font-size: 13px;
   color: #9ca3af;
+  position: sticky;
+  top: 0;
+  z-index: 2;
+  backdrop-filter: blur(8px);
 }
 
 .actionButtons {
@@ -153,6 +157,12 @@
 .contentArea {
   padding: 24px;
   min-height: 360px;
+  animation: tabFadeIn 150ms ease-out;
+}
+
+@keyframes tabFadeIn { 
+  from { opacity: 0; transform: translateY(4px); } 
+  to { opacity: 1; transform: translateY(0); } 
 }
 
 .section {
@@ -183,11 +193,40 @@
 }
 
 .checkbox {
+  appearance: none;
+  background-color: transparent;
   margin-top: 3px;
   width: 15px;
   height: 15px;
-  accent-color: #8b5cf6;
+  border: 1.5px solid #8b5cf6;
+  border-radius: 4px;
   cursor: pointer;
+  position: relative;
+  transition: all 0.2s ease;
+}
+
+.checkbox:checked {
+  background-color: #8b5cf6;
+  border-color: #8b5cf6;
+  transform: scale(1.05);
+}
+
+.checkbox:checked::after {
+  content: '';
+  position: absolute;
+  left: 4px;
+  top: 1px;
+  width: 4px;
+  height: 8px;
+  border: solid white;
+  border-width: 0 2px 2px 0;
+  transform: rotate(45deg);
+  animation: checkmarkDraw 0.2s ease-in-out forwards;
+}
+
+@keyframes checkmarkDraw {
+  0% { height: 0; width: 0; opacity: 0; }
+  100% { height: 8px; width: 4px; opacity: 1; }
 }
 
 .completedText {
@@ -219,9 +258,9 @@
   color: #a78bfa;
   font-size: 10px;
   font-weight: 700;
-  width: 16px;
-  height: 16px;
-  border-radius: 50%;
+  padding: 0 6px;
+  height: 18px;
+  border-radius: 9px;
   margin-left: 6px;
   cursor: pointer;
   user-select: none;
@@ -251,6 +290,10 @@
   border: 1px solid transparent;
 }
 
+.transcriptLine:nth-child(even) { 
+  background: rgba(255, 255, 255, 0.02); 
+}
+
 .transcriptIndex {
   font-family: monospace;
   font-size: 11px;
@@ -275,12 +318,12 @@
 
 /* Flash Highlight when linked from citation */
 .highlightLine {
-  background: rgba(139, 92, 246, 0.1) !important;
-  border-color: rgba(139, 92, 246, 0.3) !important;
-  animation: flashHighlight 2s ease-out;
+  background: rgba(245, 158, 11, 0.1) !important;
+  border-color: rgba(245, 158, 11, 0.3) !important;
+  animation: flashHighlight 3s ease-out;
 }
 
 @keyframes flashHighlight {
-  0% { background: rgba(139, 92, 246, 0.4); }
-  100% { background: rgba(139, 92, 246, 0.1); }
+  0% { background: rgba(245, 158, 11, 0.4); }
+  100% { background: rgba(245, 158, 11, 0.05); }
 }

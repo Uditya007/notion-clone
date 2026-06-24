@@ -134,10 +134,10 @@ export default function AudioRecorder({ onTranscribeComplete, onClose }: AudioRe
         gradient.addColorStop(1, "#8b5cf6");
 
         ctx.fillStyle = gradient;
-        
-        // Render symmetric visualization
         const yOffset = (height - barHeight) / 2;
-        ctx.fillRect(x, yOffset, barWidth - 4, barHeight);
+        ctx.beginPath();
+        ctx.roundRect(x, yOffset, barWidth - 2, barHeight, 2);
+        ctx.fill();
 
         x += barWidth;
       }
@@ -247,7 +247,7 @@ export default function AudioRecorder({ onTranscribeComplete, onClose }: AudioRe
       {status === "processing" && (
         <div className={styles.processingState}>
           <RefreshCw size={18} className={styles.spinningIcon} />
-          <span>Cora AI is parsing speech & generating document block...</span>
+          <span>Processing audio<span className={styles.animatedDots}>...</span></span>
         </div>
       )}
     </div>
