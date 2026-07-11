@@ -595,13 +595,13 @@ body {
 
 /* ── Spring Easing Token ─────────────────────────────────────── */
 :root {
-  --ease-spring: cubic-bezier(0.175, 0.885, 0.32, 1.275);
-  --ease-smooth: cubic-bezier(0.4, 0, 0.2, 1);
+  --ease-spring: cubic-bezier(0.175, 0.885, 0.32, 1.15);
+  --ease-smooth: cubic-bezier(0.1, 0.9, 0.2, 1);
   --ease-out-expo: cubic-bezier(0.16, 1, 0.3, 1);
   --ease-in-out: cubic-bezier(0.65, 0, 0.35, 1);
-  --motion-duration: 0.3s;
-  --motion-fast: 0.15s;
-  --motion-slow: 0.5s;
+  --motion-duration: 0.14s;
+  --motion-fast: 0.08s;
+  --motion-slow: 0.25s;
 }
 
 /* Respect user's reduced-motion preference */
@@ -615,7 +615,7 @@ body {
 
 /* ── Page Content Entrance ───────────────────────────────────── */
 .main-content {
-  animation: fadeInScale 0.4s var(--ease-out-expo) both;
+  animation: fadeInScale 0.18s var(--ease-out-expo) both;
 }
 
 /* ── Animated Sidebar ────────────────────────────────────────── */
@@ -642,7 +642,7 @@ a[class*="btn"] {
 
 button:active,
 [role="button"]:active {
-  transform: scale(0.97);
+  transform: scale(0.98);
 }
 
 /* ── Card / Panel Hover Lift ─────────────────────────────────── */
@@ -655,8 +655,8 @@ button:active,
 
 [class*="card" i]:hover,
 [class*="Card"]:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
 }
 
 /* ── Input Focus Grow ────────────────────────────────────────── */
@@ -670,7 +670,7 @@ select {
 
 input:focus,
 textarea:focus {
-  box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.15);
+  box-shadow: 0 0 0 2px rgba(99, 102, 241, 0.15);
 }
 
 /* ── Modal / Overlay Animations ──────────────────────────────── */
@@ -678,20 +678,20 @@ textarea:focus {
 [class*="Overlay"],
 [class*="backdrop" i],
 [class*="Backdrop"] {
-  animation: modalBackdropIn 0.25s var(--ease-smooth) both;
+  animation: modalBackdropIn 0.15s var(--ease-smooth) both;
 }
 
 [class*="modal" i][class*="content" i],
 [class*="Modal"][class*="Content"],
 [class*="modal" i][class*="body" i] {
-  animation: modalContentIn 0.35s var(--ease-out-expo) both;
+  animation: modalContentIn 0.22s var(--ease-out-expo) both;
 }
 
 /* ── Tooltip Fade ────────────────────────────────────────────── */
 [class*="tooltip" i],
 [class*="Tooltip"],
 [role="tooltip"] {
-  animation: fadeInScale 0.2s var(--ease-spring) both;
+  animation: fadeInScale 0.12s var(--ease-spring) both;
 }
 
 /* ── Dropdown / Menu Pop ─────────────────────────────────────── */
@@ -700,30 +700,30 @@ textarea:focus {
 [class*="menu" i][class*="popup" i],
 [role="menu"],
 [role="listbox"] {
-  animation: popIn 0.25s var(--ease-spring) both;
+  animation: popIn 0.15s var(--ease-spring) both;
   transform-origin: top center;
 }
 
 /* ── Toast / Notification ────────────────────────────────────── */
 [class*="toast" i],
 [class*="Toast"] {
-  animation: toastSlideIn 0.4s var(--ease-out-expo) both;
+  animation: toastSlideIn 0.22s var(--ease-out-expo) both;
 }
 
 /* ── Stagger Children (apply .stagger-children to parent) ───── */
 .stagger-children > * {
-  animation: staggerFadeIn 0.35s var(--ease-out-expo) both;
+  animation: staggerFadeIn 0.18s var(--ease-out-expo) both;
 }
 .stagger-children > *:nth-child(1)  { animation-delay: 0ms; }
-.stagger-children > *:nth-child(2)  { animation-delay: 40ms; }
-.stagger-children > *:nth-child(3)  { animation-delay: 80ms; }
-.stagger-children > *:nth-child(4)  { animation-delay: 120ms; }
-.stagger-children > *:nth-child(5)  { animation-delay: 160ms; }
-.stagger-children > *:nth-child(6)  { animation-delay: 200ms; }
-.stagger-children > *:nth-child(7)  { animation-delay: 240ms; }
-.stagger-children > *:nth-child(8)  { animation-delay: 280ms; }
-.stagger-children > *:nth-child(9)  { animation-delay: 320ms; }
-.stagger-children > *:nth-child(10) { animation-delay: 360ms; }
+.stagger-children > *:nth-child(2)  { animation-delay: 15ms; }
+.stagger-children > *:nth-child(3)  { animation-delay: 30ms; }
+.stagger-children > *:nth-child(4)  { animation-delay: 45ms; }
+.stagger-children > *:nth-child(5)  { animation-delay: 60ms; }
+.stagger-children > *:nth-child(6)  { animation-delay: 75ms; }
+.stagger-children > *:nth-child(7)  { animation-delay: 90ms; }
+.stagger-children > *:nth-child(8)  { animation-delay: 105ms; }
+.stagger-children > *:nth-child(9)  { animation-delay: 120ms; }
+.stagger-children > *:nth-child(10) { animation-delay: 135ms; }
 
 /* ── Smooth Skeleton Loader ──────────────────────────────────── */
 .skeleton {
