@@ -26,7 +26,8 @@ import {
   Sparkles,
   MessageSquare,
   Mic,
-  SquarePen
+  SquarePen,
+  Cpu
 } from "lucide-react";
 import styles from "./Sidebar.module.css";
 import { useState, useEffect, useRef } from "react";
@@ -826,6 +827,20 @@ export default function Sidebar() {
                 >
                   <Copy size={15} className={styles.navIconTemplates} />
                   <span>Templates</span>
+                </button>
+
+                <button 
+                  className={styles.navItem} 
+                  onClick={() => window.dispatchEvent(new CustomEvent('open-desktop-studio'))}
+                  style={{
+                    background: 'rgba(99, 102, 241, 0.12)',
+                    border: '1px solid rgba(99, 102, 241, 0.3)',
+                    margin: '6px 0',
+                    borderRadius: '8px'
+                  }}
+                >
+                  <Cpu size={15} style={{ color: '#818cf8' }} />
+                  <span style={{ fontWeight: 600, color: '#e0e7ff' }}>Desktop Studio</span>
                 </button>
 
                 <button 

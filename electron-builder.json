@@ -1,0 +1,23 @@
+{
+  "appId": "com.cora.workspace",
+  "productName": "Cora Workspace",
+  "directories": {
+    "output": "dist-desktop"
+  },
+  "mac": {
+    "category": "public.app-category.productivity",
+    "target": [
+      {
+        "target": "dmg",
+        "arch": ["x64", "arm64"]
+      }
+    ]
+  },
+  "dmg": {
+    "title": "Cora Workspace Installer",
+    "window": {
+      "width": 540,
+      "height": 380
+    }
+  }
+}

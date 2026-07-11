@@ -31,8 +31,8 @@ import DocumentAIPanel from "./DocumentAIPanel";
 import ExpenseTrackerView from "./ExpenseTrackerView";
 import OperationsDashboardView from "./OperationsDashboardView";
 import SopDocumentView from "./SopDocumentView";
-import AutoMeetingBanner from "./AutoMeetingBanner";
-import { Mic, BarChart2, Menu } from "lucide-react";
+import DesktopStudioModal from "./DesktopStudioModal";
+import { Mic, BarChart2, Menu, Cpu } from "lucide-react";
 import { useCompletion } from '@ai-sdk/react';
 import DatabaseView from "./DatabaseView";
 import { supabase } from "@/lib/supabase/client";
@@ -202,7 +202,7 @@ export default function Editor() {
   const [showHistoryPanel, setShowHistoryPanel] = useState(false);
   const [historyLogs, setHistoryLogs] = useState<any[]>([]);
   const [isFetchingHistory, setIsFetchingHistory] = useState(false);
-  const [showAutoMeetingBanner, setShowAutoMeetingBanner] = useState(false);
+  const [showDesktopStudioModal, setShowDesktopStudioModal] = useState(false);
 
   const fetchPageHistory = async () => {
     if (!activePageId) return;
@@ -724,6 +724,9 @@ export default function Editor() {
     setIsMounted(true);
     fetchProfile();
 
+    const openStudioHandler = () => setShowDesktopStudioModal(true);
+    window.addEventListener('open-desktop-studio', openStudioHandler);
+
     supabase.auth.getUser().then(({ data: { user } }) => {
       if (user) {
         setCurrentUser({
@@ -1151,13 +1154,13 @@ export default function Editor() {
           </div>
 
           <button
-            onClick={() => setShowAutoMeetingBanner(!showAutoMeetingBanner)}
-            title="Auto Record & Summarize Meeting"
+            onClick={() => setShowDesktopStudioModal(true)}
+            title="macOS Desktop App Capabilities & Custom Features"
             style={{
               display: 'inline-flex',
               alignItems: 'center',
               gap: '6px',
-              background: showAutoMeetingBanner ? 'rgba(99, 102, 241, 0.25)' : 'rgba(99, 102, 241, 0.12)',
+              background: 'rgba(99, 102, 241, 0.15)',
               border: '1px solid rgba(99, 102, 241, 0.4)',
               borderRadius: '6px',
               padding: '6px 12px',
@@ -1168,7 +1171,7 @@ export default function Editor() {
               marginRight: '6px'
             }}
           >
-            <Mic size={14} /> Auto-Meeting
+            <Cpu size={14} /> Desktop Studio
           </button>
           <button
             onClick={() => setDocAIPanelOpen(!isDocAIPanelOpen)}
@@ -1352,14 +1355,6 @@ export default function Editor() {
                 />
               ) : (
                 <>
-                  {(showAutoMeetingBanner || activePage?.title?.toLowerCase().includes("meeting") || activePage?.icon === "🎙️") && (
-                    <AutoMeetingBanner
-                      pageTitle={activePage?.title || "Meeting Notes"}
-                      onInsertSummary={(htmlContent) => {
-                        editor?.chain().focus().insertContent(htmlContent).run();
-                      }}
-                    />
-                  )}
                   {editor && (
                     <FloatingMenu 
                       editor={editor}
@@ -1581,6 +1576,40 @@ export default function Editor() {
           onClose={() => setShowExportModal(false)} 
         />
       )}
+      {/* Permanent Fixed Floating Desktop Studio Launcher */}
+      <button
+        onClick={() => setShowDesktopStudioModal(true)}
+        title="Open macOS Desktop Studio & Extensions"
+        style={{
+          position: 'fixed',
+          bottom: '24px',
+          right: '24px',
+          zIndex: 9999,
+          background: 'linear-gradient(135deg, #6366f1, #4f46e5)',
+          color: '#ffffff',
+          border: '1px solid rgba(255, 255, 255, 0.2)',
+          borderRadius: '999px',
+          padding: '10px 18px',
+          display: 'flex',
+          alignItems: 'center',
+          gap: '8px',
+          boxShadow: '0 8px 24px rgba(99, 102, 241, 0.45)',
+          fontWeight: 700,
+          fontSize: '0.88rem',
+          cursor: 'pointer',
+          transition: 'transform 0.2s'
+        }}
+      >
+        <span>🍏</span>
+        <span>Desktop Studio</span>
+      </button>
+
+      <DesktopStudioModal
+        isOpen={showDesktopStudioModal}
+        onClose={() => setShowDesktopStudioModal(false)}
+        pageTitle={activePage?.title || "Untitled Note"}
+        pageContent={activePage?.content}
+      />
       {isAudioRecordingOpen && (
         <AudioRecorder 
           onTranscribeComplete={(html) => {
