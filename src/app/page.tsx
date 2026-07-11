@@ -4,9 +4,10 @@ import Link from "next/link";
 import { useEffect, useState, useRef } from "react";
 import { useRouter } from "next/navigation";
 import { supabase } from "@/lib/supabase/client";
-import { ArrowRight, Play, X, Sun, Moon } from "lucide-react";
+import { ArrowRight, Play, X, Sun, Moon, Cpu } from "lucide-react";
 import styles from "./home.module.css";
 import CoraLogo from "@/components/CoraLogo";
+import DesktopStudioModal from "@/components/DesktopStudioModal";
 
 /* ─────────────────────────────────────────
    PIXEL 3D BOT – reusable colour-swappable
@@ -273,6 +274,7 @@ export default function LandingPage() {
   const router = useRouter();
   const [isLoading, setIsLoading] = useState(true);
   const [showDemoModal, setShowDemoModal] = useState(false);
+  const [showDesktopStudioModal, setShowDesktopStudioModal] = useState(false);
   const [stepsVisible, setStepsVisible] = useState([false, false, false]);
   const [theme, setTheme] = useState("dark");
 
@@ -387,6 +389,24 @@ export default function LandingPage() {
         </div>
 
         <div className={styles.navActions}>
+          <button
+            onClick={() => setShowDesktopStudioModal(true)}
+            style={{
+              display: 'inline-flex',
+              alignItems: 'center',
+              gap: '6px',
+              background: 'linear-gradient(135deg, rgba(99,102,241,0.25), rgba(79,70,229,0.25))',
+              border: '1px solid rgba(99,102,241,0.5)',
+              color: '#a5b4fc',
+              padding: '6px 14px',
+              borderRadius: '8px',
+              fontWeight: 600,
+              fontSize: '0.86rem',
+              cursor: 'pointer'
+            }}
+          >
+            🍏 Desktop Studio
+          </button>
           <button 
             onClick={toggleTheme} 
             className={styles.themeToggleBtn}
@@ -420,10 +440,29 @@ export default function LandingPage() {
         </p>
 
 
-        <div className={styles.heroButtons}>
+        <div className={styles.heroButtons} style={{ flexWrap: 'wrap', gap: '12px' }}>
           <Link href="/signup" className={styles.heroPrimaryBtn}>
             Start for free <ArrowRight size={16} />
           </Link>
+          <button
+            onClick={() => setShowDesktopStudioModal(true)}
+            style={{
+              display: 'inline-flex',
+              alignItems: 'center',
+              gap: '8px',
+              background: 'linear-gradient(135deg, #6366f1, #4f46e5)',
+              color: '#ffffff',
+              border: '1px solid rgba(255,255,255,0.2)',
+              padding: '12px 24px',
+              borderRadius: '12px',
+              fontWeight: 700,
+              fontSize: '0.95rem',
+              cursor: 'pointer',
+              boxShadow: '0 8px 24px rgba(99,102,241,0.45)'
+            }}
+          >
+            🍏 Open macOS Desktop Studio
+          </button>
           <button onClick={() => setShowDemoModal(true)} className={styles.heroSecondaryBtn}>
             <Play size={14} fill="currentColor" /> See how it works →
           </button>
@@ -610,6 +649,41 @@ export default function LandingPage() {
           </div>
         </div>
       )}
+
+      {/* Permanent Fixed Floating Desktop Studio Launcher on Landing Page */}
+      <button
+        onClick={() => setShowDesktopStudioModal(true)}
+        title="Open macOS Desktop Studio & Extensions"
+        style={{
+          position: 'fixed',
+          bottom: '24px',
+          right: '24px',
+          zIndex: 9999,
+          background: 'linear-gradient(135deg, #6366f1, #4f46e5)',
+          color: '#ffffff',
+          border: '1px solid rgba(255, 255, 255, 0.2)',
+          borderRadius: '999px',
+          padding: '12px 20px',
+          display: 'flex',
+          alignItems: 'center',
+          gap: '8px',
+          boxShadow: '0 8px 24px rgba(99, 102, 241, 0.45)',
+          fontWeight: 700,
+          fontSize: '0.9rem',
+          cursor: 'pointer',
+          transition: 'transform 0.2s'
+        }}
+      >
+        <span>🍏</span>
+        <span>macOS Desktop Studio</span>
+      </button>
+
+      <DesktopStudioModal
+        isOpen={showDesktopStudioModal}
+        onClose={() => setShowDesktopStudioModal(false)}
+        pageTitle="Cora Workspace Landing"
+        pageContent="# Cora Workspace Landing Page"
+      />
     </div>
   );
 }
