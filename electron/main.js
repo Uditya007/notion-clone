@@ -215,7 +215,7 @@ function createQuickCaptureWindow() {
 
 // ── System Tray ──────────────────────────────────────────────────
 function createTray() {
-  const icon = nativeImage.createFromPath(path.join(__dirname, 'assets', 'coraTemplate.svg'));
+  const icon = nativeImage.createFromPath(path.join(__dirname, 'assets', 'coraTemplate.png'));
   icon.setTemplateImage(true); // macOS template image adapts to light/dark menu bar
 
   tray = new Tray(icon);
