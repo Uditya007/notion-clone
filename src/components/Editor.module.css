@@ -5,6 +5,7 @@
   width: 100%;
   background-color: var(--bg-main);
   overflow: hidden;
+  animation: fadeInFast 0.3s ease both;
 }
 
 /* HEADER SECTION */
@@ -19,6 +20,7 @@
   background-color: var(--white);
   border-bottom: 1px solid var(--border);
   z-index: 20;
+  animation: slideDown 0.3s cubic-bezier(0.16, 1, 0.3, 1) both;
 }
 
 .breadcrumbs {
@@ -312,6 +314,12 @@
   width: 100%;
   line-height: 1.2;
   margin-bottom: 24px;
+  animation: fadeIn 0.4s cubic-bezier(0.16, 1, 0.3, 1) 0.1s both;
+  transition: letter-spacing 0.3s ease;
+}
+
+.titleInput:focus {
+  letter-spacing: -0.02em;
 }
 
 .titleInput::placeholder {
@@ -358,22 +366,30 @@
   color: var(--gray-500);
   font-size: 12px;
   font-weight: 500;
-  transition: all 0.15s ease;
+  transition: all 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+  position: relative;
 }
 
 .viewToggleBtn:hover {
   background: var(--bg-hover);
   color: var(--text-main);
+  transform: translateY(-1px);
+}
+
+.viewToggleBtn:active {
+  transform: scale(0.96);
 }
 
 .activeView {
   background: var(--bg-active);
   color: var(--text-main);
   font-weight: 600;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
 }
 
 .editorMain {
   flex: 1;
+  animation: fadeIn 0.45s cubic-bezier(0.16, 1, 0.3, 1) 0.15s both;
 }
 
 /* BUBBLE MENU FORMATTING BAR */
@@ -386,7 +402,8 @@
   padding: 4px;
   box-shadow: var(--shadow-lg);
   gap: 2px;
-  animation: popIn 0.15s ease;
+  animation: springIn 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275) both;
+  transform-origin: bottom center;
 }
 
 .bubbleBtn {

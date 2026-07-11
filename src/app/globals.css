@@ -105,41 +105,127 @@
   --nav-border: var(--gray-800);
 }
 
+/* ═══════════════════════════════════════════════════════════════
+   ANIMATION KEYFRAMES — Premium Motion Library
+   ═══════════════════════════════════════════════════════════════ */
 
-/* Animations */
+/* ── Fade Entrances ──────────────────────────────────────────── */
 @keyframes fadeIn {
   from { opacity: 0; transform: translateY(6px); }
-  to { opacity: 1; transform: translateY(0); }
+  to   { opacity: 1; transform: translateY(0); }
 }
 
 @keyframes fadeInFast {
   from { opacity: 0; }
-  to { opacity: 1; }
+  to   { opacity: 1; }
 }
 
+@keyframes fadeInScale {
+  from { opacity: 0; transform: scale(0.95) translateY(8px); }
+  to   { opacity: 1; transform: scale(1) translateY(0); }
+}
+
+@keyframes fadeInDown {
+  from { opacity: 0; transform: translateY(-10px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes fadeOut {
+  from { opacity: 1; transform: translateY(0); }
+  to   { opacity: 0; transform: translateY(6px); }
+}
+
+/* ── Slide Entrances ─────────────────────────────────────────── */
 @keyframes slideInLeft {
-  from { opacity: 0; transform: translateX(-12px); }
-  to { opacity: 1; transform: translateX(0); }
+  from { opacity: 0; transform: translateX(-16px); }
+  to   { opacity: 1; transform: translateX(0); }
 }
 
 @keyframes slideInRight {
-  from { opacity: 0; transform: translateX(12px); }
-  to { opacity: 1; transform: translateX(0); }
+  from { opacity: 0; transform: translateX(16px); }
+  to   { opacity: 1; transform: translateX(0); }
 }
 
 @keyframes slideUp {
-  from { opacity: 0; transform: translateY(12px); }
-  to { opacity: 1; transform: translateY(0); }
+  from { opacity: 0; transform: translateY(16px); }
+  to   { opacity: 1; transform: translateY(0); }
 }
 
+@keyframes slideDown {
+  from { opacity: 0; transform: translateY(-16px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+/* ── Spring / Elastic Pop ────────────────────────────────────── */
 @keyframes popIn {
-  0% { opacity: 0; transform: scale(0.96); }
-  60% { transform: scale(1.01); }
+  0%   { opacity: 0; transform: scale(0.92); }
+  50%  { transform: scale(1.03); }
+  75%  { transform: scale(0.99); }
   100% { opacity: 1; transform: scale(1); }
 }
 
+@keyframes springIn {
+  0%   { opacity: 0; transform: scale(0.85); }
+  40%  { transform: scale(1.06); }
+  70%  { transform: scale(0.97); }
+  100% { opacity: 1; transform: scale(1); }
+}
+
+@keyframes bounceIn {
+  0%   { opacity: 0; transform: translateY(20px) scale(0.95); }
+  50%  { opacity: 1; transform: translateY(-4px) scale(1.02); }
+  75%  { transform: translateY(2px) scale(0.99); }
+  100% { transform: translateY(0) scale(1); }
+}
+
+@keyframes elasticScale {
+  0%   { transform: scale(1); }
+  30%  { transform: scale(0.95); }
+  50%  { transform: scale(1.05); }
+  70%  { transform: scale(0.98); }
+  100% { transform: scale(1); }
+}
+
+/* ── Modal / Overlay ─────────────────────────────────────────── */
+@keyframes modalBackdropIn {
+  from { opacity: 0; backdrop-filter: blur(0px); }
+  to   { opacity: 1; backdrop-filter: blur(12px); }
+}
+
+@keyframes modalContentIn {
+  from { opacity: 0; transform: scale(0.94) translateY(12px); }
+  to   { opacity: 1; transform: scale(1) translateY(0); }
+}
+
+@keyframes drawerSlideUp {
+  from { opacity: 0; transform: translateY(100%); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+/* ── Subtle Breathing / Ambient ──────────────────────────────── */
+@keyframes breathe {
+  0%, 100% { opacity: 0.6; transform: scale(1); }
+  50%      { opacity: 1;   transform: scale(1.02); }
+}
+
+@keyframes glowPulse {
+  0%, 100% { box-shadow: 0 0 8px rgba(99, 102, 241, 0.2); }
+  50%      { box-shadow: 0 0 20px rgba(99, 102, 241, 0.5); }
+}
+
+@keyframes borderPulse {
+  0%, 100% { border-color: rgba(99, 102, 241, 0.3); }
+  50%      { border-color: rgba(99, 102, 241, 0.7); }
+}
+
+@keyframes subtleFloat {
+  0%, 100% { transform: translateY(0); }
+  50%      { transform: translateY(-4px); }
+}
+
+/* ── Loading / Progress ──────────────────────────────────────── */
 @keyframes shimmer {
-  0% { background-position: -400px 0; }
+  0%   { background-position: -400px 0; }
   100% { background-position: 400px 0; }
 }
 
@@ -149,7 +235,48 @@
 
 @keyframes blink {
   0%, 100% { opacity: 1; }
-  50% { opacity: 0; }
+  50%      { opacity: 0; }
+}
+
+@keyframes progressIndeterminate {
+  0%   { transform: translateX(-100%); }
+  100% { transform: translateX(400%); }
+}
+
+@keyframes skeletonWave {
+  0%   { background-position: -200% 0; }
+  100% { background-position: 200% 0; }
+}
+
+/* ── Stagger Delay Utilities ─────────────────────────────────── */
+/* Apply to children for sequential entrance animations */
+@keyframes staggerFadeIn {
+  from { opacity: 0; transform: translateY(8px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+/* ── Notification / Toast ────────────────────────────────────── */
+@keyframes toastSlideIn {
+  from { opacity: 0; transform: translateX(40px) scale(0.96); }
+  to   { opacity: 1; transform: translateX(0) scale(1); }
+}
+
+@keyframes toastSlideOut {
+  from { opacity: 1; transform: translateX(0) scale(1); }
+  to   { opacity: 0; transform: translateX(40px) scale(0.96); }
+}
+
+/* ── Ripple effect for buttons ───────────────────────────────── */
+@keyframes ripple {
+  0%   { transform: scale(0); opacity: 0.6; }
+  100% { transform: scale(2.5); opacity: 0; }
+}
+
+/* ── Typewriter cursor ───────────────────────────────────────── */
+@keyframes cursorBlink {
+  0%, 45% { opacity: 1; }
+  50%, 95% { opacity: 0; }
+  100% { opacity: 1; }
 }
 
 /* Global Reset */
@@ -458,4 +585,201 @@ body {
   outline: 2px solid #6366f1;
   outline-offset: 2px;
   border-radius: 4px;
+}
+
+
+/* ═══════════════════════════════════════════════════════════════
+   GLOBAL MOTION UTILITIES
+   Smooth, spring-physics transitions applied app-wide
+   ═══════════════════════════════════════════════════════════════ */
+
+/* ── Spring Easing Token ─────────────────────────────────────── */
+:root {
+  --ease-spring: cubic-bezier(0.175, 0.885, 0.32, 1.275);
+  --ease-smooth: cubic-bezier(0.4, 0, 0.2, 1);
+  --ease-out-expo: cubic-bezier(0.16, 1, 0.3, 1);
+  --ease-in-out: cubic-bezier(0.65, 0, 0.35, 1);
+  --motion-duration: 0.3s;
+  --motion-fast: 0.15s;
+  --motion-slow: 0.5s;
+}
+
+/* Respect user's reduced-motion preference */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
+/* ── Page Content Entrance ───────────────────────────────────── */
+.main-content {
+  animation: fadeInScale 0.4s var(--ease-out-expo) both;
+}
+
+/* ── Animated Sidebar ────────────────────────────────────────── */
+.sidebar,
+[class*="sidebar" i] {
+  transition: width var(--motion-duration) var(--ease-out-expo),
+              transform var(--motion-duration) var(--ease-out-expo),
+              opacity var(--motion-duration) ease;
+}
+
+/* ── Button Micro-Interactions ───────────────────────────────── */
+button,
+[role="button"],
+a[class*="Btn"],
+a[class*="btn"] {
+  transition: transform var(--motion-fast) var(--ease-spring),
+              background-color var(--motion-fast) ease,
+              box-shadow var(--motion-fast) ease,
+              color var(--motion-fast) ease,
+              border-color var(--motion-fast) ease,
+              opacity var(--motion-fast) ease;
+  will-change: transform;
+}
+
+button:active,
+[role="button"]:active {
+  transform: scale(0.97);
+}
+
+/* ── Card / Panel Hover Lift ─────────────────────────────────── */
+[class*="card" i],
+[class*="Card"] {
+  transition: transform var(--motion-duration) var(--ease-spring),
+              box-shadow var(--motion-duration) ease,
+              border-color var(--motion-fast) ease;
+}
+
+[class*="card" i]:hover,
+[class*="Card"]:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
+}
+
+/* ── Input Focus Grow ────────────────────────────────────────── */
+input,
+textarea,
+select {
+  transition: border-color var(--motion-fast) ease,
+              box-shadow var(--motion-fast) ease,
+              background-color var(--motion-fast) ease;
+}
+
+input:focus,
+textarea:focus {
+  box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.15);
+}
+
+/* ── Modal / Overlay Animations ──────────────────────────────── */
+[class*="overlay" i],
+[class*="Overlay"],
+[class*="backdrop" i],
+[class*="Backdrop"] {
+  animation: modalBackdropIn 0.25s var(--ease-smooth) both;
+}
+
+[class*="modal" i][class*="content" i],
+[class*="Modal"][class*="Content"],
+[class*="modal" i][class*="body" i] {
+  animation: modalContentIn 0.35s var(--ease-out-expo) both;
+}
+
+/* ── Tooltip Fade ────────────────────────────────────────────── */
+[class*="tooltip" i],
+[class*="Tooltip"],
+[role="tooltip"] {
+  animation: fadeInScale 0.2s var(--ease-spring) both;
+}
+
+/* ── Dropdown / Menu Pop ─────────────────────────────────────── */
+[class*="dropdown" i],
+[class*="Dropdown"],
+[class*="menu" i][class*="popup" i],
+[role="menu"],
+[role="listbox"] {
+  animation: popIn 0.25s var(--ease-spring) both;
+  transform-origin: top center;
+}
+
+/* ── Toast / Notification ────────────────────────────────────── */
+[class*="toast" i],
+[class*="Toast"] {
+  animation: toastSlideIn 0.4s var(--ease-out-expo) both;
+}
+
+/* ── Stagger Children (apply .stagger-children to parent) ───── */
+.stagger-children > * {
+  animation: staggerFadeIn 0.35s var(--ease-out-expo) both;
+}
+.stagger-children > *:nth-child(1)  { animation-delay: 0ms; }
+.stagger-children > *:nth-child(2)  { animation-delay: 40ms; }
+.stagger-children > *:nth-child(3)  { animation-delay: 80ms; }
+.stagger-children > *:nth-child(4)  { animation-delay: 120ms; }
+.stagger-children > *:nth-child(5)  { animation-delay: 160ms; }
+.stagger-children > *:nth-child(6)  { animation-delay: 200ms; }
+.stagger-children > *:nth-child(7)  { animation-delay: 240ms; }
+.stagger-children > *:nth-child(8)  { animation-delay: 280ms; }
+.stagger-children > *:nth-child(9)  { animation-delay: 320ms; }
+.stagger-children > *:nth-child(10) { animation-delay: 360ms; }
+
+/* ── Smooth Skeleton Loader ──────────────────────────────────── */
+.skeleton {
+  background: linear-gradient(
+    90deg,
+    rgba(255, 255, 255, 0.04) 0%,
+    rgba(255, 255, 255, 0.08) 50%,
+    rgba(255, 255, 255, 0.04) 100%
+  );
+  background-size: 200% 100%;
+  animation: skeletonWave 1.8s ease-in-out infinite;
+  border-radius: 6px;
+}
+
+/* ── Link Hover Underline Slide ──────────────────────────────── */
+a[class*="nav" i],
+a[class*="Nav"] {
+  position: relative;
+}
+
+a[class*="nav" i]::after,
+a[class*="Nav"]::after {
+  content: '';
+  position: absolute;
+  bottom: -2px;
+  left: 0;
+  width: 0;
+  height: 2px;
+  background: #6366f1;
+  border-radius: 1px;
+  transition: width var(--motion-duration) var(--ease-out-expo);
+}
+
+a[class*="nav" i]:hover::after,
+a[class*="Nav"]:hover::after {
+  width: 100%;
+}
+
+/* ── Icon Spin on Hover (for settings/refresh icons) ─────────── */
+.icon-spin-hover:hover svg,
+.icon-spin-hover:hover .lucide {
+  animation: spin 0.6s var(--ease-spring);
+}
+
+/* ── Glow effect for active/primary elements ─────────────────── */
+.glow-active {
+  animation: glowPulse 2.5s ease-in-out infinite;
+}
+
+/* ── Floating action button hover ────────────────────────────── */
+[style*="position: fixed"][style*="bottom"] {
+  transition: transform 0.2s var(--ease-spring),
+              box-shadow 0.2s ease !important;
+}
+
+[style*="position: fixed"][style*="bottom"]:hover {
+  transform: translateY(-3px) scale(1.04) !important;
+  box-shadow: 0 12px 32px rgba(99, 102, 241, 0.55) !important;
 }

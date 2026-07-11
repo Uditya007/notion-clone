@@ -266,13 +266,21 @@
   font-weight: 500;
   color: var(--text-muted);
   text-align: left;
-  transition: all 0.15s ease;
+  transition: transform 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275),
+              background-color 0.2s cubic-bezier(0.4, 0, 0.2, 1),
+              color 0.2s cubic-bezier(0.4, 0, 0.2, 1),
+              border-color 0.2s cubic-bezier(0.4, 0, 0.2, 1);
   position: relative;
 }
 
 .navItem:hover {
   background-color: var(--bg-hover);
   color: var(--text-main);
+  transform: translateX(4px);
+}
+
+.navItem:active {
+  transform: scale(0.97) translateX(2px);
 }
 
 .navActive {
@@ -281,6 +289,7 @@
   font-weight: 600;
   border-left: 2px solid var(--primary);
   border-radius: 0 var(--radius-sm) var(--radius-sm) 0;
+  box-shadow: inset 1px 0 0 var(--primary);
 }
 
 .navIconHome, .navIconInbox, .navIconAI, .navIconTasks, .navIconCalendar, .navIconAutomations, .navIconTemplates, .navIconImport, .navIconTrash, .navIconWhatsApp {
