@@ -81,6 +81,7 @@ type AppState = {
   isSearchOpen: boolean;
   isSettingsOpen: boolean;
   isAIPanelOpen: boolean;
+  isDocAIPanelOpen: boolean;
   sidebarCollapsed: boolean;
   
   // Toasts
@@ -97,6 +98,7 @@ type AppState = {
   setSearchOpen: (isOpen: boolean) => void;
   setSettingsOpen: (isOpen: boolean) => void;
   setAIPanelOpen: (isOpen: boolean) => void;
+  setDocAIPanelOpen: (isOpen: boolean) => void;
   setSidebarCollapsed: (isCollapsed: boolean) => void;
   setActiveConversation: (id: string | null) => void;
 };
@@ -107,6 +109,7 @@ export const useAppStore = create<AppState>((set) => ({
   isSearchOpen: false,
   isSettingsOpen: false,
   isAIPanelOpen: false,
+  isDocAIPanelOpen: false,
   sidebarCollapsed: false,
   toasts: [],
   aiModel: typeof window !== 'undefined' ? (localStorage.getItem('clearspace-ai-model') || 'gemini-2.5-flash') : 'gemini-2.5-flash',
@@ -131,6 +134,7 @@ export const useAppStore = create<AppState>((set) => ({
   setSearchOpen: (isOpen) => set({ isSearchOpen: isOpen }),
   setSettingsOpen: (isOpen) => set({ isSettingsOpen: isOpen }),
   setAIPanelOpen: (isOpen) => set({ isAIPanelOpen: isOpen }),
+  setDocAIPanelOpen: (isOpen) => set({ isDocAIPanelOpen: isOpen }),
   setSidebarCollapsed: (isCollapsed) => set({ sidebarCollapsed: isCollapsed }),
   setActiveConversation: (id): void => set((state) => ({ 
     activeConversationId: id, 

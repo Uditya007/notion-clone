@@ -27,6 +27,7 @@ import AudioRecorder from "./AudioRecorder";
 import MeetingRecorderDashboard from "./MeetingRecorderDashboard";
 import MeetingNotesView from "./MeetingNotesView";
 import AnalyticsPanel from "./AnalyticsPanel";
+import DocumentAIPanel from "./DocumentAIPanel";
 import { Mic, BarChart2, Menu } from "lucide-react";
 import { useCompletion } from '@ai-sdk/react';
 import DatabaseView from "./DatabaseView";
@@ -184,7 +185,7 @@ const getUserColor = (id: string) => {
 
 export default function Editor() {
   const [isMounted, setIsMounted] = useState(false);
-  const { activePageId, setActivePage, aiModel, addToast } = useAppStore();
+  const { activePageId, setActivePage, aiModel, addToast, isDocAIPanelOpen, setDocAIPanelOpen } = useAppStore();
   const [activePage, setActivePageData] = useState<any>(null);
   const [workspaceName, setWorkspaceName] = useState("My Workspace");
   const [hasDatabase, setHasDatabase] = useState(false);
@@ -1129,6 +1130,26 @@ export default function Editor() {
             </span>
           </div>
 
+          <button
+            onClick={() => setDocAIPanelOpen(!isDocAIPanelOpen)}
+            title="Open Document AI Assistant"
+            style={{
+              display: 'inline-flex',
+              alignItems: 'center',
+              gap: '6px',
+              background: isDocAIPanelOpen ? 'rgba(245, 158, 11, 0.25)' : 'rgba(245, 158, 11, 0.12)',
+              border: '1px solid rgba(245, 158, 11, 0.4)',
+              borderRadius: '6px',
+              padding: '6px 12px',
+              color: '#f59e0b',
+              fontSize: '0.82rem',
+              fontWeight: 600,
+              cursor: 'pointer',
+              marginRight: '6px'
+            }}
+          >
+            <Sparkles size={14} /> AI Assistant
+          </button>
           <button 
             className={styles.shareHeaderBtn} 
             onClick={() => setShowExportModal(true)}
@@ -1520,6 +1541,7 @@ export default function Editor() {
           onClose={() => setIsAudioRecordingOpen(false)}
         />
       )}
+      <DocumentAIPanel />
     </div>
   );
 }

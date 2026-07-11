@@ -22,7 +22,7 @@ export default function MeetingNotesView({ data, pageTitle, onDisable }: Meeting
   const [activeTab, setActiveTab] = useState<"summary" | "notes" | "transcript">("summary");
   const [completedItems, setCompletedItems] = useState<Record<number, boolean>>({});
   const [highlightedLine, setHighlightedLine] = useState<number | null>(null);
-  const { addToast } = useAppStore();
+  const { addToast, setDocAIPanelOpen } = useAppStore();
 
   const transcriptRefs = useRef<Record<number, HTMLDivElement | null>>({});
 
@@ -111,9 +111,18 @@ export default function MeetingNotesView({ data, pageTitle, onDisable }: Meeting
           <Calendar className={styles.calendarIcon} size={22} />
           <h2 className={styles.title}>{pageTitle}</h2>
         </div>
-        <button className={styles.optionsBtn} onClick={onDisable} title="Open in raw editor">
-          <Settings2 size={18} />
-        </button>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+          <button
+            onClick={() => setDocAIPanelOpen(true)}
+            title="Open AI Assistant for this meeting"
+            style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', background: 'rgba(245, 158, 11, 0.15)', border: '1px solid rgba(245, 158, 11, 0.4)', borderRadius: '6px', padding: '6px 12px', color: '#f59e0b', fontSize: '0.82rem', fontWeight: 600, cursor: 'pointer' }}
+          >
+            <Sparkles size={14} /> AI Assistant
+          </button>
+          <button className={styles.optionsBtn} onClick={onDisable} title="Open in raw editor">
+            <Settings2 size={18} />
+          </button>
+        </div>
       </div>
 
       {/* Tab bar */}
