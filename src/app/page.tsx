@@ -279,6 +279,10 @@ export default function LandingPage() {
   const [theme, setTheme] = useState("dark");
 
   useEffect(() => {
+    if (typeof window !== "undefined" && (window as any).electron) {
+      router.push("/workspace");
+      return;
+    }
     const savedTheme = localStorage.getItem("cora-theme") || "dark";
     if (savedTheme === "system") {
       const prefersDark = window.matchMedia("(prefers-color-scheme: dark)").matches;
@@ -289,7 +293,7 @@ export default function LandingPage() {
       setTheme(savedTheme);
     }
     setIsLoading(false);
-  }, []);
+  }, [router]);
 
   const toggleTheme = () => {
     const nextTheme = theme === "dark" ? "light" : "dark";

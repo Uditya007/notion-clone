@@ -882,11 +882,36 @@ export default function Sidebar() {
 
               <div>
                 <div className={styles.pagesSectionHeader}>
-                  <span className={styles.sectionLabel}>Pages</span>
+                  <span className={styles.sectionLabel}>Today</span>
                   <button className={styles.addPageBtn} onClick={(e) => handleAddPage(e, null)} title="Create new page">
                     <Plus size={14} />
                   </button>
                 </div>
+
+                {/* AI MEETING NOTE INSTANT BUTTON (MATCHING DESKTOP SCREENSHOT) */}
+                <button
+                  onClick={() => window.dispatchEvent(new CustomEvent('create-new-meeting-note'))}
+                  style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '8px',
+                    width: '100%',
+                    padding: '8px 12px',
+                    margin: '4px 0 12px 0',
+                    background: 'transparent',
+                    border: '1px solid #3b82f6',
+                    borderRadius: '8px',
+                    color: '#60a5fa',
+                    fontWeight: 600,
+                    fontSize: '0.84rem',
+                    cursor: 'pointer',
+                    transition: 'all 0.15s'
+                  }}
+                >
+                  <span>+</span>
+                  <span>New AI meeting note</span>
+                </button>
+
                 
                 {/* Page tree or beginner state if empty */}
                 {pagesList.length === 0 ? (

@@ -1,0 +1,132 @@
+.container {
+  background: #18181b;
+  border: 1px solid #27272a;
+  border-radius: 14px;
+  padding: 20px 24px;
+  margin: 18px 0 28px 0;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.4);
+}
+
+.topRow {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 16px;
+}
+
+.headerTitle {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 1.05rem;
+  font-weight: 600;
+  color: #f4f4f5;
+}
+
+.badgeIcon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  border-radius: 6px;
+  background: rgba(255, 255, 255, 0.08);
+  color: #a1a1aa;
+}
+
+.controlsRow {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 14px;
+}
+
+.notesTabBtn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  color: #e4e4e7;
+  padding: 6px 14px;
+  border-radius: 999px;
+  font-size: 0.82rem;
+  font-weight: 500;
+  cursor: pointer;
+}
+
+.rightControls {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.transcribeBtn {
+  background: #3b82f6;
+  color: #ffffff;
+  border: none;
+  border-radius: 8px;
+  padding: 8px 16px;
+  font-size: 0.84rem;
+  font-weight: 600;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  transition: background 0.15s;
+}
+
+.transcribeBtn:hover {
+  background: #2563eb;
+}
+
+.transcribingActive {
+  background: #ef4444;
+  animation: pulse 1.5s infinite;
+}
+
+@keyframes pulse {
+  0% { opacity: 1; }
+  50% { opacity: 0.75; }
+  100% { opacity: 1; }
+}
+
+.subtext {
+  font-size: 0.85rem;
+  color: #71717a;
+  margin-bottom: 18px;
+}
+
+.footerRow {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  border-top: 1px solid rgba(255, 255, 255, 0.06);
+  padding-top: 14px;
+  font-size: 0.75rem;
+  color: #52525b;
+}
+
+.instructionsSelect {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  color: #a1a1aa;
+  cursor: pointer;
+}
+
+.consentText {
+  color: #52525b;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  max-width: 320px;
+}
+
+.footerIcons {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  color: #71717a;
+}

@@ -32,6 +32,8 @@ import ExpenseTrackerView from "./ExpenseTrackerView";
 import OperationsDashboardView from "./OperationsDashboardView";
 import SopDocumentView from "./SopDocumentView";
 import DesktopStudioModal from "./DesktopStudioModal";
+import DesktopTabBar, { DocumentTab } from "./DesktopTabBar";
+import NotionMeetingCard from "./NotionMeetingCard";
 import { Mic, BarChart2, Menu, Cpu } from "lucide-react";
 import { useCompletion } from '@ai-sdk/react';
 import DatabaseView from "./DatabaseView";
@@ -203,6 +205,11 @@ export default function Editor() {
   const [historyLogs, setHistoryLogs] = useState<any[]>([]);
   const [isFetchingHistory, setIsFetchingHistory] = useState(false);
   const [showDesktopStudioModal, setShowDesktopStudioModal] = useState(false);
+  const [openTabs, setOpenTabs] = useState<DocumentTab[]>([
+    { id: "today-mtg", title: "@Today 1:46 AM", icon: "📅" },
+    { id: "protein", title: "Protein shake distribution", icon: "📄" },
+    { id: "june", title: "@June 9, 2026 8:31 PM", icon: "📅" }
+  ]);
 
   const fetchPageHistory = async () => {
     if (!activePageId) return;
@@ -727,6 +734,27 @@ export default function Editor() {
     const openStudioHandler = () => setShowDesktopStudioModal(true);
     window.addEventListener('open-desktop-studio', openStudioHandler);
 
+    const createMeetingNoteHandler = async () => {
+      const timeStr = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+      const newTitle = `@Today ${timeStr}`;
+      const res = await fetch("/api/pages", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          title: newTitle,
+          icon: "📅"
+        })
+      });
+      if (res.ok) {
+        const page = await res.json();
+        setOpenTabs((prev) => [...prev, { id: page.id, title: newTitle, icon: "📅" }]);
+        setActivePage(page.id);
+        addToast("Created AI Meeting Note: " + newTitle, "success");
+      }
+    };
+    window.addEventListener("create-new-meeting-note", createMeetingNoteHandler);
+
+
     supabase.auth.getUser().then(({ data: { user } }) => {
       if (user) {
         setCurrentUser({
@@ -1116,6 +1144,28 @@ export default function Editor() {
 
   return (
     <div className={styles.editorContainer}>
+      {/* NATIVE DESKTOP WINDOW TAB BAR */}
+      <DesktopTabBar
+        tabs={openTabs}
+        activeTabId={activePageId || "today-mtg"}
+        onSelectTab={(tabId) => {
+          setActivePage(tabId);
+        }}
+        onCloseTab={(tabId, e) => {
+          e.stopPropagation();
+          const filtered = openTabs.filter((t) => t.id !== tabId);
+          setOpenTabs(filtered);
+          if (activePageId === tabId && filtered.length > 0) {
+            setActivePage(filtered[0].id);
+          }
+        }}
+        onNewTab={() => {
+          window.dispatchEvent(new CustomEvent("create-new-meeting-note"));
+        }}
+        onToggleSidebar={() => window.dispatchEvent(new CustomEvent("openSidebar"))}
+        onShare={() => setShowShareModal(true)}
+      />
+
       {/* HEADER SECTION */}
       <header className={styles.header}>
         <button 
@@ -1305,6 +1355,22 @@ export default function Editor() {
               onChange={(e) => updatePageAttribute({ title: e.target.value })}
               placeholder="Untitled document"
             />
+
+            {(activePage?.icon === "📅" ||
+              activePage?.title?.toLowerCase().includes("meeting") ||
+              activePage?.title?.includes("@Today") ||
+              activePage?.is_meeting_note) && (
+              <NotionMeetingCard
+                pageTitle={activePage?.title || "Meeting @Today"}
+                onInsertMeetingNotes={(markdownNotes) => {
+                  if (editor) {
+                    editor.commands.insertContent(markdownNotes);
+                  } else {
+                    updatePageAttribute({ content: (activePage.content || "") + "\n\n" + markdownNotes });
+                  }
+                }}
+              />
+            )}
 
             {onlineUsersList.length > 1 && (
               <div className={styles.collaboratorActiveBanner}>
