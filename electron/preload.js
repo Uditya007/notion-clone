@@ -22,6 +22,12 @@ contextBridge.exposeInMainWorld('electron', {
   showNotification: (data) => ipcRenderer.invoke('show-notification', data),
   revealInFinder: (filePath) => ipcRenderer.invoke('reveal-in-finder', filePath),
   getSystemTheme: () => ipcRenderer.invoke('get-system-theme'),
+  
+  // ── Meeting Detection & HUD Recording ─────────────────────────
+  closeMeetingHud: () => ipcRenderer.invoke('close-meeting-hud'),
+  startSystemRecording: () => ipcRenderer.invoke('start-system-recording'),
+  stopSystemRecording: (outputPath) => ipcRenderer.invoke('stop-system-recording', outputPath),
+  openMeetingInCora: (pageId) => ipcRenderer.invoke('open-meeting-in-cora', pageId),
 
   // ── Menu Event Listeners (main → renderer) ────────────────────
   on: (channel, callback) => {
@@ -33,7 +39,9 @@ contextBridge.exposeInMainWorld('electron', {
       'open-settings',
       'export-markdown',
       'open-meeting-recorder',
-      'system-theme-changed'
+      'system-theme-changed',
+      'meeting-platform',
+      'navigate-to-page'
     ];
     if (validChannels.includes(channel)) {
       ipcRenderer.on(channel, (_event, ...args) => callback(...args));

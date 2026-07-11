@@ -15,6 +15,10 @@ interface ElectronAPI {
   showNotification: (data: { title: string; body: string; silent?: boolean }) => Promise<void>;
   revealInFinder: (filePath: string) => Promise<boolean>;
   getSystemTheme: () => Promise<'dark' | 'light'>;
+  closeMeetingHud: () => Promise<void>;
+  startSystemRecording: () => Promise<{ success: boolean; outputPath: string }>;
+  stopSystemRecording: (outputPath: string) => Promise<{ success: boolean; base64: string; mimeType: string; error?: string }>;
+  openMeetingInCora: (pageId: string) => Promise<void>;
   on: (channel: string, callback: (...args: unknown[]) => void) => void;
   off: (channel: string, callback: (...args: unknown[]) => void) => void;
 }
@@ -93,6 +97,28 @@ export function useElectron() {
     return window.electron!.getSystemTheme();
   }, [isElectron]);
 
+  /** Close active meeting HUD. */
+  const closeMeetingHud = useCallback(async () => {
+    if (isElectron) await window.electron!.closeMeetingHud();
+  }, [isElectron]);
+
+  /** Start recording system input. */
+  const startSystemRecording = useCallback(async () => {
+    if (!isElectron) return { success: false, outputPath: '' };
+    return window.electron!.startSystemRecording();
+  }, [isElectron]);
+
+  /** Stop recording system input and retrieve audio. */
+  const stopSystemRecording = useCallback(async (outputPath: string) => {
+    if (!isElectron) return { success: false, base64: '', mimeType: '', error: 'Not in desktop mode' };
+    return window.electron!.stopSystemRecording(outputPath);
+  }, [isElectron]);
+
+  /** Open main app window and focus a page. */
+  const openMeetingInCora = useCallback(async (pageId: string) => {
+    if (isElectron) await window.electron!.openMeetingInCora(pageId);
+  }, [isElectron]);
+
   return {
     isElectron,
     isMacOS,
@@ -102,6 +128,10 @@ export function useElectron() {
     exportMarkdown,
     shareContent,
     revealInFinder,
-    getSystemTheme
+    getSystemTheme,
+    closeMeetingHud,
+    startSystemRecording,
+    stopSystemRecording,
+    openMeetingInCora
   };
 }

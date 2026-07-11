@@ -31,7 +31,7 @@ import DocumentAIPanel from "./DocumentAIPanel";
 import ExpenseTrackerView from "./ExpenseTrackerView";
 import OperationsDashboardView from "./OperationsDashboardView";
 import SopDocumentView from "./SopDocumentView";
-import DesktopStudioModal from "./DesktopStudioModal";
+
 import DesktopTabBar, { DocumentTab } from "./DesktopTabBar";
 import NotionMeetingCard from "./NotionMeetingCard";
 import { Mic, BarChart2, Menu, Cpu } from "lucide-react";
@@ -204,7 +204,7 @@ export default function Editor() {
   const [showHistoryPanel, setShowHistoryPanel] = useState(false);
   const [historyLogs, setHistoryLogs] = useState<any[]>([]);
   const [isFetchingHistory, setIsFetchingHistory] = useState(false);
-  const [showDesktopStudioModal, setShowDesktopStudioModal] = useState(false);
+
   const [openTabs, setOpenTabs] = useState<DocumentTab[]>([
     { id: "today-mtg", title: "@Today 1:46 AM", icon: "📅" },
     { id: "protein", title: "Protein shake distribution", icon: "📄" },
@@ -731,8 +731,7 @@ export default function Editor() {
     setIsMounted(true);
     fetchProfile();
 
-    const openStudioHandler = () => setShowDesktopStudioModal(true);
-    window.addEventListener('open-desktop-studio', openStudioHandler);
+
 
     const createMeetingNoteHandler = async () => {
       const timeStr = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
@@ -1203,26 +1202,7 @@ export default function Editor() {
             </span>
           </div>
 
-          <button
-            onClick={() => setShowDesktopStudioModal(true)}
-            title="macOS Desktop App Capabilities & Custom Features"
-            style={{
-              display: 'inline-flex',
-              alignItems: 'center',
-              gap: '6px',
-              background: 'rgba(99, 102, 241, 0.15)',
-              border: '1px solid rgba(99, 102, 241, 0.4)',
-              borderRadius: '6px',
-              padding: '6px 12px',
-              color: '#818cf8',
-              fontSize: '0.82rem',
-              fontWeight: 600,
-              cursor: 'pointer',
-              marginRight: '6px'
-            }}
-          >
-            <Cpu size={14} /> Desktop Studio
-          </button>
+
           <button
             onClick={() => setDocAIPanelOpen(!isDocAIPanelOpen)}
             title="Open Document AI Assistant"
@@ -1642,40 +1622,7 @@ export default function Editor() {
           onClose={() => setShowExportModal(false)} 
         />
       )}
-      {/* Permanent Fixed Floating Desktop Studio Launcher */}
-      <button
-        onClick={() => setShowDesktopStudioModal(true)}
-        title="Open macOS Desktop Studio & Extensions"
-        style={{
-          position: 'fixed',
-          bottom: '24px',
-          right: '24px',
-          zIndex: 9999,
-          background: 'linear-gradient(135deg, #6366f1, #4f46e5)',
-          color: '#ffffff',
-          border: '1px solid rgba(255, 255, 255, 0.2)',
-          borderRadius: '999px',
-          padding: '10px 18px',
-          display: 'flex',
-          alignItems: 'center',
-          gap: '8px',
-          boxShadow: '0 8px 24px rgba(99, 102, 241, 0.45)',
-          fontWeight: 700,
-          fontSize: '0.88rem',
-          cursor: 'pointer',
-          transition: 'transform 0.2s'
-        }}
-      >
-        <span>🍏</span>
-        <span>Desktop Studio</span>
-      </button>
 
-      <DesktopStudioModal
-        isOpen={showDesktopStudioModal}
-        onClose={() => setShowDesktopStudioModal(false)}
-        pageTitle={activePage?.title || "Untitled Note"}
-        pageContent={activePage?.content}
-      />
       {isAudioRecordingOpen && (
         <AudioRecorder 
           onTranscribeComplete={(html) => {

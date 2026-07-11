@@ -25,6 +25,11 @@ const fs = require('fs');
 let mainWindow = null;
 let quickCaptureWindow = null;
 let tray = null;
+let meetingHudWindow = null;
+let meetingDetectorInterval = null;
+let currentMeetingPlatform = null;
+let hudShownForCurrentMeeting = false;
+let recordingProcess = null;
 
 // 16×16 template tray icon (small green Cora dot)
 const TRAY_ICON_BASE64 =
@@ -334,6 +339,64 @@ function registerIpcHandlers() {
   ipcMain.handle('get-system-theme', () => {
     return nativeTheme.shouldUseDarkColors ? 'dark' : 'light';
   });
+
+  // Close meeting HUD
+  ipcMain.handle('close-meeting-hud', () => {
+    if (meetingHudWindow && !meetingHudWindow.isDestroyed()) meetingHudWindow.hide();
+    hudShownForCurrentMeeting = false;
+  });
+
+  // Start system audio recording via sox
+  ipcMain.handle('start-system-recording', async () => {
+    const os = require('os');
+    const outputPath = path.join(os.tmpdir(), `cora-meeting-${Date.now()}.wav`);
+    
+    // sox records from default input (set BlackHole or system mic in Audio MIDI Setup)
+    recordingProcess = require('child_process').spawn('sox', [
+      '-d',           // default audio device
+      '-r', '16000',  // 16kHz sample rate (optimal for Gemini)
+      '-c', '1',      // mono
+      '-b', '16',     // 16-bit
+      outputPath
+    ]);
+
+    recordingProcess.stderr.on('data', (data) => {
+      console.log('SOX:', data.toString());
+    });
+
+    return { success: true, outputPath };
+  });
+
+  ipcMain.handle('stop-system-recording', async (event, outputPath) => {
+    if (recordingProcess) {
+      recordingProcess.kill('SIGTERM');
+      recordingProcess = null;
+    }
+    
+    // Wait for file to flush
+    await new Promise(resolve => setTimeout(resolve, 500));
+    
+    // Read the file and return as base64
+    try {
+      const audioData = fs.readFileSync(outputPath);
+      const base64 = audioData.toString('base64');
+      if (fs.existsSync(outputPath)) {
+        fs.unlinkSync(outputPath); // cleanup
+      }
+      return { success: true, base64, mimeType: 'audio/wav' };
+    } catch (err) {
+      return { success: false, error: err.message };
+    }
+  });
+
+  // Open main window and navigate to the meeting summary page
+  ipcMain.handle('open-meeting-in-cora', (event, pageId) => {
+    if (mainWindow && !mainWindow.isDestroyed()) {
+      mainWindow.show();
+      mainWindow.focus();
+      mainWindow.webContents.send('navigate-to-page', pageId);
+    }
+  });
 }
 
 // ── Application Menu (Notion-style) ─────────────────────────────
@@ -536,6 +599,121 @@ function buildDockMenu() {
   );
 }
 
+function checkForActiveMeeting() {
+  // Check Google Chrome tabs for Meet/Zoom URLs
+  const chromeScript = `
+    osascript -e '
+      tell application "System Events"
+        set chromRunning to (name of processes) contains "Google Chrome"
+      end tell
+      if chromRunning then
+        tell application "Google Chrome"
+          set tabURL to ""
+          repeat with w in windows
+            repeat with t in tabs of w
+              set u to URL of t
+              if u contains "meet.google.com" or u contains "zoom.us/wc" then
+                set tabURL to u
+                exit repeat
+              end if
+            end repeat
+          end repeat
+          return tabURL
+        end tell
+      end if
+      return ""
+    '
+  `;
+
+  exec(chromeScript, (err, stdout) => {
+    const url = (stdout || '').trim();
+    
+    if (url.includes('meet.google.com')) {
+      handleMeetingDetected('Google Meet');
+    } else if (url.includes('zoom.us')) {
+      handleMeetingDetected('Zoom');
+    } else {
+      // Also check if Zoom desktop app is running
+      exec(`osascript -e 'tell application "System Events" to (name of processes) contains "zoom.us"'`, 
+        (err2, stdout2) => {
+          if ((stdout2 || '').trim() === 'true') {
+            handleMeetingDetected('Zoom');
+          } else {
+            // Meeting ended
+            if (currentMeetingPlatform) {
+              currentMeetingPlatform = null;
+              hudShownForCurrentMeeting = false;
+              if (meetingHudWindow && !meetingHudWindow.isDestroyed()) {
+                meetingHudWindow.hide();
+              }
+            }
+          }
+        }
+      );
+    }
+  });
+}
+
+function handleMeetingDetected(platform) {
+  if (currentMeetingPlatform === platform && hudShownForCurrentMeeting) return;
+  currentMeetingPlatform = platform;
+  hudShownForCurrentMeeting = true;
+  createMeetingHudWindow(platform);
+}
+
+function startMeetingDetector() {
+  if (meetingDetectorInterval) return;
+  meetingDetectorInterval = setInterval(checkForActiveMeeting, 8000);
+}
+
+function createMeetingHudWindow(platform) {
+  if (meetingHudWindow && !meetingHudWindow.isDestroyed()) {
+    meetingHudWindow.webContents.send('meeting-platform', platform);
+    meetingHudWindow.show();
+    return;
+  }
+
+  // Position in bottom-right corner of primary display
+  const display = screen.getPrimaryDisplay();
+  const { width, height } = display.workAreaSize;
+
+  meetingHudWindow = new BrowserWindow({
+    width: 320,
+    height: 140,
+    x: width - 340,
+    y: height - 160,
+    frame: false,
+    alwaysOnTop: true,
+    resizable: false,
+    movable: true,
+    skipTaskbar: true,
+    show: false,
+    transparent: true,
+    backgroundColor: '#00000000',
+    vibrancy: 'hud',
+    visualEffectState: 'active',
+    roundedCorners: true,
+    webPreferences: {
+      preload: path.join(__dirname, 'preload.js'),
+      contextIsolation: true,
+      nodeIntegration: false
+    }
+  });
+
+  const devUrl = process.env.ELECTRON_START_URL || 'http://localhost:3000';
+  meetingHudWindow.loadURL(`${devUrl}?meetingHud=true&platform=${encodeURIComponent(platform)}`);
+
+  meetingHudWindow.once('ready-to-show', () => {
+    meetingHudWindow.show();
+    meetingHudWindow.webContents.send('meeting-platform', platform);
+  });
+
+  meetingHudWindow.on('closed', () => {
+    meetingHudWindow = null;
+    hudShownForCurrentMeeting = false;
+  });
+}
+
 // ── App Lifecycle ────────────────────────────────────────────────
 app.whenReady().then(() => {
   createMainWindow();
@@ -543,6 +721,7 @@ app.whenReady().then(() => {
   buildDockMenu();
   registerIpcHandlers();
   createTray();
+  startMeetingDetector();
 
   // Register system-wide global hotkey for Quick Capture HUD
   try {

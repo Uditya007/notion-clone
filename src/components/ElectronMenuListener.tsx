@@ -11,7 +11,7 @@ import { useAppStore } from '@/store/useAppStore';
  */
 export default function ElectronMenuListener() {
   const { on, isElectron } = useElectron();
-  const { setActivePage, addToast, isDocAIPanelOpen, setDocAIPanelOpen } = useAppStore();
+  const { setActivePage, isDocAIPanelOpen, setDocAIPanelOpen } = useAppStore();
 
   useEffect(() => {
     if (!isElectron) return;
@@ -51,6 +51,13 @@ export default function ElectronMenuListener() {
       window.dispatchEvent(new CustomEvent('open-settings'));
     });
 
+    // Navigate to a specific page (triggered by active meeting HUD click)
+    const offNavigate = on('navigate-to-page', (pageId: any) => {
+      if (pageId) {
+        setActivePage(pageId);
+      }
+    });
+
     return () => {
       offNewPage();
       offSearch();
@@ -59,8 +66,9 @@ export default function ElectronMenuListener() {
       offMeeting();
       offExport();
       offSettings();
+      offNavigate();
     };
-  }, [isElectron, on, setActivePage, addToast, isDocAIPanelOpen, setDocAIPanelOpen]);
+  }, [isElectron, on, setActivePage, isDocAIPanelOpen, setDocAIPanelOpen]);
 
   return null;
 }
