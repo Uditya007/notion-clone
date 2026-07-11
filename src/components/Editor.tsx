@@ -31,6 +31,7 @@ import DocumentAIPanel from "./DocumentAIPanel";
 import ExpenseTrackerView from "./ExpenseTrackerView";
 import OperationsDashboardView from "./OperationsDashboardView";
 import SopDocumentView from "./SopDocumentView";
+import AutoMeetingBanner from "./AutoMeetingBanner";
 import { Mic, BarChart2, Menu } from "lucide-react";
 import { useCompletion } from '@ai-sdk/react';
 import DatabaseView from "./DatabaseView";
@@ -201,6 +202,7 @@ export default function Editor() {
   const [showHistoryPanel, setShowHistoryPanel] = useState(false);
   const [historyLogs, setHistoryLogs] = useState<any[]>([]);
   const [isFetchingHistory, setIsFetchingHistory] = useState(false);
+  const [showAutoMeetingBanner, setShowAutoMeetingBanner] = useState(false);
 
   const fetchPageHistory = async () => {
     if (!activePageId) return;
@@ -1149,6 +1151,26 @@ export default function Editor() {
           </div>
 
           <button
+            onClick={() => setShowAutoMeetingBanner(!showAutoMeetingBanner)}
+            title="Auto Record & Summarize Meeting"
+            style={{
+              display: 'inline-flex',
+              alignItems: 'center',
+              gap: '6px',
+              background: showAutoMeetingBanner ? 'rgba(99, 102, 241, 0.25)' : 'rgba(99, 102, 241, 0.12)',
+              border: '1px solid rgba(99, 102, 241, 0.4)',
+              borderRadius: '6px',
+              padding: '6px 12px',
+              color: '#818cf8',
+              fontSize: '0.82rem',
+              fontWeight: 600,
+              cursor: 'pointer',
+              marginRight: '6px'
+            }}
+          >
+            <Mic size={14} /> Auto-Meeting
+          </button>
+          <button
             onClick={() => setDocAIPanelOpen(!isDocAIPanelOpen)}
             title="Open Document AI Assistant"
             style={{
@@ -1330,6 +1352,14 @@ export default function Editor() {
                 />
               ) : (
                 <>
+                  {(showAutoMeetingBanner || activePage?.title?.toLowerCase().includes("meeting") || activePage?.icon === "🎙️") && (
+                    <AutoMeetingBanner
+                      pageTitle={activePage?.title || "Meeting Notes"}
+                      onInsertSummary={(htmlContent) => {
+                        editor?.chain().focus().insertContent(htmlContent).run();
+                      }}
+                    />
+                  )}
                   {editor && (
                     <FloatingMenu 
                       editor={editor}
