@@ -2,11 +2,14 @@
   "name": "note-taking-app",
   "version": "0.1.0",
   "private": true,
+  "main": "electron/main.js",
   "scripts": {
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "eslint"
+    "lint": "eslint",
+    "desktop:dev": "electron electron/main.js",
+    "desktop:build": "electron-builder build --mac"
   },
   "dependencies": {
     "@ai-sdk/google": "^3.0.75",
@@ -38,6 +41,8 @@
     "@types/node": "^20",
     "@types/react": "^19",
     "@types/react-dom": "^19",
+    "electron": "^43.1.0",
+    "electron-builder": "^26.15.3",
     "eslint": "^9",
     "eslint-config-next": "16.2.6",
     "typescript": "^5"
