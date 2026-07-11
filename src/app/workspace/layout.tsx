@@ -1,5 +1,6 @@
 import Sidebar from "@/components/Sidebar";
 import MobileNav from "@/components/MobileNav";
+import ElectronMenuListener from "@/components/ElectronMenuListener";
 import { createClient } from "@/lib/supabase/server";
 import { redirect } from "next/navigation";
 
@@ -17,6 +18,7 @@ export default async function WorkspaceLayout({
 
   return (
     <div className="app-container">
+      <ElectronMenuListener />
       <Sidebar />
       <main className="main-content">
         {children}

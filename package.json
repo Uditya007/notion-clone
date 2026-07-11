@@ -8,8 +8,10 @@
     "build": "next build",
     "start": "next start",
     "lint": "eslint",
-    "desktop:dev": "electron electron/main.js",
-    "desktop:build": "electron-builder build --mac"
+    "desktop:dev": "NODE_ENV=development ELECTRON_START_URL=http://localhost:3000 electron electron/main.js",
+    "desktop:dev:full": "concurrently \"next dev\" \"wait-on http://localhost:3000 && npm run desktop:dev\"",
+    "desktop:build": "next build && electron-builder build --mac",
+    "desktop:build:dmg": "npm run desktop:build -- --config electron-builder.yml"
   },
   "dependencies": {
     "@ai-sdk/google": "^3.0.75",
@@ -41,10 +43,12 @@
     "@types/node": "^20",
     "@types/react": "^19",
     "@types/react-dom": "^19",
+    "concurrently": "^9.0.0",
     "electron": "^43.1.0",
     "electron-builder": "^26.15.3",
     "eslint": "^9",
     "eslint-config-next": "16.2.6",
-    "typescript": "^5"
+    "typescript": "^5",
+    "wait-on": "^8.0.0"
   }
 }

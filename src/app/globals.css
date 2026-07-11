@@ -383,3 +383,79 @@ ul[data-type="taskList"] input[type="checkbox"]:hover {
   }
 }
 
+
+/* ═══════════════════════════════════════════════════════════════
+   macOS DESKTOP APP — Native Feel
+   Applied globally when running inside Electron
+   ═══════════════════════════════════════════════════════════════ */
+
+/* Subpixel antialiasing for crisp macOS text rendering */
+body {
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* ── Window Drag Region ──────────────────────────────────────── */
+/* Make header areas draggable like a native window title bar */
+.dashboardHeader,
+[class*="topBar"],
+[class*="header"] {
+  -webkit-app-region: drag;
+}
+
+/* Interactive elements inside drag regions must NOT be draggable */
+.dashboardHeader button,
+.dashboardHeader input,
+.dashboardHeader a,
+.dashboardHeader select,
+[class*="topBar"] button,
+[class*="topBar"] input,
+[class*="topBar"] a,
+[class*="header"] button,
+[class*="header"] input,
+[class*="header"] a,
+[class*="header"] select {
+  -webkit-app-region: no-drag;
+}
+
+/* ── Traffic Light Safe Zone ─────────────────────────────────── */
+/* Push content below the macOS traffic lights (close/min/max) */
+.app-container {
+  padding-top: env(titlebar-area-height, 0px);
+}
+
+/* ── Sidebar Vibrancy ────────────────────────────────────────── */
+/* Let macOS vibrancy show through the sidebar */
+.sidebar,
+.app-container > nav,
+[class*="Sidebar"] {
+  -webkit-user-select: none;
+  user-select: none;
+}
+
+/* ── macOS Overlay Scrollbars ────────────────────────────────── */
+/* Use thin overlay scrollbars that auto-hide like native macOS */
+@media (min-width: 769px) {
+  * {
+    scrollbar-width: thin;
+    scrollbar-color: rgba(255, 255, 255, 0.12) transparent;
+  }
+  *::-webkit-scrollbar {
+    width: 6px;
+    background: transparent;
+  }
+  *::-webkit-scrollbar-thumb {
+    background: rgba(255, 255, 255, 0.12);
+    border-radius: 3px;
+  }
+  *::-webkit-scrollbar-thumb:hover {
+    background: rgba(255, 255, 255, 0.22);
+  }
+}
+
+/* ── Native Focus Ring ───────────────────────────────────────── */
+*:focus-visible {
+  outline: 2px solid #6366f1;
+  outline-offset: 2px;
+  border-radius: 4px;
+}

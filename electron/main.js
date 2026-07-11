@@ -1,30 +1,140 @@
-const { app, BrowserWindow, Menu, globalShortcut, ipcMain, shell, dialog, Tray } = require('electron');
+// ─────────────────────────────────────────────────────────────────
+//  Cora Workspace — Electron Main Process
+//  Native macOS desktop application shell
+// ─────────────────────────────────────────────────────────────────
+
+const {
+  app,
+  BrowserWindow,
+  Menu,
+  Tray,
+  globalShortcut,
+  ipcMain,
+  shell,
+  dialog,
+  nativeImage,
+  nativeTheme,
+  screen,
+  clipboard,
+  Notification
+} = require('electron');
 const path = require('path');
 const fs = require('fs');
 
-let mainWindow;
-let quickCaptureWindow;
-let tray;
+// ── Globals ──────────────────────────────────────────────────────
+let mainWindow = null;
+let quickCaptureWindow = null;
+let tray = null;
 
+// 16×16 template tray icon (small green Cora dot)
+const TRAY_ICON_BASE64 =
+  'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9h' +
+  'AAAABHNCSVQICAgIfAhkiAAAAAlwSFlzAAAAdgAAAHYBTnsmCAAAABl0RVh0U29mdH' +
+  'dhcmUAd3d3Lmlua3NjYXBlLm9yZ5vuPBoAAABOSURBVDiNY/z//z8DJYCJgUIwas' +
+  'CoAaMGjBpAXQNYGCgEoxYMDxiVYtSAUQNGDRg1gLoGsDJQCEYtGB4wKsWoAaMG' +
+  'jBowasCoARQHABqaAxX5Do+EAAAAAElFTkSuQmCC';
+
+// ── Window State Persistence ─────────────────────────────────────
+const userDataPath = app.getPath('userData');
+const windowStatePath = path.join(userDataPath, 'window-state.json');
+
+function loadWindowState() {
+  try {
+    if (fs.existsSync(windowStatePath)) {
+      return JSON.parse(fs.readFileSync(windowStatePath, 'utf-8'));
+    }
+  } catch (e) {
+    // Corrupted state file — use defaults
+  }
+  return { width: 1280, height: 800, x: undefined, y: undefined, isMaximized: false };
+}
+
+function saveWindowState() {
+  if (!mainWindow || mainWindow.isDestroyed()) return;
+  try {
+    const bounds = mainWindow.getBounds();
+    const isMaximized = mainWindow.isMaximized();
+    fs.writeFileSync(
+      windowStatePath,
+      JSON.stringify({ ...bounds, isMaximized }),
+      'utf-8'
+    );
+  } catch (e) {
+    // Silently ignore write errors
+  }
+}
+
+/**
+ * Validate that saved window position is still on-screen.
+ * Prevents the window from opening off-screen after a display change.
+ */
+function ensureBoundsOnScreen(state) {
+  if (state.x === undefined || state.y === undefined) return state;
+
+  const displays = screen.getAllDisplays();
+  const isVisible = displays.some((display) => {
+    const { x, y, width, height } = display.workArea;
+    return (
+      state.x >= x &&
+      state.y >= y &&
+      state.x + state.width <= x + width + 200 &&
+      state.y + state.height <= y + height + 200
+    );
+  });
+
+  if (!isVisible) {
+    // Reset to center on primary display
+    return { ...state, x: undefined, y: undefined };
+  }
+  return state;
+}
+
+// ── Main Window ──────────────────────────────────────────────────
 function createMainWindow() {
-  mainWindow = new BrowserWindow({
-    width: 1400,
-    height: 900,
-    minWidth: 900,
-    minHeight: 600,
+  const savedState = ensureBoundsOnScreen(loadWindowState());
+
+  const windowOptions = {
+    width: savedState.width,
+    height: savedState.height,
+    minWidth: 860,
+    minHeight: 560,
     titleBarStyle: 'hiddenInset',
-    trafficLightPosition: { x: 18, y: 18 },
-    backgroundColor: '#111827',
+    trafficLightPosition: { x: 16, y: 16 },
+    vibrancy: 'sidebar',
+    visualEffectState: 'active',
+    backgroundColor: '#00000000',
+    transparent: true,
+    frame: false,
+    roundedCorners: true,
+    show: false, // Show after ready-to-show to prevent flash
     webPreferences: {
       preload: path.join(__dirname, 'preload.js'),
       nodeIntegration: false,
-      contextIsolation: true
+      contextIsolation: true,
+      spellcheck: true,
+      devTools: true
     }
+  };
+
+  // Apply saved position if valid
+  if (savedState.x !== undefined) windowOptions.x = savedState.x;
+  if (savedState.y !== undefined) windowOptions.y = savedState.y;
+
+  mainWindow = new BrowserWindow(windowOptions);
+
+  // Show window gracefully — no white flash
+  mainWindow.once('ready-to-show', () => {
+    if (savedState.isMaximized) {
+      mainWindow.maximize();
+    }
+    mainWindow.show();
   });
 
+  // Load the Next.js app
   const devUrl = process.env.ELECTRON_START_URL || 'http://localhost:3000';
   mainWindow.loadURL(devUrl);
 
+  // Open external links in default browser
   mainWindow.webContents.setWindowOpenHandler(({ url }) => {
     if (url.startsWith('http:') || url.startsWith('https:')) {
       shell.openExternal(url);
@@ -33,13 +143,29 @@ function createMainWindow() {
     return { action: 'allow' };
   });
 
+  // Persist window state on move/resize (debounced via close)
+  mainWindow.on('close', () => {
+    saveWindowState();
+  });
+
   mainWindow.on('closed', () => {
     mainWindow = null;
   });
+
+  // Respond to macOS system theme changes
+  nativeTheme.on('updated', () => {
+    if (mainWindow && !mainWindow.isDestroyed()) {
+      mainWindow.webContents.send(
+        'system-theme-changed',
+        nativeTheme.shouldUseDarkColors ? 'dark' : 'light'
+      );
+    }
+  });
 }
 
+// ── Quick Capture HUD ────────────────────────────────────────────
 function createQuickCaptureWindow() {
-  if (quickCaptureWindow) {
+  if (quickCaptureWindow && !quickCaptureWindow.isDestroyed()) {
     quickCaptureWindow.show();
     quickCaptureWindow.focus();
     return;
@@ -53,9 +179,12 @@ function createQuickCaptureWindow() {
     resizable: false,
     movable: true,
     show: false,
+    skipTaskbar: true,
     backgroundColor: '#18181b',
+    roundedCorners: true,
     webPreferences: {
       preload: path.join(__dirname, 'preload.js'),
+      nodeIntegration: false,
       contextIsolation: true
     }
   });
@@ -63,27 +192,96 @@ function createQuickCaptureWindow() {
   const devUrl = process.env.ELECTRON_START_URL || 'http://localhost:3000';
   quickCaptureWindow.loadURL(`${devUrl}?quickCapture=true`);
 
+  quickCaptureWindow.once('ready-to-show', () => {
+    quickCaptureWindow.show();
+  });
+
   quickCaptureWindow.on('blur', () => {
-    quickCaptureWindow.hide();
+    if (quickCaptureWindow && !quickCaptureWindow.isDestroyed()) {
+      quickCaptureWindow.hide();
+    }
+  });
+
+  quickCaptureWindow.on('closed', () => {
+    quickCaptureWindow = null;
   });
 }
 
-// IPC Handlers for Native macOS Features
+// ── System Tray ──────────────────────────────────────────────────
+function createTray() {
+  const icon = nativeImage.createFromDataURL(TRAY_ICON_BASE64);
+  icon.setTemplateImage(true); // macOS template image adapts to light/dark menu bar
+
+  tray = new Tray(icon);
+
+  const contextMenu = Menu.buildFromTemplate([
+    {
+      label: 'Open Cora',
+      click: () => {
+        if (mainWindow) {
+          mainWindow.show();
+          mainWindow.focus();
+        }
+      }
+    },
+    {
+      label: 'New Page',
+      accelerator: 'CmdOrCtrl+N',
+      click: () => {
+        if (mainWindow) {
+          mainWindow.show();
+          mainWindow.webContents.send('create-new-page');
+        }
+      }
+    },
+    {
+      label: 'New Meeting Note',
+      click: () => {
+        if (mainWindow) {
+          mainWindow.show();
+          mainWindow.webContents.send('open-meeting-recorder');
+        }
+      }
+    },
+    {
+      label: 'Quick Capture',
+      accelerator: 'Option+Space',
+      click: () => createQuickCaptureWindow()
+    },
+    { type: 'separator' },
+    { label: 'Quit Cora', role: 'quit' }
+  ]);
+
+  tray.setToolTip('Cora Workspace');
+  tray.setContextMenu(contextMenu);
+
+  tray.on('click', () => {
+    if (mainWindow) {
+      mainWindow.show();
+      mainWindow.focus();
+    }
+  });
+}
+
+// ── IPC Handlers ─────────────────────────────────────────────────
 function registerIpcHandlers() {
   // Toggle Always-On-Top Floating Mode
-  ipcMain.handle('toggle-always-on-top', (event, enable) => {
-    if (mainWindow) {
+  ipcMain.handle('toggle-always-on-top', (_event, enable) => {
+    if (mainWindow && !mainWindow.isDestroyed()) {
       mainWindow.setAlwaysOnTop(enable);
       return enable;
     }
     return false;
   });
 
-  // Local File System Vault Backup / Save Note as Markdown
-  ipcMain.handle('export-local-markdown', async (event, { title, content }) => {
+  // Export note as Markdown via native Save dialog
+  ipcMain.handle('export-local-markdown', async (_event, { title, content }) => {
     const { filePath } = await dialog.showSaveDialog({
       title: 'Save Note to Local macOS Folder',
-      defaultPath: path.join(app.getPath('documents'), `${title || 'Untitled'}.md`),
+      defaultPath: path.join(
+        app.getPath('documents'),
+        `${(title || 'Untitled').replace(/[/\\?%*:|"<>]/g, '-')}.md`
+      ),
       filters: [{ name: 'Markdown Document', extensions: ['md'] }]
     });
 
@@ -94,7 +292,7 @@ function registerIpcHandlers() {
     return { success: false };
   });
 
-  // Get macOS App Version & Platform info
+  // Get macOS app and platform info
   ipcMain.handle('get-desktop-info', () => {
     return {
       platform: process.platform,
@@ -103,38 +301,75 @@ function registerIpcHandlers() {
       documentsDir: app.getPath('documents')
     };
   });
+
+  // Share content (macOS clipboard fallback since NSSharingServicePicker
+  // is not exposed by Electron without native modules)
+  ipcMain.handle('share-content', async (_event, { title, text, url }) => {
+    clipboard.writeText(text || url || title || '');
+    return { success: true, method: 'clipboard' };
+  });
+
+  // Badge count on dock icon (task reminders, unread counts)
+  ipcMain.handle('set-badge-count', (_event, count) => {
+    if (process.platform === 'darwin') {
+      app.setBadgeCount(count);
+    }
+    return count;
+  });
+
+  // Native macOS notification
+  ipcMain.handle('show-notification', (_event, { title, body, silent }) => {
+    if (Notification.isSupported()) {
+      new Notification({ title, body, silent: silent || false }).show();
+    }
+  });
+
+  // Reveal file in Finder
+  ipcMain.handle('reveal-in-finder', async (_event, filePath) => {
+    shell.showItemInFolder(filePath);
+    return true;
+  });
+
+  // Get system theme (light/dark)
+  ipcMain.handle('get-system-theme', () => {
+    return nativeTheme.shouldUseDarkColors ? 'dark' : 'light';
+  });
 }
 
+// ── Application Menu (Notion-style) ─────────────────────────────
 function buildApplicationMenu() {
+  const isMac = process.platform === 'darwin';
+
   const template = [
-    {
-      label: 'Cora Workspace',
-      submenu: [
-        { role: 'about' },
-        { type: 'separator' },
-        {
-          label: 'Open Quick Capture HUD',
-          accelerator: 'Option+Space',
-          click: () => createQuickCaptureWindow()
-        },
-        {
-          label: 'Toggle Always on Top',
-          accelerator: 'CmdOrCtrl+Shift+F',
-          click: () => {
-            if (mainWindow) {
-              const isTop = mainWindow.isAlwaysOnTop();
-              mainWindow.setAlwaysOnTop(!isTop);
-            }
+    // App menu (macOS only — Electron auto-inserts on other platforms)
+    ...(isMac
+      ? [
+          {
+            label: 'Cora',
+            submenu: [
+              { role: 'about', label: 'About Cora' },
+              { type: 'separator' },
+              {
+                label: 'Preferences…',
+                accelerator: 'Cmd+,',
+                click: () => {
+                  if (mainWindow) mainWindow.webContents.send('open-settings');
+                }
+              },
+              { type: 'separator' },
+              { role: 'services' },
+              { type: 'separator' },
+              { role: 'hide', label: 'Hide Cora' },
+              { role: 'hideOthers' },
+              { role: 'unhide' },
+              { type: 'separator' },
+              { role: 'quit', label: 'Quit Cora' }
+            ]
           }
-        },
-        { type: 'separator' },
-        { role: 'hide' },
-        { role: 'hideOthers' },
-        { role: 'unhide' },
-        { type: 'separator' },
-        { role: 'quit' }
-      ]
-    },
+        ]
+      : []),
+
+    // ── File ──
     {
       label: 'File',
       submenu: [
@@ -145,10 +380,33 @@ function buildApplicationMenu() {
             if (mainWindow) mainWindow.webContents.send('create-new-page');
           }
         },
+        {
+          label: 'New Meeting Note',
+          accelerator: 'CmdOrCtrl+Shift+M',
+          click: () => {
+            if (mainWindow) mainWindow.webContents.send('open-meeting-recorder');
+          }
+        },
+        { type: 'separator' },
+        {
+          label: 'Export as Markdown…',
+          accelerator: 'CmdOrCtrl+Shift+E',
+          click: () => {
+            if (mainWindow) mainWindow.webContents.send('export-markdown');
+          }
+        },
+        { type: 'separator' },
+        {
+          label: 'Quick Capture HUD',
+          accelerator: 'Option+Space',
+          click: () => createQuickCaptureWindow()
+        },
         { type: 'separator' },
         { role: 'close' }
       ]
     },
+
+    // ── Edit ──
     {
       label: 'Edit',
       submenu: [
@@ -158,20 +416,87 @@ function buildApplicationMenu() {
         { role: 'cut' },
         { role: 'copy' },
         { role: 'paste' },
-        { role: 'selectAll' }
+        { role: 'pasteAndMatchStyle' },
+        { role: 'delete' },
+        { role: 'selectAll' },
+        { type: 'separator' },
+        {
+          label: 'Find',
+          submenu: [
+            {
+              label: 'Find in Page…',
+              accelerator: 'CmdOrCtrl+F',
+              click: () => {
+                if (mainWindow) mainWindow.webContents.send('open-search');
+              }
+            }
+          ]
+        },
+        ...(isMac
+          ? [
+              { type: 'separator' },
+              {
+                label: 'Speech',
+                submenu: [
+                  { role: 'startSpeaking' },
+                  { role: 'stopSpeaking' }
+                ]
+              }
+            ]
+          : [])
       ]
     },
+
+    // ── View ──
     {
       label: 'View',
       submenu: [
-        { role: 'reload' },
-        { role: 'toggleDevTools' },
+        {
+          label: 'Toggle Sidebar',
+          accelerator: 'CmdOrCtrl+\\',
+          click: () => {
+            if (mainWindow) mainWindow.webContents.send('toggle-sidebar');
+          }
+        },
+        {
+          label: 'Toggle AI Panel',
+          accelerator: 'CmdOrCtrl+Shift+A',
+          click: () => {
+            if (mainWindow) mainWindow.webContents.send('toggle-ai-panel');
+          }
+        },
         { type: 'separator' },
         { role: 'resetZoom' },
         { role: 'zoomIn' },
         { role: 'zoomOut' },
         { type: 'separator' },
-        { role: 'togglefullscreen' }
+        {
+          label: 'Toggle Always on Top',
+          accelerator: 'CmdOrCtrl+Shift+F',
+          click: () => {
+            if (mainWindow && !mainWindow.isDestroyed()) {
+              const isTop = mainWindow.isAlwaysOnTop();
+              mainWindow.setAlwaysOnTop(!isTop);
+            }
+          }
+        },
+        { type: 'separator' },
+        { role: 'togglefullscreen' },
+        { type: 'separator' },
+        { role: 'toggleDevTools' }
+      ]
+    },
+
+    // ── Window ──
+    {
+      label: 'Window',
+      submenu: [
+        { role: 'minimize' },
+        { role: 'zoom' },
+        { type: 'separator' },
+        ...(isMac
+          ? [{ role: 'front' }, { type: 'separator' }, { role: 'window' }]
+          : [{ role: 'close' }])
       ]
     }
   ];
@@ -179,21 +504,62 @@ function buildApplicationMenu() {
   Menu.setApplicationMenu(Menu.buildFromTemplate(template));
 }
 
+// ── Dock Menu (macOS) ────────────────────────────────────────────
+function buildDockMenu() {
+  if (process.platform !== 'darwin') return;
+
+  app.dock.setMenu(
+    Menu.buildFromTemplate([
+      {
+        label: 'New Page',
+        click: () => {
+          if (mainWindow) {
+            mainWindow.show();
+            mainWindow.webContents.send('create-new-page');
+          }
+        }
+      },
+      {
+        label: 'Quick Capture',
+        click: () => createQuickCaptureWindow()
+      },
+      {
+        label: 'New Meeting Note',
+        click: () => {
+          if (mainWindow) {
+            mainWindow.show();
+            mainWindow.webContents.send('open-meeting-recorder');
+          }
+        }
+      }
+    ])
+  );
+}
+
+// ── App Lifecycle ────────────────────────────────────────────────
 app.whenReady().then(() => {
   createMainWindow();
   buildApplicationMenu();
+  buildDockMenu();
   registerIpcHandlers();
+  createTray();
 
-  // Register system-wide global hotkey for Quick Capture HUD (Option+Space)
+  // Register system-wide global hotkey for Quick Capture HUD
   try {
     globalShortcut.register('Option+Space', () => {
       createQuickCaptureWindow();
     });
-  } catch (err) {}
+  } catch (err) {
+    console.error('Failed to register global shortcut:', err);
+  }
 
+  // macOS: re-create window when dock icon clicked and no windows exist
   app.on('activate', () => {
     if (BrowserWindow.getAllWindows().length === 0) {
       createMainWindow();
+    } else if (mainWindow) {
+      mainWindow.show();
+      mainWindow.focus();
     }
   });
 });
@@ -203,6 +569,7 @@ app.on('will-quit', () => {
 });
 
 app.on('window-all-closed', () => {
+  // macOS convention: app stays running after last window closes
   if (process.platform !== 'darwin') {
     app.quit();
   }
