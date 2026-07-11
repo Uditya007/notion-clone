@@ -71,9 +71,6 @@ export default function WhatsAppView() {
   const [activeTab, setActiveTab] = useState<"simulator" | "credentials">("simulator");
   
   // Dashboard states
-  const [twilioSid, setTwilioSid] = useState("AC_MOCK_TWILIO_ACCOUNT_SID_CLEARSPACE");
-  const [twilioToken, setTwilioToken] = useState("••••••••••••••••••••••••••••••••");
-  const [senderNum, setSenderNum] = useState("+14155238886");
   const [nlpEnabled, setNlpEnabled] = useState(true);
   const [autoPages, setAutoPages] = useState(true);
   const [smsAlerts, setSmsAlerts] = useState(false);
@@ -496,193 +493,136 @@ export default function WhatsAppView() {
               onClick={() => setActiveTab('credentials')}
             >
               <Settings size={14} style={{ marginRight: 6 }} />
-              Twilio/API Credentials
+              Integration Setup
             </button>
           </div>
 
           <div className={styles.panelContent}>
-            
-            {/* WEBHOOK URL ENDPOINT DISPLAY CARD */}
-            <div className={styles.webhookUrlCard}>
-              <div className={styles.webhookHeader}>
-                <span className={styles.webhookBadge}>Production Webhook URL</span>
-                <span className={styles.webhookMethod}>POST</span>
-              </div>
-              <div className={styles.urlInputRow}>
-                <input 
-                  type="text" 
-                  value={webhookUrl} 
-                  readOnly 
-                  className={styles.webhookUrlInput} 
-                />
-                <button 
-                  onClick={handleCopyWebhook} 
-                  className={`${styles.copyBtn} ${copied ? styles.copyBtnSuccess : ''}`}
-                >
-                  {copied ? <Check size={15} /> : <Copy size={15} />}
-                </button>
-              </div>
-              <p className={styles.webhookDesc}>
-                Set this endpoint in your Meta WhatsApp Developer console or Twilio Console sandbox to forward incoming chat messages directly into your workspace.
-              </p>
-            </div>
-
             {activeTab === 'simulator' ? (
-              /* LIVE EVENT PAYLOAD LOGGER */
-              <div className={styles.loggerPanel}>
-                <div className={styles.panelHeaderGroup}>
-                  <h3>📡 Real-time Parser Output</h3>
-                  <button 
-                    className={styles.clearLogsBtn}
-                    onClick={() => setActivities([{
-                      timestamp: new Date().toLocaleTimeString(),
-                      direction: "inbound",
-                      message: "Logger cleared. Awaiting event payloads...",
-                      payload: {}
-                    }])}
-                  >
-                    Clear Logs
-                  </button>
+              <>
+                {/* WEBHOOK URL ENDPOINT DISPLAY CARD */}
+                <div className={styles.webhookUrlCard}>
+                  <div className={styles.webhookHeader}>
+                    <span className={styles.webhookBadge}>Production Webhook URL</span>
+                    <span className={styles.webhookMethod}>POST</span>
+                  </div>
+                  <div className={styles.urlInputRow}>
+                    <input 
+                      type="text" 
+                      value={webhookUrl} 
+                      readOnly 
+                      className={styles.webhookUrlInput} 
+                    />
+                    <button 
+                      onClick={handleCopyWebhook} 
+                      className={`${styles.copyBtn} ${copied ? styles.copyBtnSuccess : ''}`}
+                    >
+                      {copied ? <Check size={15} /> : <Copy size={15} />}
+                    </button>
+                  </div>
+                  <p className={styles.webhookDesc}>
+                    Set this endpoint in your Meta WhatsApp Developer console or Twilio Console sandbox to forward incoming chat messages directly into your workspace.
+                  </p>
                 </div>
-                
-                <div className={styles.logsScroller}>
-                  {activities.map((act, i) => (
-                    <div key={i} className={styles.logCard}>
-                      <div className={styles.logMetaRow}>
-                        <span className={`${styles.directionTag} ${act.direction === 'inbound' ? styles.tagInbound : styles.tagOutbound}`}>
-                          {act.direction === 'inbound' ? "POST REQUEST" : "JSON RESPONSE"}
-                        </span>
-                        <span className={styles.logTimestamp}>
-                          <Clock size={11} style={{ marginRight: 4 }} />
-                          {act.timestamp}
-                        </span>
-                      </div>
-                      
-                      <div className={styles.logMsg}>{act.message}</div>
-                      
-                      {Object.keys(act.payload).length > 0 && (
-                        <div className={styles.payloadPreContainer}>
-                          <div className={styles.preCodeHeader}>
-                            <Code size={12} style={{ marginRight: 4 }} />
-                            <span>Payload JSON</span>
-                          </div>
-                          <pre className={styles.payloadPre}>
-                            {JSON.stringify(act.payload, null, 2)}
-                          </pre>
+
+                /* LIVE EVENT PAYLOAD LOGGER */
+                <div className={styles.loggerPanel}>
+                  <div className={styles.panelHeaderGroup}>
+                    <h3>📡 Real-time Parser Output</h3>
+                    <button 
+                      className={styles.clearLogsBtn}
+                      onClick={() => setActivities([{
+                        timestamp: new Date().toLocaleTimeString(),
+                        direction: "inbound",
+                        message: "Logger cleared. Awaiting event payloads...",
+                        payload: {}
+                      }])}
+                    >
+                      Clear Logs
+                    </button>
+                  </div>
+                  
+                  <div className={styles.logsScroller}>
+                    {activities.map((act, i) => (
+                      <div key={i} className={styles.logCard}>
+                        <div className={styles.logMetaRow}>
+                          <span className={`${styles.directionTag} ${act.direction === 'inbound' ? styles.tagInbound : styles.tagOutbound}`}>
+                            {act.direction === 'inbound' ? "POST REQUEST" : "JSON RESPONSE"}
+                          </span>
+                          <span className={styles.logTimestamp}>
+                            <Clock size={11} style={{ marginRight: 4 }} />
+                            {act.timestamp}
+                          </span>
                         </div>
-                      )}
-                    </div>
-                  ))}
+                        
+                        <div className={styles.logMsg}>{act.message}</div>
+                        
+                        {Object.keys(act.payload).length > 0 && (
+                          <div className={styles.payloadPreContainer}>
+                            <div className={styles.preCodeHeader}>
+                              <Code size={12} style={{ marginRight: 4 }} />
+                              <span>Payload JSON</span>
+                            </div>
+                            <pre className={styles.payloadPre}>
+                              {JSON.stringify(act.payload, null, 2)}
+                            </pre>
+                          </div>
+                        )}
+                      </div>
+                    ))}
+                  </div>
                 </div>
-              </div>
+              </>
             ) : (
-              /* SYSTEM CREDENTIALS & AUTOMATION SETTINGS PANEL */
+              /* USER-FRIENDLY WHATSAPP INTEGRATION HUB */
               <div className={styles.settingsForm}>
                 
-                <div className={styles.settingsGroup}>
-                  <h3>🔑 Meta / Twilio Gateway settings</h3>
-                  
-                  <div className={styles.formRow}>
-                    <label>Twilio Account SID</label>
-                    <input 
-                      type="text" 
-                      value={twilioSid} 
-                      onChange={(e) => setTwilioSid(e.target.value)} 
-                      placeholder="AC..." 
-                    />
+                {/* OFFICIAL WHATSAPP BOT CARD */}
+                <div className={styles.botHeroCard}>
+                  <div className={styles.botHeroHeader}>
+                    <div className={styles.botHeroTitle}>
+                      <MessageSquare size={18} style={{ color: "#25D366" }} />
+                      <span>Cora AI Assistant on WhatsApp</span>
+                    </div>
+                    <span className={styles.connectedBadge} style={{ margin: 0 }}>
+                      <span className={styles.connectedDot} />
+                      Connected & Ready
+                    </span>
                   </div>
-
-                  <div className={styles.formRow}>
-                    <label>Auth Token</label>
-                    <input 
-                      type="password" 
-                      value={twilioToken} 
-                      onChange={(e) => setTwilioToken(e.target.value)} 
-                      placeholder="Enter API token" 
-                    />
-                  </div>
-
-                  <div className={styles.formRow}>
-                    <label>WhatsApp Sender Number</label>
-                    <input 
-                      type="text" 
-                      value={senderNum} 
-                      onChange={(e) => setSenderNum(e.target.value)} 
-                      placeholder="whatsapp:+14155238886" 
-                    />
+                  <p className={styles.botHeroDesc}>
+                    Chat with Cora from your mobile phone on WhatsApp to schedule tasks, capture meeting notes, and receive daily briefings anytime, anywhere.
+                  </p>
+                  <div className={styles.botHeroActions}>
+                    <a 
+                      href="https://wa.me/14155238886?text=join%20cora" 
+                      target="_blank" 
+                      rel="noopener noreferrer"
+                      className={styles.primaryWaBtn}
+                    >
+                      💬 Start WhatsApp Bot ↗
+                    </a>
+                    <button 
+                      className={styles.secondaryWaBtn}
+                      onClick={() => {
+                        fetch("/api/whatsapp/send-alert", { method: "POST" })
+                          .then(() => addToast("📱 Sent test notification to WhatsApp!", "success"))
+                          .catch(() => addToast("Failed to send test alert", "error"));
+                      }}
+                    >
+                      📱 Send Test Alert
+                    </button>
                   </div>
                 </div>
 
-                <div className={styles.settingsGroup}>
-                  <h3>⚙️ Automation Triggers</h3>
-                  
-                  <div className={styles.toggleRow}>
-                    <div className={styles.toggleInfo}>
-                      <span className={styles.toggleTitle}>Gemini 2.5 NLP Intent Extraction</span>
-                      <span className={styles.toggleSub}>Use AI models to extract task title, times, and attendees instead of basic keyword matchers.</span>
-                    </div>
-                    <label className={styles.switch}>
-                      <input 
-                        type="checkbox" 
-                        checked={nlpEnabled} 
-                        onChange={(e) => setNlpEnabled(e.target.checked)} 
-                      />
-                      <span className={styles.slider} />
-                    </label>
-                  </div>
-
-                  <div className={styles.toggleRow}>
-                    <div className={styles.toggleInfo}>
-                      <span className={styles.toggleTitle}>Create Meeting Note Templates</span>
-                      <span className={styles.toggleSub}>Automatically spin up formatted Notion documents when creating scheduled meetings.</span>
-                    </div>
-                    <label className={styles.switch}>
-                      <input 
-                        type="checkbox" 
-                        checked={autoPages} 
-                        onChange={(e) => setAutoPages(e.target.checked)} 
-                      />
-                      <span className={styles.slider} />
-                    </label>
-                  </div>
-
-                  <div className={styles.toggleRow}>
-                    <div className={styles.toggleInfo}>
-                      <span className={styles.toggleTitle}>WhatsApp Confirmation Alerts</span>
-                      <span className={styles.toggleSub}>Send automated SMS or WhatsApp callback confirmations back to the message sender phone number.</span>
-                    </div>
-                    <label className={styles.switch}>
-                      <input 
-                        type="checkbox" 
-                        checked={smsAlerts} 
-                        onChange={(e) => setSmsAlerts(e.target.checked)} 
-                      />
-                      <span className={styles.slider} />
-                    </label>
-                  </div>
-                </div>
-
-                {/* SETUP WALKTHROUGH */}
-                <div className={styles.walkthroughCard}>
-                  <div className={styles.walkthroughTitle}>
-                    <Info size={14} style={{ color: "var(--primary)", marginRight: 6 }} />
-                    <span>How to connect this sandbox to your real phone:</span>
-                  </div>
-                  <ol className={styles.walkthroughList}>
-                    <li>Create a free account at <strong>Twilio</strong> or <strong>Meta developers</strong>.</li>
-                    <li>Access your WhatsApp sandbox console.</li>
-                    <li>Add the number <strong>+1 415 523 8886</strong> to your phone contacts.</li>
-                    <li>Send the message <strong>join code</strong> from your device to join the sandbox channel.</li>
-                    <li>Set your Twilio incoming message endpoint to our copyable <strong>Webhook URL</strong> above.</li>
-                    <li>Type any text from your real phone and watch it schedule tasks instantly!</li>
-                  </ol>
-                </div>
-
+                {/* DAILY DIGEST CONFIGURATION */}
                 <div className={styles.digestSection}>
                   <div className={styles.digestTitle}>
                     <span>☀️</span>
-                    <span>Daily Digest</span>
+                    <span>Morning Daily Digest</span>
                   </div>
+                  <p className={styles.botHeroDesc}>
+                    Enter your WhatsApp phone number with country code to receive a morning summary of due tasks and updated pages.
+                  </p>
                   <input 
                     type="text" 
                     value={digestPhone} 
@@ -705,8 +645,79 @@ export default function WhatsAppView() {
                     }}
                     className={styles.digestBtn}
                   >
-                    📱 Send Today's Digest
+                    📱 Send Today's Digest Now
                   </button>
+                </div>
+
+                {/* AUTOMATION PREFERENCES */}
+                <div className={styles.settingsGroup}>
+                  <h3>⚡ AI & Automation Capabilities</h3>
+                  
+                  <div className={styles.toggleRow}>
+                    <div className={styles.toggleInfo}>
+                      <span className={styles.toggleTitle}>Gemini 2.5 Smart NLP Intent Extraction</span>
+                      <span className={styles.toggleSub}>Automatically parse task titles, dates, times, and action items from conversational chat messages.</span>
+                    </div>
+                    <label className={styles.switch}>
+                      <input 
+                        type="checkbox" 
+                        checked={nlpEnabled} 
+                        onChange={(e) => setNlpEnabled(e.target.checked)} 
+                      />
+                      <span className={styles.slider} />
+                    </label>
+                  </div>
+
+                  <div className={styles.toggleRow}>
+                    <div className={styles.toggleInfo}>
+                      <span className={styles.toggleTitle}>Auto-Create Notion Meeting Documents</span>
+                      <span className={styles.toggleSub}>Automatically create structured workspace pages when you schedule meetings via WhatsApp.</span>
+                    </div>
+                    <label className={styles.switch}>
+                      <input 
+                        type="checkbox" 
+                        checked={autoPages} 
+                        onChange={(e) => setAutoPages(e.target.checked)} 
+                      />
+                      <span className={styles.slider} />
+                    </label>
+                  </div>
+
+                  <div className={styles.toggleRow}>
+                    <div className={styles.toggleInfo}>
+                      <span className={styles.toggleTitle}>WhatsApp Confirmation & Deadline Alerts</span>
+                      <span className={styles.toggleSub}>Receive instant callback confirmations and deadline reminders on your linked WhatsApp number.</span>
+                    </div>
+                    <label className={styles.switch}>
+                      <input 
+                        type="checkbox" 
+                        checked={smsAlerts} 
+                        onChange={(e) => setSmsAlerts(e.target.checked)} 
+                      />
+                      <span className={styles.slider} />
+                    </label>
+                  </div>
+                </div>
+
+                {/* QUICK COMMAND REFERENCE */}
+                <div className={styles.cheatSheetCard}>
+                  <div className={styles.cheatSheetHeader}>
+                    <span>💬 Try These Commands on WhatsApp</span>
+                  </div>
+                  <div className={styles.cheatSheetList}>
+                    <div className={styles.cheatSheetItem}>
+                      <span>Schedule a task</span>
+                      <span className={styles.cheatSheetCommand}>Schedule task: Review designs tomorrow at 5pm</span>
+                    </div>
+                    <div className={styles.cheatSheetItem}>
+                      <span>Schedule a meeting</span>
+                      <span className={styles.cheatSheetCommand}>Schedule meeting: Team Sync on Monday at 10am</span>
+                    </div>
+                    <div className={styles.cheatSheetItem}>
+                      <span>Get daily briefing</span>
+                      <span className={styles.cheatSheetCommand}>Daily digest</span>
+                    </div>
+                  </div>
                 </div>
 
               </div>
