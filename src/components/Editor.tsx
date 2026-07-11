@@ -28,6 +28,9 @@ import MeetingRecorderDashboard from "./MeetingRecorderDashboard";
 import MeetingNotesView from "./MeetingNotesView";
 import AnalyticsPanel from "./AnalyticsPanel";
 import DocumentAIPanel from "./DocumentAIPanel";
+import ExpenseTrackerView from "./ExpenseTrackerView";
+import OperationsDashboardView from "./OperationsDashboardView";
+import SopDocumentView from "./SopDocumentView";
 import { Mic, BarChart2, Menu } from "lucide-react";
 import { useCompletion } from '@ai-sdk/react';
 import DatabaseView from "./DatabaseView";
@@ -1079,13 +1082,28 @@ export default function Editor() {
   }
 
   if (!isMounted) return null;
-  if (activePageId === 'calendar') return <CalendarView />;
-  if (activePageId === 'inbox') return <InboxView />;
-  if (activePageId === 'tasks') return <TasksView />;
-  if (activePageId === 'automations') return <AgentsView />;
-  if (activePageId === 'templates') return <TemplatesView />;
-  if (activePageId === 'trash') return <TrashView />;
-  if (activePageId === 'whatsapp') return <WhatsAppView />;
+  if (activePageId === 'calendar') return <><CalendarView /><DocumentAIPanel /></>;
+  if (activePageId === 'inbox') return <><InboxView /><DocumentAIPanel /></>;
+  if (activePageId === 'tasks' || activePage?.title === 'Tasks & Projects') return <><TasksView /><DocumentAIPanel /></>;
+  if (activePageId === 'automations') return <><AgentsView /><DocumentAIPanel /></>;
+  if (activePageId === 'templates') return <><TemplatesView /><DocumentAIPanel /></>;
+  if (activePageId === 'trash') return <><TrashView /><DocumentAIPanel /></>;
+  if (activePageId === 'whatsapp') return <><WhatsAppView /><DocumentAIPanel /></>;
+
+  if (activePage?.title === 'Expense Tracking' || activePage?.title?.includes('Expense Tracking')) {
+    return <><ExpenseTrackerView /><DocumentAIPanel /></>;
+  }
+  if (activePage?.title === 'Operations Dashboard' || activePage?.title?.includes('Operations Dashboard')) {
+    return <><OperationsDashboardView /><DocumentAIPanel /></>;
+  }
+  if (
+    activePage?.title === 'SOPs & Documentation' ||
+    activePage?.title === 'HR Policies' ||
+    activePage?.title === 'IT Guidelines' ||
+    activePage?.title === 'Marketing Guidelines'
+  ) {
+    return <><SopDocumentView pageTitle={activePage?.title} /><DocumentAIPanel /></>;
+  }
 
   if (!activePage) {
     return <CommandCenter />;

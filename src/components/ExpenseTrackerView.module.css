@@ -1,0 +1,382 @@
+.container {
+  padding: 32px 40px;
+  max-width: 1320px;
+  margin: 0 auto;
+  color: var(--text-main, #f3f4f6);
+  font-family: 'Outfit', 'Inter', -apple-system, sans-serif;
+  animation: fadeIn 0.25s ease-in-out;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(6px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 28px;
+}
+
+.titleArea {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.iconBadge {
+  width: 44px;
+  height: 44px;
+  border-radius: 12px;
+  background: rgba(16, 185, 129, 0.15);
+  border: 1px solid rgba(16, 185, 129, 0.35);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 22px;
+}
+
+.title {
+  font-size: 1.6rem;
+  font-weight: 700;
+  margin: 0;
+  color: #ffffff;
+  letter-spacing: -0.02em;
+}
+
+.subtitle {
+  font-size: 0.85rem;
+  color: #9ca3af;
+  margin: 2px 0 0 0;
+}
+
+.headerActions {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.primaryBtn {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  background: linear-gradient(135deg, #10b981, #059669);
+  color: #ffffff;
+  border: none;
+  border-radius: 8px;
+  padding: 10px 16px;
+  font-size: 0.86rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+  box-shadow: 0 4px 14px rgba(16, 185, 129, 0.25);
+}
+
+.primaryBtn:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 6px 18px rgba(16, 185, 129, 0.38);
+}
+
+.aiAuditBtn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background: rgba(245, 158, 11, 0.15);
+  border: 1px solid rgba(245, 158, 11, 0.4);
+  color: #f59e0b;
+  border-radius: 8px;
+  padding: 10px 14px;
+  font-size: 0.85rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.15s;
+}
+
+.aiAuditBtn:hover {
+  background: rgba(245, 158, 11, 0.22);
+}
+
+/* KPI Summary Cards */
+.kpiGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(230px, 1fr));
+  gap: 16px;
+  margin-bottom: 28px;
+}
+
+.kpiCard {
+  background: rgba(255, 255, 255, 0.035);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 14px;
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.kpiLabel {
+  font-size: 0.8rem;
+  color: #9ca3af;
+  font-weight: 500;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.kpiValue {
+  font-size: 1.65rem;
+  font-weight: 700;
+  color: #ffffff;
+}
+
+.kpiValueGreen {
+  color: #34d399;
+}
+
+.kpiValueAmber {
+  color: #fbbf24;
+}
+
+.progressContainer {
+  margin-top: 8px;
+  background: rgba(255, 255, 255, 0.08);
+  height: 6px;
+  border-radius: 999px;
+  overflow: hidden;
+}
+
+.progressBar {
+  height: 100%;
+  background: linear-gradient(90deg, #10b981, #34d399);
+  border-radius: 999px;
+  transition: width 0.4s ease;
+}
+
+/* Filters & Toolbar */
+.toolbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 18px;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+
+.filterTabs {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  background: rgba(255, 255, 255, 0.04);
+  padding: 4px;
+  border-radius: 10px;
+  border: 1px solid rgba(255, 255, 255, 0.06);
+}
+
+.filterTab {
+  background: transparent;
+  border: none;
+  color: #9ca3af;
+  font-size: 0.82rem;
+  font-weight: 500;
+  padding: 6px 12px;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: all 0.15s;
+}
+
+.filterTab:hover {
+  color: #ffffff;
+}
+
+.activeFilterTab {
+  background: rgba(255, 255, 255, 0.12);
+  color: #ffffff;
+  font-weight: 600;
+}
+
+.searchInput {
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 8px;
+  padding: 8px 14px;
+  color: #ffffff;
+  font-size: 0.84rem;
+  outline: none;
+  width: 260px;
+}
+
+.searchInput::placeholder {
+  color: #6b7280;
+}
+
+/* Ledger Table */
+.tableContainer {
+  background: rgba(255, 255, 255, 0.025);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 14px;
+  overflow: hidden;
+}
+
+.table {
+  width: 100%;
+  border-collapse: collapse;
+  text-align: left;
+}
+
+.th {
+  padding: 14px 18px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: #9ca3af;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+  background: rgba(255, 255, 255, 0.02);
+}
+
+.tr {
+  border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+  transition: background 0.15s;
+}
+
+.tr:hover {
+  background: rgba(255, 255, 255, 0.035);
+}
+
+.td {
+  padding: 14px 18px;
+  font-size: 0.86rem;
+  color: #e5e7eb;
+}
+
+.categoryChip {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 6px;
+  padding: 4px 10px;
+  font-size: 0.78rem;
+  color: #d1d5db;
+}
+
+.statusBadge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 10px;
+  border-radius: 999px;
+  font-size: 0.75rem;
+  font-weight: 600;
+}
+
+.statusApproved {
+  background: rgba(16, 185, 129, 0.15);
+  color: #34d399;
+  border: 1px solid rgba(16, 185, 129, 0.3);
+}
+
+.statusPending {
+  background: rgba(245, 158, 11, 0.15);
+  color: #fbbf24;
+  border: 1px solid rgba(245, 158, 11, 0.3);
+}
+
+.statusReimbursed {
+  background: rgba(59, 130, 246, 0.15);
+  color: #60a5fa;
+  border: 1px solid rgba(59, 130, 246, 0.3);
+}
+
+.amountText {
+  font-weight: 700;
+  color: #ffffff;
+  font-variant-numeric: tabular-nums;
+}
+
+.actionBtn {
+  background: transparent;
+  border: none;
+  color: #9ca3af;
+  padding: 6px;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: all 0.15s;
+}
+
+.actionBtn:hover {
+  background: rgba(255, 255, 255, 0.08);
+  color: #ffffff;
+}
+
+/* Modal */
+.modalOverlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.7);
+  backdrop-filter: blur(8px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 10000;
+}
+
+.modalCard {
+  background: #18181b;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 16px;
+  width: 440px;
+  max-width: 90vw;
+  padding: 24px;
+  box-shadow: 0 25px 50px rgba(0, 0, 0, 0.6);
+}
+
+.modalTitle {
+  font-size: 1.2rem;
+  font-weight: 700;
+  color: #ffffff;
+  margin: 0 0 16px 0;
+}
+
+.formGroup {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin-bottom: 14px;
+}
+
+.formLabel {
+  font-size: 0.8rem;
+  color: #9ca3af;
+  font-weight: 500;
+}
+
+.formInput, .formSelect {
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 8px;
+  padding: 10px 12px;
+  color: #ffffff;
+  font-size: 0.88rem;
+  outline: none;
+}
+
+.modalActions {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 10px;
+  margin-top: 20px;
+}
+
+.cancelBtn {
+  background: transparent;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  color: #e5e7eb;
+  border-radius: 8px;
+  padding: 8px 14px;
+  font-size: 0.85rem;
+  cursor: pointer;
+}
