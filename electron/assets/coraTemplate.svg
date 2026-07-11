@@ -1,0 +1,6 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 16 16">
+  <!-- Rounded square border like Notion's N -->
+  <rect x="1.2" y="1.2" width="13.6" height="13.6" rx="3.5" ry="3.5" fill="none" stroke="#000000" stroke-width="1.6"/>
+  <!-- Stylized "C" letter inside -->
+  <path d="M10.8,5.2 C10.1,4.5 9.1,4.1 8,4.1 C5.8,4.1 4.2,5.8 4.2,8 C4.2,10.2 5.8,11.9 8,11.9 C9.1,11.9 10.1,11.5 10.8,10.8" fill="none" stroke="#000000" stroke-width="1.6" stroke-linecap="round"/>
+</svg>
